@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Aforo Profesional</title>
+    <!-- Librería para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Open+Sans:wght@400;700&family=Roboto+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTRUCTURA Y ESTILOS GLOBALES --- */
+        :root {
+            --font-size-base: 16px;
+            --font-family-main: 'Open Sans', sans-serif;
+            --font-family-dyslexia: 'Roboto Mono', monospace;
+            
+            /* Paleta de colores para el tema "Sencillo" */
+            --color-primary: #8458B3;
+            --color-text: #494D5F;
+            --color-bg: #e5eaf5;
+            --color-card-bg: #ffffff;
+            --color-border: #d0bdf4;
+            --color-shadow: rgba(73, 77, 95, 0.15);
+            --color-women: #8458B3;
+            --color-men: #a0d2eb;
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-main);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-size: var(--font-size-base);
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr;
+        }
+
+        .card {
+            background-color: var(--color-card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px var(--color-shadow);
+            border: 1px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        /* --- CABECERA --- */
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        header h1 {
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+            margin: 0;
+            text-align: left;
+            flex-grow: 1; /* Asegura que el título ocupe el espacio disponible */
+        }
+
+        /* Ajuste específico para el título del tema Retro para que quepa en una línea */
+        body.theme-retro h1 {
+            font-size: clamp(1.2rem, 4vw, 1.75rem);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .control-btn, select, button {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background-color: var(--color-card-bg);
+            color: var(--color-text);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover, button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px var(--color-shadow);
+        }
+        
+        #theme-toggle-btn {
+            background-color: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        /* --- CONTADOR PRINCIPAL --- */
+        #main-counter-display {
+            font-size: clamp(4rem, 15vw, 8rem);
+            font-weight: 700;
+            text-align: center;
+            padding: 2rem 1rem;
+            border-radius: 12px;
+            transition: background-color 0.5s, color 0.5s;
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .capacity-low { background-color: var(--color-success); }
+        .capacity-medium { background-color: var(--color-warning); }
+        .capacity-high { background-color: var(--color-danger); }
+        .capacity-unlimited { background: linear-gradient(45deg, var(--color-primary), #9b59b6); }
+
+        #capacity-info {
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* --- ENTRADAS DE GÉNERO --- */
+        #gender-inputs {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .women-group { border: 2px solid var(--color-women); }
+        .men-group { border: 2px solid var(--color-men); }
+
+        .input-group h3 { margin-bottom: 0.5rem; }
+        .input-group input[type="number"] {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            font-size: 1rem;
+            width: 100%;
+        }
+        .subtract-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .subtract-buttons button { flex-grow: 1; }
+        
+        .women-group button { background-color: var(--color-women); color: white; border-color: var(--color-women); }
+        .men-group button { background-color: var(--color-men); color: white; border-color: var(--color-men); }
+        
+        /* --- GRÁFICAS --- */
+        .chart-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .chart-header h2 { margin: 0; }
+        .chart-controls { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .chart-selector { display: flex; align-items: center; gap: 0.5rem; }
+        .chart-selector select { padding: 0.5rem; }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            min-height: 300px;
+        }
+        .chart-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+
+        /* --- CONTROLES Y AJUSTES --- */
+        #controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .settings-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .settings-modal-content {
+            background-color: var(--color-card-bg);
+            margin: auto;
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            animation: slide-in 0.3s ease-out;
+        }
+        @keyframes slide-in {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .close-btn { font-size: 2rem; cursor: pointer; border: none; background: none; }
+        .setting-item { margin-bottom: 1rem; }
+        .setting-item label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        #daily-settings-container {
+            border-top: 1px solid var(--color-border);
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+
+        /* --- TEMAS (usando variables CSS) --- */
+        body.theme-dark {
+            --color-text: #e5eaf5;
+            --color-bg: #121212;
+            --color-card-bg: #1e1e1e;
+            --color-border: #2c2c2c;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-women: #d0bdf4;
+            --color-men: #a0d2eb;
+            --color-primary: #d0bdf4;
+        }
+        
+        body.theme-retro {
+            --font-family-main: 'Press Start 2P', cursive;
+            --color-text: #2c3e50;
+            --color-bg: #ecf0f1;
+            --color-card-bg: #ffffff;
+            --color-border: #3498db;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-women: #e91e63;
+            --color-men: #2196f3;
+            --color-primary: #9b59b6;
+        }
+        
+        body.theme-retro.theme-dark {
+            --color-text: #00f0ff;
+            --color-bg: #0a043c;
+            --color-card-bg: #1b263b;
+            --color-border: #ff00ff;
+            --color-shadow: rgba(255, 0, 255, 0.2);
+            --color-women: #ff00ff;
+            --color-men: #ffff00;
+            --color-primary: #00f0ff;
+            text-shadow: 0 0 5px var(--color-primary);
+        }
+        
+        body.theme-high-contrast {
+            --color-text: #00ffff;
+            --color-bg: #000000;
+            --color-card-bg: #000000;
+            --color-border: #00ffff;
+            --color-shadow: rgba(0, 0, 0, 0);
+            --color-women: #ffff00;
+            --color-men: #00ff00;
+            --color-primary: #00ffff;
+        }
+
+        body.theme-high-contrast .women-group button,
+        body.theme-high-contrast .men-group button {
+            color: #000000;
+            font-weight: bold;
+        }
+
+        body.theme-forest {
+            --color-text: #2c3e50;
+            --color-bg: #e9eef2;
+            --color-card-bg: #ffffff;
+            --color-border: #b0c4de;
+            --color-shadow: rgba(44, 62, 80, 0.1);
+            --color-women: #d4bca4;
+            --color-men: #6a8d9f;
+            --color-primary: #6a8d9f;
+        }
+        
+        body.theme-forest.theme-dark {
+            --color-text: #e8e8e8;
+            --color-bg: #1e3e2a;
+            --color-card-bg: #2a553a;
+            --color-border: #4f785a;
+            --color-women: #8fbc8f;
+            --color-men: #cd853f;
+            --color-primary: #8b4513;
+        }
+
+        body.theme-ocean {
+            --color-text: #0a1c2e;
+            --color-bg: #cce2ef;
+            --color-card-bg: #ffffff;
+            --color-border: #b3d4e6;
+            --color-shadow: rgba(10, 28, 46, 0.1);
+            --color-women: #3c8ab0;
+            --color-men: #439db7;
+            --color-primary: #1c4a6e;
+        }
+
+        body.theme-ocean.theme-dark {
+            --color-text: #b3d4e6;
+            --color-bg: #010b1a;
+            --color-card-bg: #0a1c2e;
+            --color-border: #122c44;
+            --color-shadow: rgba(0, 0, 0, 0.2);
+            --color-women: #4ea0c1;
+            --color-men: #94c0d5;
+            --color-primary: #4ea0c1;
+        }
+
+        body.theme-90s {
+            --font-family-main: 'Bungee', cursive;
+            --color-text: #733426;
+            --color-bg: #F2D98A;
+            --color-card-bg: #FEF4E6;
+            --color-border: #FAB621;
+            --color-shadow: rgba(115, 52, 38, 0.15);
+            --color-women: #D96690;
+            --color-men: #F66A2C;
+            --color-primary: #BD363F;
+        }
+
+        body.theme-90s.theme-dark {
+            --color-text: #FEF4E6;
+            --color-bg: #1A1A26;
+            --color-card-bg: #032859;
+            --color-border: #463259;
+            --color-shadow: rgba(0, 0, 0, 0.2);
+            --color-women: #F66A2C;
+            --color-men: #29A68F;
+            --color-primary: #FAB621;
+        }
+
+        body.theme-minimalist {
+            --color-text: #000;
+            --color-bg: #fff;
+            --color-card-bg: #fff;
+            --color-border: #eee;
+            --color-shadow: rgba(0, 0, 0, 0.05);
+            --color-women: #333;
+            --color-men: #555;
+            --color-primary: #000;
+        }
+        
+        body.theme-minimalist.theme-dark {
+            --color-text: #fff;
+            --color-bg: #000;
+            --color-card-bg: #000;
+            --color-border: #333;
+            --color-women: #ccc;
+            --color-men: #aaa;
+            --color-primary: #fff;
+        }
+
+        body.theme-futuristic {
+            --font-family-main: 'Roboto Mono', monospace;
+            --color-text: #00ffde;
+            --color-bg: #0d0221;
+            --color-card-bg: rgba(42, 12, 80, 0.5);
+            --color-border: #2a0c50;
+            --color-women: #f900f9;
+            --color-men: #00f0ff;
+            --color-primary: #00ffde;
+            text-shadow: 0 0 3px var(--color-primary);
+        }
+
+        body.dyslexia-font {
+            --font-family-main: var(--font-family-dyslexia);
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-areas:
+                    "header header"
+                    "counter controls"
+                    "inputs inputs"
+                    "charts charts";
+            }
+            header { grid-area: header; }
+            #counter-section { grid-area: counter; }
+            #controls-section { grid-area: controls; }
+            #gender-inputs { grid-area: inputs; grid-template-columns: 1fr 1fr; }
+            #charts-section { grid-area: charts; }
+            .chart-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr 350px;
+                grid-template-areas:
+                    "header header"
+                    "counter controls"
+                    "inputs controls"
+                    "charts charts";
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="card">
+            <h1>Control de Aforo</h1>
+            <div class="header-controls">
+                <button id="theme-toggle-btn" class="control-btn" title="Alternar tema claro/oscuro">🌓</button>
+                <select id="theme-select" class="control-btn" title="Seleccionar tema">
+                    <option value="light">Sencillo</option>
+                    <option value="retro">Retro</option>
+                    <option value="high-contrast">Alto Contraste</option>
+                    <option value="forest">Bosque</option>
+                    <option value="ocean">Oceánico</option>
+                    <option value="90s">Retro 90s</option>
+                    <option value="minimalist">Minimalista</option>
+                    <option value="futuristic">Futurista</option>
+                </select>
+                <button id="screen-reader-btn" class="control-btn" aria-label="Activar lector de pantalla">🔊</button>
+            </div>
+        </header>
+
+        <section id="counter-section" class="card">
+            <div id="main-counter-display" class="capacity-unlimited">0</div>
+            <div id="capacity-info">
+                Modo: <strong id="mode-label">Sin Límite</strong> | Aforo Máximo: <strong id="capacity-label">∞</strong>
+            </div>
+        </section>
+
+        <section id="gender-inputs" class="card">
+            <div class="input-group women-group">
+                <h3>Mujeres: <span id="women-count">0</span></h3>
+                <input type="number" id="women-input" placeholder="Añadir cantidad" min="1">
+                <button id="add-women-btn">Añadir</button>
+                <div id="women-subtract-buttons" class="subtract-buttons"></div>
+            </div>
+            <div class="input-group men-group">
+                <h3>Hombres: <span id="men-count">0</span></h3>
+                <input type="number" id="men-input" placeholder="Añadir cantidad" min="1">
+                <button id="add-men-btn">Añadir</button>
+                <div id="men-subtract-buttons" class="subtract-buttons"></div>
+            </div>
+        </section>
+
+        <section id="charts-section" class="card">
+            <div class="chart-header">
+                <h2>Analíticas de Aforo</h2>
+                <div class="chart-controls">
+                    <div class="chart-selector">
+                        <label for="gender-chart-type">Gráfico Género:</label>
+                        <select id="gender-chart-type">
+                            <option value="bar">Barras</option>
+                            <option value="pie">Circular</option>
+                            <option value="doughnut">Anillo</option>
+                            <option value="radar">Radar</option>
+                        </select>
+                    </div>
+                    <div class="chart-selector">
+                        <label for="hourly-chart-type">Gráfico Horario:</label>
+                        <select id="hourly-chart-type">
+                            <option value="line">Línea</option>
+                            <option value="bar">Barras</option>
+                            <option value="radar">Radar</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <canvas id="gender-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="hourly-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <aside id="controls-section" class="card">
+            <h3>Controles y Exportación</h3>
+            <button id="save-data-btn">Guardar</button>
+            <button id="reset-day-btn">Resetear Día</button>
+            <button id="export-csv-btn">Exportar a CSV (Excel)</button>
+            <button id="settings-btn">Ajustes</button>
+        </aside>
+
+    </div>
+
+    <!-- Modal de Ajustes -->
+    <div id="settings-modal" class="settings-modal">
+        <div class="settings-modal-content card">
+            <div class="modal-header">
+                <h2>Ajustes</h2>
+                <span id="close-modal-btn" class="close-btn">&times;</span>
+            </div>
+            <div class="setting-item">
+                <label for="capacity-mode">Modo de Aforo</label>
+                <select id="capacity-mode">
+                    <option value="unlimited">Sin Límite</option>
+                    <option value="daily">Por Días</option>
+                </select>
+            </div>
+            <div id="daily-settings-container" class="setting-item" style="display: none;">
+                <label for="day-override-select">Forzar Día y Aforo</label>
+                <select id="day-override-select">
+                    <option value="auto">Automático (Hoy)</option>
+                    <option value="1">Lunes</option>
+                    <option value="2">Martes</option>
+                    <option value="3">Miércoles</option>
+                    <option value="4">Jueves</option>
+                    <option value="5">Viernes</option>
+                    <option value="6">Sábado</option>
+                    <option value="0">Domingo</option>
+                </select>
+                <input type="number" id="capacity-override-input" placeholder="Aforo personalizado" min="0" style="margin-top: 0.5rem; width: 100%;">
+            </div>
+            <div class="setting-item">
+                <label for="font-size-slider">Tamaño de Letra</label>
+                <input type="range" id="font-size-slider" min="12" max="24" step="1">
+            </div>
+            <div class="setting-item">
+                <label for="dyslexia-toggle">Fuente para Dislexia</label>
+                <input type="checkbox" id="dyslexia-toggle">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. ESTADO DE LA APLICACIÓN Y REFERENCIAS AL DOM ---
+        const state = {
+            womenCount: 0,
+            menCount: 0,
+            get totalCount() { return this.womenCount + this.menCount; },
+            records: [], // { timestamp, gender, count, type: 'add'/'subtract' }
+            settings: {
+                theme: 'light',
+                capacityMode: 'unlimited',
+                fontSize: 16,
+                dyslexiaFont: false,
+                isDarkMode: false,
+                dayOverride: 'auto',
+                capacityOverride: null,
+                genderChartType: 'bar',
+                hourlyChartType: 'line',
+            }
+        };
+
+        const dom = {
+            body: document.body,
+            mainCounter: document.getElementById('main-counter-display'),
+            capacityInfo: {
+                mode: document.getElementById('mode-label'),
+                capacity: document.getElementById('capacity-label')
+            },
+            women: {
+                count: document.getElementById('women-count'),
+                input: document.getElementById('women-input'),
+                addBtn: document.getElementById('add-women-btn'),
+                subtractContainer: document.getElementById('women-subtract-buttons')
+            },
+            men: {
+                count: document.getElementById('men-count'),
+                input: document.getElementById('men-input'),
+                addBtn: document.getElementById('add-men-btn'),
+                subtractContainer: document.getElementById('men-subtract-buttons')
+            },
+            theme: {
+                toggleBtn: document.getElementById('theme-toggle-btn'),
+                select: document.getElementById('theme-select')
+            },
+            charts: {
+                gender: null,
+                hourly: null,
+                genderTypeSelect: document.getElementById('gender-chart-type'),
+                hourlyTypeSelect: document.getElementById('hourly-chart-type'),
+            },
+            settings: {
+                modal: document.getElementById('settings-modal'),
+                openBtn: document.getElementById('settings-btn'),
+                closeBtn: document.getElementById('close-modal-btn'),
+                capacityMode: document.getElementById('capacity-mode'),
+                fontSizeSlider: document.getElementById('font-size-slider'),
+                dyslexiaToggle: document.getElementById('dyslexia-toggle'),
+                dailySettingsContainer: document.getElementById('daily-settings-container'),
+                dayOverrideSelect: document.getElementById('day-override-select'),
+                capacityOverrideInput: document.getElementById('capacity-override-input'),
+            },
+            controls: {
+                saveData: document.getElementById('save-data-btn'),
+                resetDay: document.getElementById('reset-day-btn'),
+                exportCSV: document.getElementById('export-csv-btn'),
+                screenReader: document.getElementById('screen-reader-btn')
+            }
+        };
+
+        let screenReaderActive = false;
+
+        // --- 2. LÓGICA DEL CONTADOR Y CAPACIDAD ---
+        
+        const getDailyCapacity = () => {
+            if (state.settings.capacityMode !== 'daily') return Infinity;
+            
+            if (state.settings.capacityOverride !== null && !isNaN(state.settings.capacityOverride)) {
+                return state.settings.capacityOverride;
+            }
+
+            const dayToEvaluate = state.settings.dayOverride === 'auto' 
+                ? new Date().getDay() 
+                : parseInt(state.settings.dayOverride);
+
+            if (dayToEvaluate >= 1 && dayToEvaluate <= 4) return 500;
+            return 1500;
+        };
+
+        const updateCounterDisplay = () => {
+            dom.mainCounter.textContent = state.totalCount;
+            dom.women.count.textContent = state.womenCount;
+            dom.men.count.textContent = state.menCount;
+
+            const capacity = getDailyCapacity();
+            const percentage = capacity === Infinity ? 0 : (state.totalCount / capacity) * 100;
+            
+            dom.mainCounter.className = 'main-counter-display'; // Reset classes
+
+            if (capacity === Infinity) {
+                dom.mainCounter.classList.add('capacity-unlimited');
+            } else if (percentage < 50) {
+                dom.mainCounter.classList.add('capacity-low');
+            } else if (percentage < 90) {
+                dom.mainCounter.classList.add('capacity-medium');
+            } else {
+                dom.mainCounter.classList.add('capacity-high');
+            }
+
+            dom.capacityInfo.mode.textContent = state.settings.capacityMode === 'daily' ? 'Por Días' : 'Sin Límite';
+            dom.capacityInfo.capacity.textContent = capacity === Infinity ? '∞' : capacity;
+        };
+
+        const addRecord = (gender, count, type) => {
+            state.records.push({ timestamp: new Date().toISOString(), gender, count, type });
+        };
+        
+        const addPeople = (gender, count) => {
+            const capacity = getDailyCapacity();
+            if (state.totalCount + count > capacity) {
+                alert('¡Se ha superado el aforo máximo!');
+                return;
+            }
+            if (gender === 'women') state.womenCount += count;
+            if (gender === 'men') state.menCount += count;
+            addRecord(gender, count, 'add');
+            renderAll();
+        };
+
+        const subtractPeople = (gender, count) => {
+            if (gender === 'women' && state.womenCount >= count) {
+                state.womenCount -= count;
+                addRecord(gender, count, 'subtract');
+            } else if (gender === 'men' && state.menCount >= count) {
+                state.menCount -= count;
+                addRecord(gender, count, 'subtract');
+            }
+            renderAll();
+        };
+
+        // --- 3. MANEJO DE LA INTERFAZ Y BOTONES ---
+
+        const createSubtractButtons = (gender, container) => {
+            container.innerHTML = '';
+            const count = gender === 'women' ? state.womenCount : state.menCount;
+            if (count > 0) {
+                [1, 10, 100].forEach(val => {
+                    if (count >= val) {
+                        const btn = document.createElement('button');
+                        btn.textContent = `- ${val}`;
+                        btn.onclick = () => subtractPeople(gender, val);
+                        container.appendChild(btn);
+                    }
+                });
+            }
+        };
+
+        // --- 4. GRÁFICAS (CHART.JS) ---
+
+        const updateCharts = () => {
+            const computedStyles = getComputedStyle(dom.body);
+            const womenColor = computedStyles.getPropertyValue('--color-women').trim();
+            const menColor = computedStyles.getPropertyValue('--color-men').trim();
+            const successColor = computedStyles.getPropertyValue('--color-success').trim();
+            const dangerColor = computedStyles.getPropertyValue('--color-danger').trim();
+            const borderColor = computedStyles.getPropertyValue('--color-border').trim();
+
+            // Gráfico de Género
+            if (dom.charts.gender) dom.charts.gender.destroy();
+            const genderCtx = document.getElementById('gender-chart').getContext('2d');
+            const genderData = {
+                labels: ['Mujeres', 'Hombres'],
+                datasets: [{
+                    label: 'Personas por Género',
+                    data: [state.womenCount, state.menCount],
+                    backgroundColor: [womenColor, menColor],
+                    borderColor: borderColor,
+                    borderWidth: 1
+                }]
+            };
+            if (state.settings.genderChartType === 'radar') genderData.datasets[0].fill = true;
+            
+            dom.charts.gender = new Chart(genderCtx, {
+                type: state.settings.genderChartType,
+                data: genderData,
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Gráfico Horario
+            if (dom.charts.hourly) dom.charts.hourly.destroy();
+            const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
+            const hourlyAdds = Array(24).fill(0);
+            const hourlySubs = Array(24).fill(0);
+            state.records.forEach(rec => {
+                const hour = new Date(rec.timestamp).getHours();
+                if (rec.type === 'add') hourlyAdds[hour] += rec.count;
+                else hourlySubs[hour] += rec.count;
+            });
+            const hourlyData = {
+                labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+                datasets: [
+                    { label: 'Entradas', data: hourlyAdds, borderColor: successColor, backgroundColor: successColor + '80', tension: 0.1 },
+                    { label: 'Salidas', data: hourlySubs, borderColor: dangerColor, backgroundColor: dangerColor + '80', tension: 0.1 }
+                ]
+            };
+            if (state.settings.hourlyChartType === 'radar') {
+                hourlyData.datasets[0].fill = true;
+                hourlyData.datasets[1].fill = true;
+            }
+            dom.charts.hourly = new Chart(hourlyCtx, {
+                type: state.settings.hourlyChartType,
+                data: hourlyData,
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        };
+
+        // --- 5. TEMAS Y AJUSTES ---
+
+        const applyTheme = () => {
+            const themeClasses = ['theme-dark', 'theme-retro', 'theme-high-contrast', 'theme-forest', 'theme-ocean', 'theme-90s', 'theme-minimalist', 'theme-futuristic'];
+            dom.body.classList.remove(...themeClasses);
+
+            const isFixedTheme = state.settings.theme === 'high-contrast' || state.settings.theme === 'futuristic';
+            dom.theme.toggleBtn.style.display = isFixedTheme ? 'none' : 'flex';
+
+            const baseTheme = state.settings.theme;
+            if (baseTheme !== 'light') dom.body.classList.add(`theme-${baseTheme}`);
+            
+            // Forzamos que los temas fijos no tengan modo oscuro
+            if (isFixedTheme) {
+                state.settings.isDarkMode = false;
+            }
+
+            if (state.settings.isDarkMode) dom.body.classList.add('theme-dark');
+
+            dom.body.classList.toggle('dyslexia-font', state.settings.dyslexiaFont);
+            
+            document.documentElement.style.setProperty('--font-size-base', `${state.settings.fontSize}px`);
+        };
+        
+        const renderSettings = () => {
+            dom.settings.dailySettingsContainer.style.display = state.settings.capacityMode === 'daily' ? 'block' : 'none';
+            dom.theme.select.value = state.settings.theme;
+            dom.settings.capacityMode.value = state.settings.capacityMode;
+            dom.settings.fontSizeSlider.value = state.settings.fontSize;
+            dom.settings.dyslexiaToggle.checked = state.settings.dyslexiaFont;
+            dom.settings.dayOverrideSelect.value = state.settings.dayOverride;
+            dom.settings.capacityOverrideInput.value = state.settings.capacityOverride ?? '';
+            dom.charts.genderTypeSelect.value = state.settings.genderChartType;
+            dom.charts.hourlyTypeSelect.value = state.settings.hourlyChartType;
+        };
+
+        // --- 6. EXPORTACIÓN Y PERSISTENCIA ---
+        
+        const saveData = () => {
+            localStorage.setItem('personCounterState', JSON.stringify(state));
+            alert('¡Datos guardados correctamente!');
+        };
+        
+        const loadData = () => {
+            const savedState = localStorage.getItem('personCounterState');
+            if (savedState) {
+                const loadedState = JSON.parse(savedState);
+                const defaultSettings = {
+                    dayOverride: 'auto',
+                    capacityOverride: null,
+                    genderChartType: 'bar',
+                    hourlyChartType: 'line',
+                };
+                // Fusionar el estado guardado con los valores por defecto para asegurar que todas las claves existen
+                const mergedSettings = { ...defaultSettings, ...loadedState.settings };
+                Object.assign(state, loadedState);
+                state.settings = mergedSettings;
+            }
+        };
+
+        const exportToCSV = () => {
+            if (state.records.length === 0) {
+                alert('No hay registros para exportar.');
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,Timestamp,Gender,Count,Type\n";
+            state.records.forEach(rec => {
+                csvContent += `${rec.timestamp},${rec.gender},${rec.count},${rec.type}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `aforo_records_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // --- 7. ACCESIBILIDAD ---
+
+        const speak = (text) => {
+            if (!screenReaderActive || !window.speechSynthesis) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            window.speechSynthesis.speak(utterance);
+        };
+        
+        // --- 8. INICIALIZACIÓN Y EVENT LISTENERS ---
+        
+        const renderAll = () => {
+            renderSettings();
+            updateCounterDisplay();
+            createSubtractButtons('women', dom.women.subtractContainer);
+            createSubtractButtons('men', dom.men.subtractContainer);
+            applyTheme();
+            updateCharts();
+        };
+
+        const init = () => {
+            loadData();
+            
+            dom.women.addBtn.onclick = () => {
+                const val = parseInt(dom.women.input.value);
+                if (val > 0) addPeople('women', val);
+                dom.women.input.value = '';
+            };
+            dom.men.addBtn.onclick = () => {
+                const val = parseInt(dom.men.input.value);
+                if (val > 0) addPeople('men', val);
+                dom.men.input.value = '';
+            };
+
+            dom.theme.toggleBtn.onclick = () => {
+                state.settings.isDarkMode = !state.settings.isDarkMode;
+                renderAll();
+            };
+            dom.theme.select.onchange = (e) => {
+                state.settings.theme = e.target.value;
+                if (e.target.value === 'light') state.settings.isDarkMode = false;
+                renderAll();
+            };
+            
+            dom.charts.genderTypeSelect.onchange = (e) => {
+                state.settings.genderChartType = e.target.value;
+                renderAll();
+            };
+            dom.charts.hourlyTypeSelect.onchange = (e) => {
+                state.settings.hourlyChartType = e.target.value;
+                renderAll();
+            };
+
+            dom.controls.saveData.onclick = saveData;
+            dom.controls.resetDay.onclick = () => {
+                if (confirm('¿Seguro que quieres resetear los datos del día?')) {
+                    state.womenCount = 0;
+                    state.menCount = 0;
+                    state.records = [];
+                    renderAll();
+                }
+            };
+            dom.controls.exportCSV.onclick = exportToCSV;
+
+            dom.settings.openBtn.onclick = () => dom.settings.modal.style.display = 'flex';
+            dom.settings.closeBtn.onclick = () => dom.settings.modal.style.display = 'none';
+            window.onclick = (event) => {
+                if (event.target == dom.settings.modal) dom.settings.modal.style.display = "none";
+            };
+            dom.settings.capacityMode.onchange = (e) => {
+                state.settings.capacityMode = e.target.value;
+                renderAll();
+            };
+            dom.settings.dayOverrideSelect.onchange = (e) => {
+                state.settings.dayOverride = e.target.value;
+                renderAll();
+            };
+            dom.settings.capacityOverrideInput.oninput = (e) => {
+                const value = e.target.value;
+                state.settings.capacityOverride = value === '' ? null : parseInt(value);
+                renderAll();
+            };
+            dom.settings.fontSizeSlider.oninput = (e) => {
+                state.settings.fontSize = e.target.value;
+                applyTheme(); 
+            };
+            dom.settings.dyslexiaToggle.onchange = (e) => {
+                state.settings.dyslexiaFont = e.target.checked;
+                renderAll();
+            };
+
+            dom.controls.screenReader.onclick = () => {
+                screenReaderActive = !screenReaderActive;
+                dom.controls.screenReader.style.backgroundColor = screenReaderActive ? 'var(--color-success)' : '';
+                const message = screenReaderActive ? 'Lector de pantalla activado' : 'Lector de pantalla desactivado';
+                alert(message);
+                speak(message);
+            };
+            document.querySelectorAll('button, a, input, select').forEach(el => {
+                el.addEventListener('focus', () => speak(el.title || el.innerText || el.ariaLabel || 'Elemento interactivo'));
+            });
+            
+            renderAll();
+        };
+
+        init();
+    });
+    </script>
+
+</body>
+</html>
+
+
+

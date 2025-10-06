@@ -9,7 +9,7 @@
     <!-- Fuentes de Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Open+Sans:wght@400;700&family=Roboto+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         /* --- ESTRUCTURA Y ESTILOS GLOBALES --- */
@@ -18,7 +18,7 @@
             --font-family-main: 'Open Sans', sans-serif;
             --font-family-dyslexia: 'Roboto Mono', monospace;
             
-            /* Paleta de colores para el tema "Sencillo" */
+            /* Paleta de colores por defecto (Sencillo Claro) */
             --color-primary: #8458B3;
             --color-text: #494D5F;
             --color-bg: #e5eaf5;
@@ -47,6 +47,10 @@
             line-height: 1.6;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -68,7 +72,7 @@
         /* --- CABECERA --- */
         header {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Permite el salto de línea en pantallas pequeñas */
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
@@ -78,18 +82,14 @@
             font-size: clamp(1.5rem, 5vw, 2.25rem);
             margin: 0;
             text-align: left;
-            flex-grow: 1; /* Asegura que el título ocupe el espacio disponible */
-        }
-
-        /* Ajuste específico para el título del tema Retro para que quepa en una línea */
-        body.theme-retro h1 {
-            font-size: clamp(1.2rem, 4vw, 1.75rem);
+            flex-grow: 1; 
         }
 
         .header-controls {
             display: flex;
             align-items: center;
             gap: 1rem;
+            flex-wrap: wrap;
         }
         
         .control-btn, select, button {
@@ -103,15 +103,16 @@
             transition: all 0.2s ease;
         }
 
-        .control-btn:hover, button:hover {
+        .control-btn:hover, button:hover, select:hover {
             transform: translateY(-2px);
             box-shadow: 0 2px 5px var(--color-shadow);
         }
         
-        #theme-toggle-btn {
-            background-color: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
+        #role-display {
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            background-color: var(--color-bg);
+            border-radius: 8px;
         }
 
         /* --- CONTADOR PRINCIPAL --- */
@@ -129,7 +130,7 @@
         .capacity-low { background-color: var(--color-success); }
         .capacity-medium { background-color: var(--color-warning); }
         .capacity-high { background-color: var(--color-danger); }
-        .capacity-unlimited { background: linear-gradient(45deg, var(--color-primary), #9b59b6); }
+        .capacity-unlimited { background: linear-gradient(45deg, var(--color-primary), var(--color-women)); }
 
         #capacity-info {
             text-align: center;
@@ -196,7 +197,28 @@
             gap: 1rem;
         }
 
-        .settings-modal {
+        .role-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background-color: var(--color-bg);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .export-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .export-controls select {
+            flex-grow: 1;
+        }
+        
+        /* --- MODALES --- */
+        .modal {
             display: none;
             position: fixed;
             z-index: 1000;
@@ -205,11 +227,11 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.6);
             align-items: center;
             justify-content: center;
         }
-        .settings-modal-content {
+        .modal-content {
             background-color: var(--color-card-bg);
             margin: auto;
             padding: 2rem;
@@ -218,6 +240,7 @@
             max-width: 500px;
             border-radius: 12px;
             animation: slide-in 0.3s ease-out;
+            text-align: center;
         }
         @keyframes slide-in {
             from { transform: translateY(-50px); opacity: 0; }
@@ -225,165 +248,133 @@
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .close-btn { font-size: 2rem; cursor: pointer; border: none; background: none; }
-        .setting-item { margin-bottom: 1rem; }
+        .setting-item { margin-bottom: 1rem; text-align: left; }
         .setting-item label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
         #daily-settings-container {
             border-top: 1px solid var(--color-border);
             margin-top: 1rem;
             padding-top: 1rem;
         }
-
-        /* --- TEMAS (usando variables CSS) --- */
-        body.theme-dark {
-            --color-text: #e5eaf5;
-            --color-bg: #121212;
-            --color-card-bg: #1e1e1e;
-            --color-border: #2c2c2c;
-            --color-shadow: rgba(0, 0, 0, 0.3);
-            --color-women: #d0bdf4;
-            --color-men: #a0d2eb;
-            --color-primary: #d0bdf4;
+        #role-selection, .confirm-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
         }
-        
+        .confirm-actions {
+            flex-direction: row;
+            justify-content: center;
+        }
+        #role-selection button, .confirm-actions button {
+            padding: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* --- DEFINICIÓN DE TEMAS --- */
+
+        /* MODO OSCURO GENÉRICO (se aplica a todos los temas) */
+        body.dark-mode {
+            /* Sencillo Oscuro por defecto */
+            --color-text: #e5eaf5; --color-bg: #121212; --color-card-bg: #1e1e1e;
+            --color-border: #2c2c2c; --color-shadow: rgba(0, 0, 0, 0.3); --color-women: #d0bdf4;
+            --color-men: #a0d2eb; --color-primary: #d0bdf4;
+        }
+
+        /* TEMA RETRO (Claro) */
         body.theme-retro {
-            --font-family-main: 'Press Start 2P', cursive;
-            --color-text: #2c3e50;
-            --color-bg: #ecf0f1;
-            --color-card-bg: #ffffff;
-            --color-border: #3498db;
-            --color-shadow: rgba(0, 0, 0, 0.15);
-            --color-women: #e91e63;
-            --color-men: #2196f3;
-            --color-primary: #9b59b6;
+            --color-bg: #fdf6e3; --color-card-bg: #eee8d5; --color-text: #657b83;
+            --color-primary: #cb4b16; --color-border: #93a1a1; --color-women: #dc322f;
+            --color-men: #268bd2; --color-shadow: rgba(0,0,0,0.1);
         }
-        
-        body.theme-retro.theme-dark {
-            --color-text: #00f0ff;
-            --color-bg: #0a043c;
-            --color-card-bg: #1b263b;
-            --color-border: #ff00ff;
-            --color-shadow: rgba(255, 0, 255, 0.2);
-            --color-women: #ff00ff;
-            --color-men: #ffff00;
-            --color-primary: #00f0ff;
-            text-shadow: 0 0 5px var(--color-primary);
-        }
-        
-        body.theme-high-contrast {
-            --color-text: #00ffff;
-            --color-bg: #000000;
-            --color-card-bg: #000000;
-            --color-border: #00ffff;
-            --color-shadow: rgba(0, 0, 0, 0);
-            --color-women: #ffff00;
-            --color-men: #00ff00;
-            --color-primary: #00ffff;
+        /* TEMA RETRO (Oscuro) */
+        body.dark-mode.theme-retro {
+            --color-bg: #002b36; --color-card-bg: #073642; --color-text: #839496;
+            --color-primary: #cb4b16; --color-border: #586e75; --color-women: #dc322f;
+            --color-men: #268bd2; --color-shadow: rgba(0,0,0,0.3);
         }
 
-        body.theme-high-contrast .women-group button,
-        body.theme-high-contrast .men-group button {
-            color: #000000;
-            font-weight: bold;
+        /* TEMA ALTO CONTRASTE (Se mantiene igual en ambos modos) */
+        body.theme-alto-contraste {
+            --color-bg: #000000; --color-card-bg: #000000; --color-text: #ffffff;
+            --color-primary: #ffff00; --color-border: #ffff00; --color-women: #ffff00;
+            --color-men: #00ffff; --color-shadow: rgba(255,255,0,0.2);
         }
 
-        body.theme-forest {
-            --color-text: #2c3e50;
-            --color-bg: #e9eef2;
-            --color-card-bg: #ffffff;
-            --color-border: #b0c4de;
-            --color-shadow: rgba(44, 62, 80, 0.1);
-            --color-women: #d4bca4;
-            --color-men: #6a8d9f;
-            --color-primary: #6a8d9f;
+        /* TEMA BOSQUE (Claro) */
+        body.theme-bosque {
+            --color-bg: #f4f1e9; --color-card-bg: #ffffff; --color-text: #4a4a4a;
+            --color-primary: #5a7465; --color-border: #d3c7b3; --color-women: #c7a48b;
+            --color-men: #8da382; --color-shadow: rgba(0,0,0,0.1);
         }
-        
-        body.theme-forest.theme-dark {
-            --color-text: #e8e8e8;
-            --color-bg: #1e3e2a;
-            --color-card-bg: #2a553a;
-            --color-border: #4f785a;
-            --color-women: #8fbc8f;
-            --color-men: #cd853f;
-            --color-primary: #8b4513;
+        /* TEMA BOSQUE (Oscuro) */
+        body.dark-mode.theme-bosque {
+            --color-bg: #2d3a32; --color-card-bg: #43584c; --color-text: #e0e0e0;
+            --color-primary: #a1b499; --color-border: #5a7465; --color-women: #c7a48b;
+            --color-men: #8da382; --color-shadow: rgba(0,0,0,0.3);
         }
 
-        body.theme-ocean {
-            --color-text: #0a1c2e;
-            --color-bg: #cce2ef;
-            --color-card-bg: #ffffff;
-            --color-border: #b3d4e6;
-            --color-shadow: rgba(10, 28, 46, 0.1);
-            --color-women: #3c8ab0;
-            --color-men: #439db7;
-            --color-primary: #1c4a6e;
+        /* TEMA OCEANICO (Claro) */
+        body.theme-oceanico {
+            --color-bg: #e0f7fa; --color-card-bg: #ffffff; --color-text: #004d40;
+            --color-primary: #00796b; --color-border: #b2ebf2; --color-women: #ff8a65;
+            --color-men: #4dd0e1; --color-shadow: rgba(0, 121, 107, 0.1);
+        }
+        /* TEMA OCEANICO (Oscuro) */
+        body.dark-mode.theme-oceanico {
+            --color-bg: #001f3f; --color-card-bg: #003366; --color-text: #b2ebf2;
+            --color-primary: #4dd0e1; --color-border: #004d40; --color-women: #ff8a65;
+            --color-men: #4dd0e1; --color-shadow: rgba(0,0,0,0.4);
         }
 
-        body.theme-ocean.theme-dark {
-            --color-text: #b3d4e6;
-            --color-bg: #010b1a;
-            --color-card-bg: #0a1c2e;
-            --color-border: #122c44;
-            --color-shadow: rgba(0, 0, 0, 0.2);
-            --color-women: #4ea0c1;
-            --color-men: #94c0d5;
-            --color-primary: #4ea0c1;
+        /* TEMA RETRO 90s (Claro) */
+        body.theme-retro-90s {
+            --color-bg: #ffffff; --color-card-bg: #f0f0f0; --color-text: #000000;
+            --color-primary: #f400a1; --color-border: #cccccc; --color-women: #be00ff;
+            --color-men: #00f0ff; --color-shadow: rgba(0,0,0,0.15);
+        }
+        /* TEMA RETRO 90s (Oscuro) */
+        body.dark-mode.theme-retro-90s {
+            --color-bg: #0d0230; --color-card-bg: #231942; --color-text: #ffffff;
+            --color-primary: #f400a1; --color-border: #9f1873; --color-women: #be00ff;
+            --color-men: #00f0ff; --color-shadow: rgba(190, 0, 255, 0.2);
         }
 
-        body.theme-90s {
-            --font-family-main: 'Bungee', cursive;
-            --color-text: #733426;
-            --color-bg: #F2D98A;
-            --color-card-bg: #FEF4E6;
-            --color-border: #FAB621;
-            --color-shadow: rgba(115, 52, 38, 0.15);
-            --color-women: #D96690;
-            --color-men: #F66A2C;
-            --color-primary: #BD363F;
+        /* TEMA MINIMALISTA (Claro) */
+        body.theme-minimalista {
+            --color-bg: #f5f5f5; --color-card-bg: #ffffff; --color-text: #333333;
+            --color-primary: #555555; --color-border: #e0e0e0; --color-women: #777;
+            --color-men: #999; --color-shadow: rgba(0,0,0,0.05);
+        }
+        /* TEMA MINIMALISTA (Oscuro) */
+        body.dark-mode.theme-minimalista {
+            --color-bg: #121212; --color-card-bg: #1e1e1e; --color-text: #f5f5f5;
+            --color-primary: #aaaaaa; --color-border: #333333; --color-women: #bbbbbb;
+            --color-men: #999999; --color-shadow: rgba(0,0,0,0.2);
         }
 
-        body.theme-90s.theme-dark {
-            --color-text: #FEF4E6;
-            --color-bg: #1A1A26;
-            --color-card-bg: #032859;
-            --color-border: #463259;
-            --color-shadow: rgba(0, 0, 0, 0.2);
-            --color-women: #F66A2C;
-            --color-men: #29A68F;
-            --color-primary: #FAB621;
+        /* TEMA FUTURISTA (Claro) */
+        body.theme-futurista {
+            --color-bg: #e1eef5; --color-card-bg: #ffffff; --color-text: #0a192f;
+            --color-primary: #0088a3; --color-border: #b0c4de; --color-women: #ff64da;
+            --color-men: #64ffda; --color-shadow: rgba(176, 196, 222, 0.4);
+        }
+        /* TEMA FUTURISTA (Oscuro) */
+        body.dark-mode.theme-futurista {
+            --color-bg: #0a192f; --color-card-bg: #112240; --color-text: #ccd6f6;
+            --color-primary: #64ffda; --color-border: #003358; --color-women: #ff64da;
+            --color-men: #64ffda; --color-shadow: rgba(100, 255, 218, 0.2);
         }
 
-        body.theme-minimalist {
-            --color-text: #000;
-            --color-bg: #fff;
-            --color-card-bg: #fff;
-            --color-border: #eee;
-            --color-shadow: rgba(0, 0, 0, 0.05);
-            --color-women: #333;
-            --color-men: #555;
-            --color-primary: #000;
+        /* Estilo específico para botones de añadir en temas oscuros */
+        body.dark-mode .input-group button {
+            color: #121212;
+            font-weight: 700;
         }
-        
-        body.theme-minimalist.theme-dark {
-            --color-text: #fff;
-            --color-bg: #000;
-            --color-card-bg: #000;
-            --color-border: #333;
-            --color-women: #ccc;
-            --color-men: #aaa;
-            --color-primary: #fff;
+        /* Excepción para Alto Contraste para que el texto siga siendo legible */
+        body.dark-mode.theme-alto-contraste .input-group button {
+            color: var(--color-bg);
         }
 
-        body.theme-futuristic {
-            --font-family-main: 'Roboto Mono', monospace;
-            --color-text: #00ffde;
-            --color-bg: #0d0221;
-            --color-card-bg: rgba(42, 12, 80, 0.5);
-            --color-border: #2a0c50;
-            --color-women: #f900f9;
-            --color-men: #00f0ff;
-            --color-primary: #00ffde;
-            text-shadow: 0 0 3px var(--color-primary);
-        }
 
         body.dyslexia-font {
             --font-family-main: var(--font-family-dyslexia);
@@ -425,17 +416,20 @@
         <header class="card">
             <h1>Control de Aforo</h1>
             <div class="header-controls">
-                <button id="theme-toggle-btn" class="control-btn" title="Alternar tema claro/oscuro">🌓</button>
-                <select id="theme-select" class="control-btn" title="Seleccionar tema">
-                    <option value="light">Sencillo</option>
-                    <option value="retro">Retro</option>
-                    <option value="high-contrast">Alto Contraste</option>
-                    <option value="forest">Bosque</option>
-                    <option value="ocean">Oceánico</option>
-                    <option value="90s">Retro 90s</option>
-                    <option value="minimalist">Minimalista</option>
-                    <option value="futuristic">Futurista</option>
-                </select>
+                <div class="control-item">
+                    <label for="theme-select" class="hidden">Tema:</label>
+                    <select id="theme-select" title="Seleccionar tema visual">
+                        <option value="sencillo">Sencillo</option>
+                        <option value="retro">Retro</option>
+                        <option value="alto-contraste">Alto Contraste</option>
+                        <option value="bosque">Bosque</option>
+                        <option value="oceanico">Oceánico</option>
+                        <option value="retro-90s">Retro 90s</option>
+                        <option value="minimalista">Minimalista</option>
+                        <option value="futurista">Futurista</option>
+                    </select>
+                </div>
+                <button id="mode-toggle-btn" class="control-btn" title="Alternar modo claro/oscuro">🌓</button>
                 <button id="screen-reader-btn" class="control-btn" aria-label="Activar lector de pantalla">🔊</button>
             </div>
         </header>
@@ -497,20 +491,32 @@
 
         <aside id="controls-section" class="card">
             <h3>Controles y Exportación</h3>
+            <div class="role-controls">
+                <span id="role-display"></span>
+                <button id="change-role-btn">Cambiar Rol</button>
+            </div>
             <button id="save-data-btn">Guardar</button>
             <button id="reset-day-btn">Resetear Día</button>
-            <button id="export-csv-btn">Exportar a CSV (Excel)</button>
+            <div class="export-controls">
+                <select id="export-format-select">
+                    <option value="csv">Exportar CSV (Informe)</option>
+                    <option value="json">Exportar JSON (Base de Datos)</option>
+                </select>
+                <button id="export-data-btn">Exportar</button>
+            </div>
+            <button id="import-data-btn">Importar JSON (Base de Datos)</button>
+            <input type="file" id="import-file-input" class="hidden" accept=".json">
             <button id="settings-btn">Ajustes</button>
         </aside>
 
     </div>
 
     <!-- Modal de Ajustes -->
-    <div id="settings-modal" class="settings-modal">
-        <div class="settings-modal-content card">
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2>Ajustes</h2>
-                <span id="close-modal-btn" class="close-btn">&times;</span>
+                <span id="close-settings-modal-btn" class="close-btn">&times;</span>
             </div>
             <div class="setting-item">
                 <label for="capacity-mode">Modo de Aforo</label>
@@ -519,7 +525,7 @@
                     <option value="daily">Por Días</option>
                 </select>
             </div>
-            <div id="daily-settings-container" class="setting-item" style="display: none;">
+            <div id="daily-settings-container" class="setting-item hidden">
                 <label for="day-override-select">Forzar Día y Aforo</label>
                 <select id="day-override-select">
                     <option value="auto">Automático (Hoy)</option>
@@ -543,31 +549,72 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal de Roles -->
+    <div id="role-modal" class="modal">
+        <div class="modal-content">
+            <h2>Selecciona tu Rol</h2>
+            <div id="role-selection">
+                <button data-role="portero">Portero</button>
+                <button data-role="director">Director</button>
+                <button data-role="dueño">Dueño</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="confirm-title">¿Estás seguro?</h2>
+            <p id="confirm-message">Esta acción no se puede deshacer.</p>
+            <div class="confirm-actions">
+                <button id="confirm-yes-btn">Sí</button>
+                <button id="confirm-no-btn">No</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Notificación -->
+    <div id="notification-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="notification-title">Notificación</h2>
+            <p id="notification-message">Este es un mensaje de notificación.</p>
+            <div class="confirm-actions">
+                <button id="notification-ok-btn">Aceptar</button>
+            </div>
+        </div>
+    </div>
 
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- 1. ESTADO DE LA APLICACIÓN Y REFERENCIAS AL DOM ---
-        const state = {
+        let state = {}; // Se inicializará con getNewState
+
+        const getNewState = () => ({
             womenCount: 0,
             menCount: 0,
             get totalCount() { return this.womenCount + this.menCount; },
-            records: [], // { timestamp, gender, count, type: 'add'/'subtract' }
+            records: [],
             settings: {
-                theme: 'light',
+                userRole: null,
+                theme: 'sencillo',
+                isDarkMode: false,
                 capacityMode: 'unlimited',
                 fontSize: 16,
                 dyslexiaFont: false,
-                isDarkMode: false,
                 dayOverride: 'auto',
                 capacityOverride: null,
                 genderChartType: 'bar',
                 hourlyChartType: 'line',
             }
-        };
+        });
+
+        state = getNewState();
 
         const dom = {
             body: document.body,
+            container: document.querySelector('.container'),
             mainCounter: document.getElementById('main-counter-display'),
             capacityInfo: {
                 mode: document.getElementById('mode-label'),
@@ -586,10 +633,11 @@
                 subtractContainer: document.getElementById('men-subtract-buttons')
             },
             theme: {
-                toggleBtn: document.getElementById('theme-toggle-btn'),
-                select: document.getElementById('theme-select')
+                select: document.getElementById('theme-select'),
+                modeToggleBtn: document.getElementById('mode-toggle-btn'),
             },
             charts: {
+                section: document.getElementById('charts-section'),
                 gender: null,
                 hourly: null,
                 genderTypeSelect: document.getElementById('gender-chart-type'),
@@ -598,7 +646,7 @@
             settings: {
                 modal: document.getElementById('settings-modal'),
                 openBtn: document.getElementById('settings-btn'),
-                closeBtn: document.getElementById('close-modal-btn'),
+                closeBtn: document.getElementById('close-settings-modal-btn'),
                 capacityMode: document.getElementById('capacity-mode'),
                 fontSizeSlider: document.getElementById('font-size-slider'),
                 dyslexiaToggle: document.getElementById('dyslexia-toggle'),
@@ -607,16 +655,89 @@
                 capacityOverrideInput: document.getElementById('capacity-override-input'),
             },
             controls: {
+                section: document.getElementById('controls-section'),
                 saveData: document.getElementById('save-data-btn'),
                 resetDay: document.getElementById('reset-day-btn'),
-                exportCSV: document.getElementById('export-csv-btn'),
+                exportBtn: document.getElementById('export-data-btn'),
+                exportFormat: document.getElementById('export-format-select'),
+                importBtn: document.getElementById('import-data-btn'),
+                importInput: document.getElementById('import-file-input'),
                 screenReader: document.getElementById('screen-reader-btn')
+            },
+            roles: {
+                modal: document.getElementById('role-modal'),
+                selectionContainer: document.getElementById('role-selection'),
+                display: document.getElementById('role-display'),
+                changeBtn: document.getElementById('change-role-btn')
+            },
+            confirm: {
+                modal: document.getElementById('confirm-modal'),
+                title: document.getElementById('confirm-title'),
+                message: document.getElementById('confirm-message'),
+                yesBtn: document.getElementById('confirm-yes-btn'),
+                noBtn: document.getElementById('confirm-no-btn'),
+            },
+            notification: {
+                modal: document.getElementById('notification-modal'),
+                title: document.getElementById('notification-title'),
+                message: document.getElementById('notification-message'),
+                okBtn: document.getElementById('notification-ok-btn'),
             }
         };
 
         let screenReaderActive = false;
 
-        // --- 2. LÓGICA DEL CONTADOR Y CAPACIDAD ---
+        // --- 2. LÓGICA DE ROLES Y PERSISTENCIA POR ROL ---
+
+        const applyRolePermissions = () => {
+            const role = state.settings.userRole;
+            if (!role) {
+                dom.roles.modal.style.display = 'flex';
+                dom.container.classList.add('hidden');
+                return;
+            }
+            
+            dom.roles.modal.style.display = 'none';
+            dom.container.classList.remove('hidden');
+            dom.roles.display.textContent = `Rol: ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+
+            const isPortero = role === 'portero';
+            const isDueño = role === 'dueño';
+
+            dom.charts.section.classList.toggle('hidden', isPortero);
+            dom.settings.openBtn.classList.toggle('hidden', !isDueño);
+            dom.controls.importBtn.classList.toggle('hidden', !isDueño);
+            dom.controls.exportFormat.parentElement.classList.toggle('hidden', isPortero);
+        };
+        
+        const setRole = (role) => {
+            // Antes de cambiar, guarda el estado actual (especialmente los ajustes del rol anterior)
+            if (state.settings.userRole) {
+                saveData(true);
+            }
+            
+            const allData = JSON.parse(localStorage.getItem('personCounterSharedData')) || {
+                sharedData: { womenCount: 0, menCount: 0, records: [] },
+                rolesSettings: {}
+            };
+
+            // 1. Carga los datos compartidos en el estado
+            state.womenCount = allData.sharedData.womenCount || 0;
+            state.menCount = allData.sharedData.menCount || 0;
+            state.records = allData.sharedData.records || [];
+
+            // 2. Carga los ajustes para el nuevo rol, o usa los predeterminados
+            const defaultSettings = getNewState().settings;
+            const roleSettings = allData.rolesSettings[role] || {};
+            state.settings = { ...defaultSettings, ...roleSettings };
+            state.settings.userRole = role;
+
+            // 3. Guarda el último rol y renderiza todo
+            localStorage.setItem('personCounterLastRole', role);
+            renderAll();
+        };
+
+        // --- 3. LÓGICA DEL CONTADOR Y CAPACIDAD ---
         
         const getDailyCapacity = () => {
             if (state.settings.capacityMode !== 'daily') return Infinity;
@@ -641,7 +762,7 @@
             const capacity = getDailyCapacity();
             const percentage = capacity === Infinity ? 0 : (state.totalCount / capacity) * 100;
             
-            dom.mainCounter.className = 'main-counter-display'; // Reset classes
+            dom.mainCounter.className = 'main-counter-display';
 
             if (capacity === Infinity) {
                 dom.mainCounter.classList.add('capacity-unlimited');
@@ -658,13 +779,20 @@
         };
 
         const addRecord = (gender, count, type) => {
-            state.records.push({ timestamp: new Date().toISOString(), gender, count, type });
+            state.records.push({ 
+                timestamp: new Date().toISOString(), 
+                gender, 
+                count, 
+                type,
+                womenCountAfter: state.womenCount,
+                menCountAfter: state.menCount
+            });
         };
         
         const addPeople = (gender, count) => {
             const capacity = getDailyCapacity();
             if (state.totalCount + count > capacity) {
-                alert('¡Se ha superado el aforo máximo!');
+                showNotification('Aforo Superado', `No se pueden añadir ${count} personas, el aforo máximo de ${capacity} sería superado.`);
                 return;
             }
             if (gender === 'women') state.womenCount += count;
@@ -676,15 +804,16 @@
         const subtractPeople = (gender, count) => {
             if (gender === 'women' && state.womenCount >= count) {
                 state.womenCount -= count;
-                addRecord(gender, count, 'subtract');
             } else if (gender === 'men' && state.menCount >= count) {
                 state.menCount -= count;
-                addRecord(gender, count, 'subtract');
+            } else {
+                return;
             }
+            addRecord(gender, count, 'subtract');
             renderAll();
         };
 
-        // --- 3. MANEJO DE LA INTERFAZ Y BOTONES ---
+        // --- 4. MANEJO DE LA INTERFAZ Y BOTONES ---
 
         const createSubtractButtons = (gender, container) => {
             container.innerHTML = '';
@@ -701,92 +830,75 @@
             }
         };
 
-        // --- 4. GRÁFICAS (CHART.JS) ---
+        // --- 5. GRÁFICAS (CHART.JS) ---
 
         const updateCharts = () => {
-            const computedStyles = getComputedStyle(dom.body);
-            const womenColor = computedStyles.getPropertyValue('--color-women').trim();
-            const menColor = computedStyles.getPropertyValue('--color-men').trim();
-            const successColor = computedStyles.getPropertyValue('--color-success').trim();
-            const dangerColor = computedStyles.getPropertyValue('--color-danger').trim();
-            const borderColor = computedStyles.getPropertyValue('--color-border').trim();
+            if (state.settings.userRole === 'portero') return;
 
-            // Gráfico de Género
-            if (dom.charts.gender) dom.charts.gender.destroy();
-            const genderCtx = document.getElementById('gender-chart').getContext('2d');
-            const genderData = {
-                labels: ['Mujeres', 'Hombres'],
-                datasets: [{
-                    label: 'Personas por Género',
-                    data: [state.womenCount, state.menCount],
-                    backgroundColor: [womenColor, menColor],
-                    borderColor: borderColor,
-                    borderWidth: 1
-                }]
-            };
-            if (state.settings.genderChartType === 'radar') genderData.datasets[0].fill = true;
-            
-            dom.charts.gender = new Chart(genderCtx, {
-                type: state.settings.genderChartType,
-                data: genderData,
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            // Retraso ligero para permitir que las variables CSS se apliquen
+            setTimeout(() => {
+                const computedStyles = getComputedStyle(dom.body);
+                const womenColor = computedStyles.getPropertyValue('--color-women').trim();
+                const menColor = computedStyles.getPropertyValue('--color-men').trim();
+                const successColor = computedStyles.getPropertyValue('--color-success').trim();
+                const dangerColor = computedStyles.getPropertyValue('--color-danger').trim();
+                const borderColor = computedStyles.getPropertyValue('--color-border').trim();
 
-            // Gráfico Horario
-            if (dom.charts.hourly) dom.charts.hourly.destroy();
-            const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
-            const hourlyAdds = Array(24).fill(0);
-            const hourlySubs = Array(24).fill(0);
-            state.records.forEach(rec => {
-                const hour = new Date(rec.timestamp).getHours();
-                if (rec.type === 'add') hourlyAdds[hour] += rec.count;
-                else hourlySubs[hour] += rec.count;
-            });
-            const hourlyData = {
-                labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-                datasets: [
-                    { label: 'Entradas', data: hourlyAdds, borderColor: successColor, backgroundColor: successColor + '80', tension: 0.1 },
-                    { label: 'Salidas', data: hourlySubs, borderColor: dangerColor, backgroundColor: dangerColor + '80', tension: 0.1 }
-                ]
-            };
-            if (state.settings.hourlyChartType === 'radar') {
-                hourlyData.datasets[0].fill = true;
-                hourlyData.datasets[1].fill = true;
-            }
-            dom.charts.hourly = new Chart(hourlyCtx, {
-                type: state.settings.hourlyChartType,
-                data: hourlyData,
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+                if (dom.charts.gender) dom.charts.gender.destroy();
+                const genderCtx = document.getElementById('gender-chart').getContext('2d');
+                dom.charts.gender = new Chart(genderCtx, {
+                    type: state.settings.genderChartType,
+                    data: {
+                        labels: ['Mujeres', 'Hombres'],
+                        datasets: [{
+                            data: [state.womenCount, state.menCount],
+                            backgroundColor: [womenColor, menColor],
+                            borderColor: borderColor, borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+
+                if (dom.charts.hourly) dom.charts.hourly.destroy();
+                const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
+                const hourlyAdds = Array(24).fill(0);
+                const hourlySubs = Array(24).fill(0);
+                state.records.forEach(rec => {
+                    const hour = new Date(rec.timestamp).getHours();
+                    if (rec.type === 'add') hourlyAdds[hour] += rec.count;
+                    else hourlySubs[hour] += rec.count;
+                });
+                dom.charts.hourly = new Chart(hourlyCtx, {
+                    type: state.settings.hourlyChartType,
+                    data: {
+                        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+                        datasets: [
+                            { label: 'Entradas', data: hourlyAdds, borderColor: successColor, backgroundColor: successColor + '80', tension: 0.1 },
+                            { label: 'Salidas', data: hourlySubs, borderColor: dangerColor, backgroundColor: dangerColor + '80', tension: 0.1 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }, 50);
         };
 
-        // --- 5. TEMAS Y AJUSTES ---
+        // --- 6. TEMAS Y AJUSTES ---
 
         const applyTheme = () => {
-            const themeClasses = ['theme-dark', 'theme-retro', 'theme-high-contrast', 'theme-forest', 'theme-ocean', 'theme-90s', 'theme-minimalist', 'theme-futuristic'];
-            dom.body.classList.remove(...themeClasses);
-
-            const isFixedTheme = state.settings.theme === 'high-contrast' || state.settings.theme === 'futuristic';
-            dom.theme.toggleBtn.style.display = isFixedTheme ? 'none' : 'flex';
-
-            const baseTheme = state.settings.theme;
-            if (baseTheme !== 'light') dom.body.classList.add(`theme-${baseTheme}`);
-            
-            // Forzamos que los temas fijos no tengan modo oscuro
-            if (isFixedTheme) {
-                state.settings.isDarkMode = false;
+            dom.body.className = ''; // Limpiamos todas las clases
+            dom.body.classList.add(`theme-${state.settings.theme}`);
+            if (state.settings.isDarkMode) {
+                dom.body.classList.add('dark-mode');
             }
-
-            if (state.settings.isDarkMode) dom.body.classList.add('theme-dark');
-
-            dom.body.classList.toggle('dyslexia-font', state.settings.dyslexiaFont);
-            
+            if (state.settings.dyslexiaFont) {
+                dom.body.classList.add('dyslexia-font');
+            }
             document.documentElement.style.setProperty('--font-size-base', `${state.settings.fontSize}px`);
+            dom.theme.modeToggleBtn.textContent = state.settings.isDarkMode ? '☀️' : '🌓';
         };
         
         const renderSettings = () => {
-            dom.settings.dailySettingsContainer.style.display = state.settings.capacityMode === 'daily' ? 'block' : 'none';
-            dom.theme.select.value = state.settings.theme;
+            dom.settings.dailySettingsContainer.classList.toggle('hidden', state.settings.capacityMode !== 'daily');
             dom.settings.capacityMode.value = state.settings.capacityMode;
             dom.settings.fontSizeSlider.value = state.settings.fontSize;
             dom.settings.dyslexiaToggle.checked = state.settings.dyslexiaFont;
@@ -794,73 +906,154 @@
             dom.settings.capacityOverrideInput.value = state.settings.capacityOverride ?? '';
             dom.charts.genderTypeSelect.value = state.settings.genderChartType;
             dom.charts.hourlyTypeSelect.value = state.settings.hourlyChartType;
+            dom.theme.select.value = state.settings.theme;
         };
 
-        // --- 6. EXPORTACIÓN Y PERSISTENCIA ---
+        // --- 7. MODALES, IMPORT/EXPORT Y PERSISTENCIA ---
         
-        const saveData = () => {
-            localStorage.setItem('personCounterState', JSON.stringify(state));
-            alert('¡Datos guardados correctamente!');
+        const showNotification = (title, message) => {
+            dom.notification.title.textContent = title;
+            dom.notification.message.textContent = message;
+            dom.notification.modal.style.display = 'flex';
+        };
+
+        const saveData = (silent = false) => {
+            if (!state.settings.userRole) return;
+            const allData = JSON.parse(localStorage.getItem('personCounterSharedData')) || {
+                sharedData: { womenCount: 0, menCount: 0, records: [] },
+                rolesSettings: {}
+            };
+
+            // 1. Actualiza la parte de datos compartidos desde el estado actual
+            allData.sharedData.womenCount = state.womenCount;
+            allData.sharedData.menCount = state.menCount;
+            allData.sharedData.records = state.records;
+
+            // 2. Actualiza los ajustes para el rol actual
+            allData.rolesSettings[state.settings.userRole] = state.settings;
+
+            // 3. Guarda todo de nuevo
+            localStorage.setItem('personCounterSharedData', JSON.stringify(allData));
+
+            if (!silent) showNotification('Guardado', '¡Datos guardados correctamente!');
         };
         
-        const loadData = () => {
-            const savedState = localStorage.getItem('personCounterState');
-            if (savedState) {
-                const loadedState = JSON.parse(savedState);
-                const defaultSettings = {
-                    dayOverride: 'auto',
-                    capacityOverride: null,
-                    genderChartType: 'bar',
-                    hourlyChartType: 'line',
-                };
-                // Fusionar el estado guardado con los valores por defecto para asegurar que todas las claves existen
-                const mergedSettings = { ...defaultSettings, ...loadedState.settings };
-                Object.assign(state, loadedState);
-                state.settings = mergedSettings;
+        const loadInitialRole = () => {
+            const lastRole = localStorage.getItem('personCounterLastRole');
+            if (lastRole) {
+                setRole(lastRole);
+            } else {
+                renderAll();
             }
         };
 
-        const exportToCSV = () => {
-            if (state.records.length === 0) {
-                alert('No hay registros para exportar.');
+        const showConfirm = (title, message, onConfirm) => {
+            dom.confirm.title.textContent = title;
+            dom.confirm.message.textContent = message;
+            dom.confirm.modal.style.display = 'flex';
+            
+            dom.confirm.yesBtn.onclick = () => {
+                dom.confirm.modal.style.display = 'none';
+                onConfirm();
+            };
+            dom.confirm.noBtn.onclick = () => {
+                dom.confirm.modal.style.display = 'none';
+            };
+        };
+
+        const importData = (file) => {
+            if (!file || file.type !== 'application/json') {
+                showNotification('Error', 'Por favor, selecciona un archivo JSON válido.');
                 return;
             }
-            let csvContent = "data:text/csv;charset=utf-8,Timestamp,Gender,Count,Type\n";
-            state.records.forEach(rec => {
-                csvContent += `${rec.timestamp},${rec.gender},${rec.count},${rec.type}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    // Comprueba si tiene el nuevo formato compartido
+                    if (importedData.sharedData && importedData.rolesSettings) {
+                         showConfirm('Importar Base de Datos', '¿Seguro que quieres sobreescribir TODOS los datos compartidos y de roles?', () => {
+                            localStorage.setItem('personCounterSharedData', JSON.stringify(importedData));
+                            const currentRole = state.settings.userRole || localStorage.getItem('personCounterLastRole');
+                            if (currentRole) {
+                                setRole(currentRole); // Recarga la UI con los nuevos datos
+                            } else {
+                                renderAll(); // Muestra la selección de rol si no había ninguno activo
+                            }
+                            showNotification('Éxito', '¡Datos importados correctamente!');
+                        });
+                    } else {
+                        showNotification('Error de Formato', 'El archivo de importación no es compatible. Debe ser un archivo de datos compartidos.');
+                    }
+                } catch (error) {
+                    showNotification('Error de Importación', 'Error al leer el archivo. Asegúrate de que es un archivo JSON válido.');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        const exportData = () => {
+            const format = dom.controls.exportFormat.value;
+            const date = new Date().toISOString().split('T')[0];
+            let fileContent, mimeType, fileName;
+
+            if (format === 'json') {
+                const allData = localStorage.getItem('personCounterSharedData') || '{}';
+                fileContent = JSON.stringify(JSON.parse(allData), null, 2);
+                mimeType = 'application/json';
+                fileName = `aforo_backup_total_compartido_${date}.json`;
+            } else { // CSV
+                if (state.records.length === 0) {
+                    showNotification('Exportación Vacía', 'No hay registros para exportar en el informe.');
+                    return;
+                }
+                const headers = "Timestamp,Hora,Tipo,Genero,Cantidad,Mujeres Despues,Hombres Despues,Total Despues,Aforo Max\n";
+                const capacityToday = getDailyCapacity();
+                const rows = state.records.map(rec => {
+                    const d = new Date(rec.timestamp);
+                    const time = d.toTimeString().split(' ')[0];
+                    const type = rec.type === 'add' ? 'Entrada' : 'Salida';
+                    const gender = rec.gender === 'women' ? 'Mujer' : 'Hombre';
+                    return [rec.timestamp, time, type, gender, rec.count, rec.womenCountAfter, rec.menCountAfter,
+                        rec.womenCountAfter + rec.menCountAfter, capacityToday === Infinity ? 'Ilimitado' : capacityToday].join(',');
+                }).join('\n');
+                fileContent = headers + rows;
+                mimeType = 'text/csv';
+                fileName = `aforo_informe_compartido_${date}.csv`;
+            }
+
+            const blob = new Blob([fileContent], { type: `${mimeType};charset=utf-8,` });
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `aforo_records_${new Date().toISOString().split('T')[0]}.csv`);
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         };
 
-        // --- 7. ACCESIBILIDAD ---
-
+        // --- 8. ACCESIBILIDAD ---
         const speak = (text) => {
             if (!screenReaderActive || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'es-ES';
             window.speechSynthesis.speak(utterance);
         };
         
-        // --- 8. INICIALIZACIÓN Y EVENT LISTENERS ---
-        
+        // --- 9. INICIALIZACIÓN Y EVENT LISTENERS ---
         const renderAll = () => {
-            renderSettings();
-            updateCounterDisplay();
-            createSubtractButtons('women', dom.women.subtractContainer);
-            createSubtractButtons('men', dom.men.subtractContainer);
-            applyTheme();
-            updateCharts();
+            applyRolePermissions();
+            if (state.settings.userRole) {
+                applyTheme();
+                renderSettings();
+                updateCounterDisplay();
+                createSubtractButtons('women', dom.women.subtractContainer);
+                createSubtractButtons('men', dom.men.subtractContainer);
+                updateCharts();
+            }
         };
 
         const init = () => {
-            loadData();
-            
             dom.women.addBtn.onclick = () => {
                 const val = parseInt(dom.women.input.value);
                 if (val > 0) addPeople('women', val);
@@ -872,75 +1065,77 @@
                 dom.men.input.value = '';
             };
 
-            dom.theme.toggleBtn.onclick = () => {
+            dom.theme.modeToggleBtn.onclick = () => {
                 state.settings.isDarkMode = !state.settings.isDarkMode;
-                renderAll();
-            };
-            dom.theme.select.onchange = (e) => {
-                state.settings.theme = e.target.value;
-                if (e.target.value === 'light') state.settings.isDarkMode = false;
-                renderAll();
-            };
-            
-            dom.charts.genderTypeSelect.onchange = (e) => {
-                state.settings.genderChartType = e.target.value;
-                renderAll();
-            };
-            dom.charts.hourlyTypeSelect.onchange = (e) => {
-                state.settings.hourlyChartType = e.target.value;
-                renderAll();
+                applyTheme();
+                updateCharts();
+                saveData(true);
             };
 
-            dom.controls.saveData.onclick = saveData;
+            dom.theme.select.onchange = (e) => {
+                state.settings.theme = e.target.value;
+                applyTheme();
+                updateCharts();
+                saveData(true);
+            };
+            
+            dom.charts.genderTypeSelect.onchange = (e) => { state.settings.genderChartType = e.target.value; renderAll(); };
+            dom.charts.hourlyTypeSelect.onchange = (e) => { state.settings.hourlyChartType = e.target.value; renderAll(); };
+
+            dom.controls.saveData.onclick = () => saveData(false);
             dom.controls.resetDay.onclick = () => {
-                if (confirm('¿Seguro que quieres resetear los datos del día?')) {
+                showConfirm('Resetear Día', '¿Seguro que quieres borrar todos los datos del día? Esta acción afectará a TODOS los roles.', () => {
+                    // Resetea las partes compartidas del estado
                     state.womenCount = 0;
                     state.menCount = 0;
                     state.records = [];
+                    // Renderiza la UI inmediatamente
                     renderAll();
-                }
+                    // Guarda el estado reseteado silenciosamente
+                    saveData(true);
+                });
             };
-            dom.controls.exportCSV.onclick = exportToCSV;
+            dom.controls.exportBtn.onclick = exportData;
+            dom.controls.importBtn.onclick = () => dom.controls.importInput.click();
+            dom.controls.importInput.onchange = (e) => { importData(e.target.files[0]); e.target.value = null; };
 
             dom.settings.openBtn.onclick = () => dom.settings.modal.style.display = 'flex';
-            dom.settings.closeBtn.onclick = () => dom.settings.modal.style.display = 'none';
-            window.onclick = (event) => {
-                if (event.target == dom.settings.modal) dom.settings.modal.style.display = "none";
+            dom.settings.closeBtn.onclick = () => { dom.settings.modal.style.display = 'none'; saveData(true); };
+            
+            dom.settings.capacityMode.onchange = (e) => { state.settings.capacityMode = e.target.value; renderAll(); };
+            dom.settings.dayOverrideSelect.onchange = (e) => { state.settings.dayOverride = e.target.value; renderAll(); };
+            dom.settings.capacityOverrideInput.oninput = (e) => { state.settings.capacityOverride = e.target.value === '' ? null : parseInt(e.target.value); renderAll();};
+            dom.settings.fontSizeSlider.oninput = (e) => { state.settings.fontSize = e.target.value; applyTheme(); };
+            dom.settings.dyslexiaToggle.onchange = (e) => { state.settings.dyslexiaFont = e.target.checked; renderAll(); };
+
+            dom.roles.selectionContainer.onclick = (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    setRole(e.target.dataset.role);
+                }
             };
-            dom.settings.capacityMode.onchange = (e) => {
-                state.settings.capacityMode = e.target.value;
-                renderAll();
-            };
-            dom.settings.dayOverrideSelect.onchange = (e) => {
-                state.settings.dayOverride = e.target.value;
-                renderAll();
-            };
-            dom.settings.capacityOverrideInput.oninput = (e) => {
-                const value = e.target.value;
-                state.settings.capacityOverride = value === '' ? null : parseInt(value);
-                renderAll();
-            };
-            dom.settings.fontSizeSlider.oninput = (e) => {
-                state.settings.fontSize = e.target.value;
-                applyTheme(); 
-            };
-            dom.settings.dyslexiaToggle.onchange = (e) => {
-                state.settings.dyslexiaFont = e.target.checked;
-                renderAll();
+            dom.roles.changeBtn.onclick = () => {
+                showConfirm('Cambiar de Rol', '¿Seguro que quieres cambiar de rol? Se guardarán los datos actuales.', () => {
+                    saveData(true);
+                    state = getNewState(); // Reset state before showing role modal
+                    renderAll();
+                });
             };
 
             dom.controls.screenReader.onclick = () => {
                 screenReaderActive = !screenReaderActive;
                 dom.controls.screenReader.style.backgroundColor = screenReaderActive ? 'var(--color-success)' : '';
                 const message = screenReaderActive ? 'Lector de pantalla activado' : 'Lector de pantalla desactivado';
-                alert(message);
+                showNotification('Accesibilidad', message);
                 speak(message);
             };
+            
+            dom.notification.okBtn.onclick = () => { dom.notification.modal.style.display = 'none'; };
+            
             document.querySelectorAll('button, a, input, select').forEach(el => {
                 el.addEventListener('focus', () => speak(el.title || el.innerText || el.ariaLabel || 'Elemento interactivo'));
             });
             
-            renderAll();
+            loadInitialRole();
         };
 
         init();
@@ -949,6 +1144,9 @@
 
 </body>
 </html>
+
+
+
 
 
 

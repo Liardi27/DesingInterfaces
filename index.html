@@ -6,10 +6,12 @@
     <title>Contador de Aforo Profesional</title>
     <!-- Librería para las gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Librería para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Fuentes de Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Roboto+Mono:wght@400;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     
     <style>
         /* --- ESTRUCTURA Y ESTILOS GLOBALES --- */
@@ -17,6 +19,8 @@
             --font-size-base: 16px;
             --font-family-main: 'Open Sans', sans-serif;
             --font-family-dyslexia: 'Roboto Mono', monospace;
+            --font-family-retro: 'Press Start 2P', cursive;
+            --font-family-retro-90s: 'VT323', monospace;
             
             /* Paleta de colores por defecto (Sencillo Claro) */
             --color-primary: #8458B3;
@@ -43,7 +47,7 @@
             background-color: var(--color-bg);
             color: var(--color-text);
             font-size: var(--font-size-base);
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, font-size 0.2s;
             line-height: 1.6;
         }
 
@@ -56,14 +60,14 @@
             margin: 0 auto;
             padding: 1rem;
             display: grid;
-            gap: 1.5rem;
+            gap: 1rem;
             grid-template-columns: 1fr;
         }
 
         .card {
             background-color: var(--color-card-bg);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             box-shadow: 0 4px 15px var(--color-shadow);
             border: 1px solid var(--color-border);
             transition: all 0.3s ease;
@@ -72,7 +76,7 @@
         /* --- CABECERA --- */
         header {
             display: flex;
-            flex-wrap: wrap; /* Permite el salto de línea en pantallas pequeñas */
+            flex-wrap: wrap; 
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
@@ -101,6 +105,8 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-family: inherit; /* Hereda la fuente del body */
+            white-space: nowrap;
         }
 
         .control-btn:hover, button:hover, select:hover {
@@ -117,10 +123,10 @@
 
         /* --- CONTADOR PRINCIPAL --- */
         #main-counter-display {
-            font-size: clamp(4rem, 15vw, 8rem);
+            font-size: clamp(3.5rem, 15vw, 7rem);
             font-weight: 700;
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem;
             border-radius: 12px;
             transition: background-color 0.5s, color 0.5s;
             color: white;
@@ -136,7 +142,7 @@
             text-align: center;
             margin-top: 1rem;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         /* --- ENTRADAS DE GÉNERO --- */
@@ -155,7 +161,7 @@
         .women-group { border: 2px solid var(--color-women); }
         .men-group { border: 2px solid var(--color-men); }
 
-        .input-group h3 { margin-bottom: 0.5rem; }
+        .input-group h3 { margin-bottom: 0.5rem; font-size: 1.1rem;}
         .input-group input[type="number"] {
             padding: 0.75rem;
             border-radius: 8px;
@@ -186,7 +192,7 @@
         .chart-container {
             position: relative;
             width: 100%;
-            min-height: 300px;
+            min-height: 250px;
         }
         .chart-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 
@@ -195,6 +201,26 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
+        }
+        .setting-item { margin-bottom: 1rem; text-align: left; }
+        .setting-item label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .accessibility-settings {
+            border-top: 1px solid var(--color-border);
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+        .accessibility-settings input[type="range"]{
+             width: 100%;
+        }
+        .accessibility-settings .dyslexia-toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+         .accessibility-settings .dyslexia-toggle-container input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
 
         .role-controls {
@@ -210,12 +236,9 @@
 
         .export-controls {
             display: flex;
-            flex-direction: column; /* Coloca los elementos en vertical */
-            gap: 0.75rem; /* Aumenta el espacio entre elementos */
-            align-items: stretch; /* Asegura que ocupen el ancho completo */
-        }
-        .export-controls select {
-            /* flex-grow ya no es necesario */
+            flex-direction: column; 
+            gap: 0.75rem; 
+            align-items: stretch;
         }
         
         /* --- MODALES --- */
@@ -242,6 +265,7 @@
             border-radius: 12px;
             animation: slide-in 0.3s ease-out;
             text-align: center;
+            position: relative;
         }
         @keyframes slide-in {
             from { transform: translateY(-50px); opacity: 0; }
@@ -249,13 +273,24 @@
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .close-btn { font-size: 2rem; cursor: pointer; border: none; background: none; }
-        .setting-item { margin-bottom: 1rem; text-align: left; }
-        .setting-item label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-        #daily-settings-container {
+        
+        #daily-settings-container, #password-management-section {
             border-top: 1px solid var(--color-border);
             margin-top: 1rem;
             padding-top: 1rem;
         }
+      
+        .modal .dyslexia-label-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
         #role-selection, .confirm-actions {
             display: flex;
             flex-direction: column;
@@ -270,8 +305,43 @@
             padding: 1rem;
             font-size: 1.2rem;
         }
+        .password-container {
+            position: relative;
+        }
+        .password-toggle-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            user-select: none;
+        }
+        #password-modal input {
+            width: 100%;
+            padding: 0.75rem;
+            padding-right: 2.5rem; 
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            font-size: 1rem;
+        }
+        #password-hint {
+            position: absolute;
+            bottom: 1rem;
+            right: 1.5rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
 
         /* --- DEFINICIÓN DE TEMAS --- */
+        
+        body.theme-retro {
+            font-family: var(--font-family-retro);
+        }
+
+        body.theme-retro-90s {
+            font-family: var(--font-family-retro-90s);
+        }
 
         /* MODO OSCURO GENÉRICO (se aplica a todos los temas) */
         body.dark-mode {
@@ -378,12 +448,26 @@
 
 
         body.dyslexia-font {
-            --font-family-main: var(--font-family-dyslexia);
+            font-family: var(--font-family-dyslexia) !important;
         }
 
         /* --- RESPONSIVE DESIGN --- */
+
+        /* Móviles muy pequeños */
+        @media (max-width: 380px) {
+            .header-controls {
+                justify-content: center;
+            }
+            .chart-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Tablets */
         @media (min-width: 768px) {
             .container {
+                gap: 1.5rem;
                 grid-template-columns: repeat(2, 1fr);
                 grid-template-areas:
                     "header header"
@@ -391,14 +475,19 @@
                     "inputs inputs"
                     "charts charts";
             }
+            .card {
+                padding: 1.5rem;
+            }
             header { grid-area: header; }
             #counter-section { grid-area: counter; }
             #controls-section { grid-area: controls; }
             #gender-inputs { grid-area: inputs; grid-template-columns: 1fr 1fr; }
             #charts-section { grid-area: charts; }
             .chart-grid { grid-template-columns: 1fr 1fr; }
+            .chart-container { min-height: 300px; }
         }
 
+        /* Portátiles y Escritorio */
         @media (min-width: 1024px) {
             .container {
                 grid-template-columns: 1fr 350px;
@@ -501,13 +590,26 @@
             <div class="export-controls">
                 <select id="export-format-select">
                     <option value="csv">Exportar CSV (Informe)</option>
+                    <option value="excel">Exportar Excel (Informe)</option>
                     <option value="json">Exportar JSON (Base de Datos)</option>
                 </select>
                 <button id="export-data-btn">Exportar</button>
             </div>
+             <div class="accessibility-settings">
+                <h4>Ajustes de Accesibilidad</h4>
+                <div class="setting-item">
+                    <label for="font-size-slider">Tamaño de Letra</label>
+                    <input type="range" id="font-size-slider" min="12" max="24" step="1">
+                </div>
+                <div class="setting-item dyslexia-toggle-container">
+                    <label for="dyslexia-toggle">Fuente para Dislexia</label>
+                    <input type="checkbox" id="dyslexia-toggle">
+                </div>
+            </div>
             <button id="import-data-btn">Importar JSON (Base de Datos)</button>
             <input type="file" id="import-file-input" class="hidden" accept=".json">
-            <button id="settings-btn">Ajustes</button>
+            
+            <button id="settings-btn">Ajustes de Aforo y Contraseña</button>
         </aside>
 
     </div>
@@ -516,9 +618,10 @@
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Ajustes</h2>
+                <h2>Ajustes de Aforo y Contraseña</h2>
                 <span id="close-settings-modal-btn" class="close-btn">&times;</span>
             </div>
+            
             <div class="setting-item">
                 <label for="capacity-mode">Modo de Aforo</label>
                 <select id="capacity-mode">
@@ -540,13 +643,18 @@
                 </select>
                 <input type="number" id="capacity-override-input" placeholder="Aforo personalizado" min="0" style="margin-top: 0.5rem; width: 100%;">
             </div>
-            <div class="setting-item">
-                <label for="font-size-slider">Tamaño de Letra</label>
-                <input type="range" id="font-size-slider" min="12" max="24" step="1">
-            </div>
-            <div class="setting-item">
-                <label for="dyslexia-toggle">Fuente para Dislexia</label>
-                <input type="checkbox" id="dyslexia-toggle">
+
+            <div id="password-management-section">
+                <div id="password-settings-container" class="setting-item">
+                    <label for="new-password-input">Cambiar Contraseña Portero</label>
+                    <input type="password" id="new-password-input" placeholder="Nueva contraseña">
+                    <button id="save-password-btn" style="margin-top: 0.5rem; width: 100%;">Guardar Contraseña</button>
+                </div>
+                <div id="director-password-settings-container" class="setting-item">
+                    <label for="new-director-password-input">Cambiar Contraseña Director</label>
+                    <input type="password" id="new-director-password-input" placeholder="Nueva contraseña">
+                    <button id="save-director-password-btn" style="margin-top: 0.5rem; width: 100%;">Guardar Contraseña</button>
+                </div>
             </div>
         </div>
     </div>
@@ -560,6 +668,23 @@
                 <button data-role="director">Director</button>
                 <button data-role="dueño">Dueño</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Contraseña -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="password-modal-title">Contraseña</h2>
+            <p>Por favor, introduce la contraseña para acceder.</p>
+            <div class="setting-item password-container">
+                <input type="password" id="password-input" placeholder="Contraseña">
+                <span id="toggle-password-visibility" class="password-toggle-icon">👁️</span>
+            </div>
+            <div class="confirm-actions">
+                <button id="password-submit-btn">Entrar</button>
+                <button id="password-cancel-btn">Cancelar</button>
+            </div>
+            <div id="password-hint"></div>
         </div>
     </div>
 
@@ -595,6 +720,9 @@
         const getNewState = () => ({
             womenCount: 0,
             menCount: 0,
+            porteroPassword: '1234',
+            directorPassword: '3456',
+            dueñoPassword: '6987',
             get totalCount() { return this.womenCount + this.menCount; },
             records: [],
             settings: {
@@ -649,11 +777,20 @@
                 openBtn: document.getElementById('settings-btn'),
                 closeBtn: document.getElementById('close-settings-modal-btn'),
                 capacityMode: document.getElementById('capacity-mode'),
-                fontSizeSlider: document.getElementById('font-size-slider'),
-                dyslexiaToggle: document.getElementById('dyslexia-toggle'),
                 dailySettingsContainer: document.getElementById('daily-settings-container'),
                 dayOverrideSelect: document.getElementById('day-override-select'),
                 capacityOverrideInput: document.getElementById('capacity-override-input'),
+                passwordManagementSection: document.getElementById('password-management-section'),
+                passwordSettingsContainer: document.getElementById('password-settings-container'),
+                newPasswordInput: document.getElementById('new-password-input'),
+                savePasswordBtn: document.getElementById('save-password-btn'),
+                directorPasswordSettingsContainer: document.getElementById('director-password-settings-container'),
+                newDirectorPasswordInput: document.getElementById('new-director-password-input'),
+                saveDirectorPasswordBtn: document.getElementById('save-director-password-btn'),
+            },
+             accessibility: {
+                fontSizeSlider: document.getElementById('font-size-slider'),
+                dyslexiaToggle: document.getElementById('dyslexia-toggle'),
             },
             controls: {
                 section: document.getElementById('controls-section'),
@@ -671,6 +808,15 @@
                 display: document.getElementById('role-display'),
                 changeBtn: document.getElementById('change-role-btn')
             },
+            password: {
+                modal: document.getElementById('password-modal'),
+                title: document.getElementById('password-modal-title'),
+                input: document.getElementById('password-input'),
+                submitBtn: document.getElementById('password-submit-btn'),
+                cancelBtn: document.getElementById('password-cancel-btn'),
+                toggleVisibilityBtn: document.getElementById('toggle-password-visibility'),
+                hint: document.getElementById('password-hint'),
+            },
             confirm: {
                 modal: document.getElementById('confirm-modal'),
                 title: document.getElementById('confirm-title'),
@@ -687,6 +833,7 @@
         };
 
         let screenReaderActive = false;
+        let roleAttemptingLogin = null;
 
         // --- 2. LÓGICA DE ROLES Y PERSISTENCIA POR ROL ---
 
@@ -705,35 +852,37 @@
             const isPortero = role === 'portero';
             const isDueño = role === 'dueño';
 
+
+            // El portero tiene la vista más restringida
             dom.charts.section.classList.toggle('hidden', isPortero);
-            dom.settings.openBtn.classList.toggle('hidden', !isDueño);
-            dom.controls.importBtn.classList.toggle('hidden', !isDueño);
             dom.controls.exportFormat.parentElement.classList.toggle('hidden', isPortero);
+
+            // Solo el dueño puede importar el JSON
+            dom.controls.importBtn.classList.toggle('hidden', !isDueño);
         };
         
         const setRole = (role) => {
-            // Antes de cambiar, guarda el estado actual (especialmente los ajustes del rol anterior)
             if (state.settings.userRole) {
                 saveData(true);
             }
             
             const allData = JSON.parse(localStorage.getItem('personCounterSharedData')) || {
-                sharedData: { womenCount: 0, menCount: 0, records: [] },
+                sharedData: { womenCount: 0, menCount: 0, records: [], porteroPassword: '1234', directorPassword: '3456', dueñoPassword: '6987' },
                 rolesSettings: {}
             };
 
-            // 1. Carga los datos compartidos en el estado
             state.womenCount = allData.sharedData.womenCount || 0;
             state.menCount = allData.sharedData.menCount || 0;
             state.records = allData.sharedData.records || [];
+            state.porteroPassword = allData.sharedData.porteroPassword || '1234';
+            state.directorPassword = allData.sharedData.directorPassword || '3456';
+            state.dueñoPassword = allData.sharedData.dueñoPassword || '6987';
 
-            // 2. Carga los ajustes para el nuevo rol, o usa los predeterminados
             const defaultSettings = getNewState().settings;
             const roleSettings = allData.rolesSettings[role] || {};
             state.settings = { ...defaultSettings, ...roleSettings };
             state.settings.userRole = role;
 
-            // 3. Guarda el último rol y renderiza todo
             localStorage.setItem('personCounterLastRole', role);
             renderAll();
         };
@@ -887,7 +1036,10 @@
 
         const applyTheme = () => {
             dom.body.className = ''; // Limpiamos todas las clases
+            
+            // La fuente se controla por CSS a través de las clases
             dom.body.classList.add(`theme-${state.settings.theme}`);
+            
             if (state.settings.isDarkMode) {
                 dom.body.classList.add('dark-mode');
             }
@@ -899,12 +1051,23 @@
         };
         
         const renderSettings = () => {
+            const isDueño = state.settings.userRole === 'dueño';
+            const isDirector = state.settings.userRole === 'director';
+            
+            // Password management visibility
+            dom.settings.passwordManagementSection.classList.toggle('hidden', !isDueño && !isDirector);
+            dom.settings.passwordSettingsContainer.classList.toggle('hidden', !isDueño); // Portero password only for dueño
+            dom.settings.directorPasswordSettingsContainer.classList.toggle('hidden', !isDueño && !isDirector); // Director password for dueño and director
+
+            // Other settings
             dom.settings.dailySettingsContainer.classList.toggle('hidden', state.settings.capacityMode !== 'daily');
             dom.settings.capacityMode.value = state.settings.capacityMode;
-            dom.settings.fontSizeSlider.value = state.settings.fontSize;
-            dom.settings.dyslexiaToggle.checked = state.settings.dyslexiaFont;
             dom.settings.dayOverrideSelect.value = state.settings.dayOverride;
             dom.settings.capacityOverrideInput.value = state.settings.capacityOverride ?? '';
+            
+            dom.accessibility.fontSizeSlider.value = state.settings.fontSize;
+            dom.accessibility.dyslexiaToggle.checked = state.settings.dyslexiaFont;
+            
             dom.charts.genderTypeSelect.value = state.settings.genderChartType;
             dom.charts.hourlyTypeSelect.value = state.settings.hourlyChartType;
             dom.theme.select.value = state.settings.theme;
@@ -921,19 +1084,19 @@
         const saveData = (silent = false) => {
             if (!state.settings.userRole) return;
             const allData = JSON.parse(localStorage.getItem('personCounterSharedData')) || {
-                sharedData: { womenCount: 0, menCount: 0, records: [] },
+                sharedData: { womenCount: 0, menCount: 0, records: [], porteroPassword: '1234', directorPassword: '3456', dueñoPassword: '6987' },
                 rolesSettings: {}
             };
 
-            // 1. Actualiza la parte de datos compartidos desde el estado actual
             allData.sharedData.womenCount = state.womenCount;
             allData.sharedData.menCount = state.menCount;
             allData.sharedData.records = state.records;
+            allData.sharedData.porteroPassword = state.porteroPassword;
+            allData.sharedData.directorPassword = state.directorPassword;
+            allData.sharedData.dueñoPassword = state.dueñoPassword;
 
-            // 2. Actualiza los ajustes para el rol actual
             allData.rolesSettings[state.settings.userRole] = state.settings;
 
-            // 3. Guarda todo de nuevo
             localStorage.setItem('personCounterSharedData', JSON.stringify(allData));
 
             if (!silent) showNotification('Guardado', '¡Datos guardados correctamente!');
@@ -942,7 +1105,9 @@
         const loadInitialRole = () => {
             const lastRole = localStorage.getItem('personCounterLastRole');
             if (lastRole) {
-                setRole(lastRole);
+                // Si el último rol fue uno con contraseña, la pedimos de nuevo
+                localStorage.removeItem('personCounterLastRole');
+                dom.roles.modal.style.display = 'flex';
             } else {
                 renderAll();
             }
@@ -971,20 +1136,19 @@
             reader.onload = (e) => {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    // Comprueba si tiene el nuevo formato compartido
                     if (importedData.sharedData && importedData.rolesSettings) {
                          showConfirm('Importar Base de Datos', '¿Seguro que quieres sobreescribir TODOS los datos compartidos y de roles?', () => {
                             localStorage.setItem('personCounterSharedData', JSON.stringify(importedData));
                             const currentRole = state.settings.userRole || localStorage.getItem('personCounterLastRole');
                             if (currentRole) {
-                                setRole(currentRole); // Recarga la UI con los nuevos datos
+                                setRole(currentRole);
                             } else {
-                                renderAll(); // Muestra la selección de rol si no había ninguno activo
+                                renderAll();
                             }
                             showNotification('Éxito', '¡Datos importados correctamente!');
                         });
                     } else {
-                        showNotification('Error de Formato', 'El archivo de importación no es compatible. Debe ser un archivo de datos compartidos.');
+                        showNotification('Error de Formato', 'El archivo de importación no es compatible.');
                     }
                 } catch (error) {
                     showNotification('Error de Importación', 'Error al leer el archivo. Asegúrate de que es un archivo JSON válido.');
@@ -996,40 +1160,59 @@
         const exportData = () => {
             const format = dom.controls.exportFormat.value;
             const date = new Date().toISOString().split('T')[0];
-            let fileContent, mimeType, fileName;
 
-            if (format === 'json') {
-                const allData = localStorage.getItem('personCounterSharedData') || '{}';
-                fileContent = JSON.stringify(JSON.parse(allData), null, 2);
-                mimeType = 'application/json';
-                fileName = `aforo_backup_total_compartido_${date}.json`;
-            } else { // CSV
+            if (format === 'csv' || format === 'excel') {
                 if (state.records.length === 0) {
                     showNotification('Exportación Vacía', 'No hay registros para exportar en el informe.');
                     return;
                 }
-                const headers = "Timestamp,Hora,Tipo,Genero,Cantidad,Mujeres Despues,Hombres Despues,Total Despues,Aforo Max\n";
                 const capacityToday = getDailyCapacity();
-                const rows = state.records.map(rec => {
+                const dataForExport = state.records.map(rec => {
                     const d = new Date(rec.timestamp);
-                    const time = d.toTimeString().split(' ')[0];
-                    const type = rec.type === 'add' ? 'Entrada' : 'Salida';
-                    const gender = rec.gender === 'women' ? 'Mujer' : 'Hombre';
-                    return [rec.timestamp, time, type, gender, rec.count, rec.womenCountAfter, rec.menCountAfter,
-                        rec.womenCountAfter + rec.menCountAfter, capacityToday === Infinity ? 'Ilimitado' : capacityToday].join(',');
-                }).join('\n');
-                fileContent = headers + rows;
-                mimeType = 'text/csv';
-                fileName = `aforo_informe_compartido_${date}.csv`;
+                    return {
+                        'Timestamp': rec.timestamp, 'Hora': d.toTimeString().split(' ')[0], 'Tipo': rec.type === 'add' ? 'Entrada' : 'Salida',
+                        'Género': rec.gender === 'women' ? 'Mujer' : 'Hombre', 'Cantidad': rec.count, 'Mujeres Después': rec.womenCountAfter,
+                        'Hombres Después': rec.menCountAfter, 'Total Después': rec.womenCountAfter + rec.menCountAfter,
+                        'Aforo Máximo': capacityToday === Infinity ? 'Ilimitado' : capacityToday
+                    };
+                });
+                if (format === 'excel') {
+                    if (typeof XLSX === 'undefined') {
+                        showNotification('Error', 'La librería para exportar a Excel no se pudo cargar.');
+                        return;
+                    }
+                    const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registros de Aforo');
+                    XLSX.writeFile(workbook, `aforo_informe_${date}.xlsx`);
+                    return;
+                }
+                const headers = Object.keys(dataForExport[0]).join(',');
+                const rows = dataForExport.map(row => Object.values(row).map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')).join('\n');
+                const fileContent = `${headers}\n${rows}`;
+                const fileName = `aforo_informe_compartido_${date}.csv`;
+                const mimeType = 'text/csv';
+                
+                const blob = new Blob([fileContent], { type: `${mimeType};charset=utf-8,` });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else if (format === 'json') {
+                const allData = localStorage.getItem('personCounterSharedData') || '{}';
+                const fileContent = JSON.stringify(JSON.parse(allData), null, 2);
+                const mimeType = 'application/json';
+                const fileName = `aforo_backup_total_compartido_${date}.json`;
+                const blob = new Blob([fileContent], { type: `${mimeType};charset=utf-8,` });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
-
-            const blob = new Blob([fileContent], { type: `${mimeType};charset=utf-8,` });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         };
 
         // --- 8. ACCESIBILIDAD ---
@@ -1086,13 +1269,8 @@
             dom.controls.saveData.onclick = () => saveData(false);
             dom.controls.resetDay.onclick = () => {
                 showConfirm('Resetear Día', '¿Seguro que quieres borrar todos los datos del día? Esta acción afectará a TODOS los roles.', () => {
-                    // Resetea las partes compartidas del estado
-                    state.womenCount = 0;
-                    state.menCount = 0;
-                    state.records = [];
-                    // Renderiza la UI inmediatamente
+                    state.womenCount = 0; state.menCount = 0; state.records = [];
                     renderAll();
-                    // Guarda el estado reseteado silenciosamente
                     saveData(true);
                 });
             };
@@ -1102,24 +1280,116 @@
 
             dom.settings.openBtn.onclick = () => dom.settings.modal.style.display = 'flex';
             dom.settings.closeBtn.onclick = () => { dom.settings.modal.style.display = 'none'; saveData(true); };
-            
             dom.settings.capacityMode.onchange = (e) => { state.settings.capacityMode = e.target.value; renderAll(); };
             dom.settings.dayOverrideSelect.onchange = (e) => { state.settings.dayOverride = e.target.value; renderAll(); };
             dom.settings.capacityOverrideInput.oninput = (e) => { state.settings.capacityOverride = e.target.value === '' ? null : parseInt(e.target.value); renderAll();};
-            dom.settings.fontSizeSlider.oninput = (e) => { state.settings.fontSize = e.target.value; applyTheme(); };
-            dom.settings.dyslexiaToggle.onchange = (e) => { state.settings.dyslexiaFont = e.target.checked; renderAll(); };
-
-            dom.roles.selectionContainer.onclick = (e) => {
-                if(e.target.tagName === 'BUTTON') {
-                    setRole(e.target.dataset.role);
+            
+            dom.accessibility.fontSizeSlider.oninput = (e) => { state.settings.fontSize = e.target.value; applyTheme(); saveData(true);};
+            dom.accessibility.dyslexiaToggle.onchange = (e) => { state.settings.dyslexiaFont = e.target.checked; renderAll(); saveData(true); };
+            
+            dom.settings.savePasswordBtn.onclick = () => {
+                const newPassword = dom.settings.newPasswordInput.value;
+                if (newPassword && newPassword.length >= 4) {
+                    state.porteroPassword = newPassword;
+                    saveData(true);
+                    showNotification('Éxito', 'Contraseña del portero actualizada.');
+                    dom.settings.newPasswordInput.value = '';
+                } else {
+                    showNotification('Error', 'La contraseña debe tener al menos 4 caracteres.');
                 }
             };
-            dom.roles.changeBtn.onclick = () => {
-                showConfirm('Cambiar de Rol', '¿Seguro que quieres cambiar de rol? Se guardarán los datos actuales.', () => {
+             dom.settings.saveDirectorPasswordBtn.onclick = () => {
+                const newPassword = dom.settings.newDirectorPasswordInput.value;
+                if (newPassword && newPassword.length >= 4) {
+                    state.directorPassword = newPassword;
                     saveData(true);
-                    state = getNewState(); // Reset state before showing role modal
+                    showNotification('Éxito', 'Contraseña del director actualizada.');
+                    dom.settings.newDirectorPasswordInput.value = '';
+                } else {
+                    showNotification('Error', 'La contraseña debe tener al menos 4 caracteres.');
+                }
+            };
+
+            dom.roles.selectionContainer.onclick = (e) => {
+                if(e.target.tagName !== 'BUTTON') return;
+                const role = e.target.dataset.role;
+                const allData = JSON.parse(localStorage.getItem('personCounterSharedData')) || {};
+                
+                roleAttemptingLogin = role;
+                let password, title;
+
+                if (role === 'portero') {
+                    state.porteroPassword = allData?.sharedData?.porteroPassword || '1234';
+                    password = state.porteroPassword;
+                    title = 'Contraseña de Portero';
+                } else if (role === 'director') {
+                    state.directorPassword = allData?.sharedData?.directorPassword || '3456';
+                    password = state.directorPassword;
+                    title = 'Contraseña de Director';
+                } else { // Dueño
+                    state.dueñoPassword = allData?.sharedData?.dueñoPassword || '6987';
+                    password = state.dueñoPassword;
+                    title = 'Contraseña de Dueño';
+                }
+                
+                dom.password.title.textContent = title;
+                dom.password.hint.textContent = `Contraseña: ${password}`;
+                dom.password.modal.style.display = 'flex';
+                dom.password.input.focus();
+            };
+            dom.roles.changeBtn.onclick = () => {
+                showConfirm('Cambiar de Rol', '¿Seguro que quieres cambiar de rol?', () => {
+                    saveData(true);
+                    state = getNewState();
                     renderAll();
                 });
+            };
+
+            const handlePasswordSubmit = () => {
+                let isCorrect = false;
+                if (roleAttemptingLogin === 'portero' && dom.password.input.value === state.porteroPassword) {
+                    isCorrect = true;
+                } else if (roleAttemptingLogin === 'director' && dom.password.input.value === state.directorPassword) {
+                    isCorrect = true;
+                } else if (roleAttemptingLogin === 'dueño' && dom.password.input.value === state.dueñoPassword) {
+                    isCorrect = true;
+                }
+
+                 if (isCorrect) {
+                    dom.password.modal.style.display = 'none';
+                    dom.password.input.value = '';
+                    dom.password.hint.textContent = '';
+                    setRole(roleAttemptingLogin);
+                    roleAttemptingLogin = null;
+                } else {
+                    showNotification('Error', 'Contraseña incorrecta.');
+                    dom.password.input.value = '';
+                }
+            };
+
+            dom.password.submitBtn.onclick = handlePasswordSubmit;
+            dom.password.input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    handlePasswordSubmit();
+                }
+            };
+
+            dom.password.cancelBtn.onclick = () => {
+                dom.password.modal.style.display = 'none';
+                dom.password.input.value = '';
+                dom.password.hint.textContent = '';
+                roleAttemptingLogin = null;
+            };
+            dom.password.toggleVisibilityBtn.onclick = () => {
+                const input = dom.password.input;
+                const icon = dom.password.toggleVisibilityBtn;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.textContent = '🙈';
+                } else {
+                    input.type = 'password';
+                    icon.textContent = '👁️';
+                }
             };
 
             dom.controls.screenReader.onclick = () => {
@@ -1145,3 +1415,4 @@
 
 </body>
 </html>
+

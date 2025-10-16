@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Productividad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Open+Dyslexic&family=Roboto+Mono&family=Special+Elite&family=Lato&family=Playfair+Display&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- API de YouTube para controlar el reproductor -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <style>
+        :root {
+            --primary-color: #e11d48;
+            --primary-hover: #f43f5e;
+            --secondary-color: #334155;
+            --secondary-hover: #475569;
+            --background-color: #0f172a;
+            --card-bg-color: rgba(30, 41, 59, 0.8);
+            --text-color: #e2e8f0;
+            --text-muted-color: #94a3b8;
+            --accent-color: #facc15;
+            --chart-bg-color: rgba(225, 29, 72, 0.5);
+            --chart-border-color: rgba(225, 29, 72, 1);
+            --font-main: 'Inter', sans-serif;
+            --font-dyslexia: 'Open Dyslexic', sans-serif;
+        }
+
+        body[data-theme="bosque"] {
+            --primary-color: #16a34a; --primary-hover: #22c55e;
+            --secondary-color: #44403c; --secondary-hover: #57534e;
+            --background-color: #1c1917; --card-bg-color: rgba(41, 37, 36, 0.8);
+            --text-color: #f5f5f4; --text-muted-color: #a8a29e;
+            --accent-color: #a3e635;
+            --chart-bg-color: rgba(22, 163, 74, 0.5); --chart-border-color: rgba(22, 163, 74, 1);
+        }
+
+        body[data-theme="oceania"] {
+            --primary-color: #2563eb; --primary-hover: #3b82f6;
+            --secondary-color: #374151; --secondary-hover: #4b5563;
+            --background-color: #111827; --card-bg-color: rgba(31, 41, 55, 0.8);
+            --text-color: #f3f4f6; --text-muted-color: #9ca3af;
+            --accent-color: #38bdf8;
+            --chart-bg-color: rgba(37, 99, 235, 0.5); --chart-border-color: rgba(37, 99, 235, 1);
+        }
+
+        body[data-theme="retro"] {
+            --primary-color: #f97316; --primary-hover: #fb923c;
+            --secondary-color: #5b21b6; --secondary-hover: #6d28d9;
+            --background-color: #1e1b4b; --card-bg-color: rgba(49, 46, 129, 0.8);
+            --text-color: #e0e7ff; --text-muted-color: #c7d2fe;
+            --accent-color: #fde047;
+            --chart-bg-color: rgba(249, 115, 22, 0.5); --chart-border-color: rgba(249, 115, 22, 1);
+            font-size: 11px;
+        }
+        
+        body[data-theme="colorido"] {
+            --primary-color: #d946ef; --primary-hover: #e879f9;
+            --secondary-color: #0891b2; --secondary-hover: #06b6d4;
+            --background-color: #1a1a2e; --card-bg-color: rgba(26, 26, 46, 0.8);
+            --text-color: #e0e7ff; --text-muted-color: #c7d2fe;
+            --accent-color: #5eead4;
+            --chart-bg-color: rgba(217, 70, 239, 0.5); --chart-border-color: rgba(217, 70, 239, 1);
+        }
+
+        body[data-theme="sakura"] {
+            --primary-color: #ec4899;
+            --primary-hover: #f472b6;
+            --secondary-color: #6b7280;
+            --secondary-hover: #4b5563;
+            --background-color: #fdf2f8;
+            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --text-color: #1f2937;
+            --text-muted-color: #4b5563;
+            --accent-color: #db2777;
+            --chart-bg-color: rgba(236, 72, 153, 0.5);
+            --chart-border-color: rgba(236, 72, 153, 1);
+        }
+
+        body[data-theme="retro"] #timer-display { font-size: 3.75rem; line-height: 1; }
+        @media (min-width: 640px) { body[data-theme="retro"] #timer-display { font-size: 4.5rem; } }
+
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--background-color); color: var(--text-color);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            transition: background-color 0.5s ease-in-out, background-image 0.5s ease-in-out, font-family 0.3s;
+            font-size: 1rem;
+        }
+        .dyslexia-mode { font-family: var(--font-dyslexia) !important; letter-spacing: 0.1em; word-spacing: 0.3em; }
+
+        /* FIX: Añadir sombra a los elementos del encabezado para mejor visibilidad sobre cualquier fondo */
+        #main-header .font-semibold, #main-header .text-sm {
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        #main-header svg {
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+        }
+
+        .card { background-color: var(--card-bg-color); border: 1px solid var(--secondary-color); backdrop-filter: blur(10px); }
+        .btn-primary { background-color: var(--primary-color); color: white; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: var(--secondary-color); color: white; transition: background-color 0.3s; }
+        .btn-secondary:hover { background-color: var(--secondary-hover); }
+        
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 1; transition: opacity 0.4s ease-in-out; overflow-y: auto;
+        }
+        .screen.is-hidden { opacity: 0; pointer-events: none; }
+        
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; visibility: hidden; opacity: 0;
+            transition: visibility 0s 0.3s, opacity 0.3s;
+        }
+        .modal-overlay.visible { visibility: visible; opacity: 1; transition: visibility 0s, opacity 0.3s; }
+        .modal-content {
+            background-color: var(--card-bg-color);
+            padding: 2rem; border-radius: 0.5rem;
+            border: 1px solid var(--secondary-color); width: 90%; max-width: 500px;
+            transform: scale(0.95); transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+
+        #profile-selection-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .profile-card {
+            position: relative; border: 2px solid transparent;
+            transition: transform 0.2s, border-color 0.2s; cursor: pointer;
+            background-color: var(--card-bg-color);
+        }
+        .profile-card:hover { transform: translateY(-5px); border-color: var(--primary-color); }
+        .profile-options-btn { position: absolute; top: 0.5rem; left: 0.5rem; display: none; z-index: 10; }
+        .profile-card:hover .profile-options-btn { display: block; }
+        .password-indicator { position: absolute; bottom: 0.5rem; right: 0.5rem; color: var(--text-muted-color); }
+
+        #timer-container { position: relative; width: 100%; height: 200px; display: flex; justify-content: center; align-items: center;}
+        #timer-visual-container { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; }
+        #timer-display { z-index: 10; pointer-events: none; }
+        #candle-flame { animation: flicker 1.5s infinite alternate; transform-origin: bottom center; }
+        @keyframes flicker { 0%, 100% { transform: scaleY(1) skewX(0); } 50% { transform: scaleY(0.95) skewX(2deg); } }
+        
+        .calendar-day.has-task { background-color: var(--primary-color); border-radius: 50%; color: white !important; position: relative; }
+        .calendar-day.today { border: 2px solid var(--primary-hover); border-radius: 50%; }
+        #dyslexia-toggle.is-active, #audio-toggle.is-active, #theme-btn.is-active { background-color: var(--primary-color); }
+        
+        .theme-card {
+            border: 2px solid var(--secondary-color); padding: 1rem; border-radius: 0.5rem;
+             transition: border-color 0.2s, transform 0.2s; position: relative;
+        }
+        .theme-card-content { cursor: pointer; }
+        .theme-card:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .theme-card.active { border-color: var(--primary-color); }
+        .theme-card .color-swatch {
+            display: inline-block; width: 20px; height: 20px;
+            flex-shrink: 0; border-radius: 50%; margin-right: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: var(--secondary-color); border-radius: 5px; outline: none; opacity: 0.7; transition: opacity .2s; }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; cursor: pointer; }
+        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; cursor: pointer; }
+
+        /* Focus Mode Styles */
+        #exit-focus-btn { z-index: 1001; }
+
+        /* Color Picker Styles */
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 44px;
+            height: 44px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+        }
+        input[type="color"]::-moz-color-swatch {
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+        }
+        
+        /* Estilos para el reproductor de playlist flotante */
+        #playlist-container {
+            position: fixed;
+            bottom: 90px;
+            right: 1.5rem;
+            width: 350px;
+            max-width: calc(100vw - 3rem);
+            background-color: var(--card-bg-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--secondary-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 998;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transform-origin: bottom right;
+            pointer-events: none;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.5s, border-color 0.5s;
+        }
+
+        #playlist-container.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        #playlist-player-wrapper {
+            width: 100%;
+            height: 195px;
+            background-color: #000;
+            border-radius: 11px 11px 0 0;
+        }
+
+        #youtube-player, #spotify-player {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 11px 11px 0 0;
+        }
+        
+        #playlist-controls {
+            width: 100%;
+            padding: 0.5rem;
+        }
+        
+        .media-control-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .media-control-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .media-control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        #music-toggle-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 999;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        #music-toggle-btn:hover {
+            background-color: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        #music-toggle-btn.is-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body data-theme="basico">
+
+    <!-- Pantalla de Selección de Perfil -->
+    <div id="profile-selection-screen" class="screen p-4">
+        <h1 class="text-4xl font-bold mb-8" data-lang="profile_select_title">Seleccionar Perfil</h1>
+        <div id="profile-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-8">
+            <!-- Perfiles se insertan aquí -->
+        </div>
+        <button id="add-profile-btn" class="btn-primary font-bold py-3 px-8 rounded-lg" data-lang="profile_add_btn">Crear Nuevo Perfil</button>
+    </div>
+
+    <!-- Contenido Principal de la App -->
+    <div id="main-app" class="screen is-hidden p-4 sm:p-6 lg:p-8">
+        <header id="main-header" class="flex justify-between items-center gap-4 mb-6 transition-opacity duration-300">
+            <div id="profile-btn" class="flex items-center gap-4 cursor-pointer p-2 -m-2 rounded-xl transition-colors duration-200 hover:bg-slate-700">
+                <div id="user-avatar" class="w-10 h-10 bg-rose-600 rounded-full flex items-center justify-center font-bold text-white overflow-hidden" style="background-color: var(--primary-color);"></div>
+                <div>
+                    <span id="user-name" class="font-semibold text-lg"></span>
+                    <div class="text-sm" style="color: var(--accent-color);"><span id="user-points"></span> <span data-lang="points">Puntos</span></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center">
+                <button id="hamburger-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors lg:hidden" title="Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+
+                <div id="main-menu" class="hidden fixed inset-0 bg-slate-900 bg-opacity-90 backdrop-blur-sm z-50 lg:block lg:static lg:bg-transparent lg:backdrop-blur-none lg:p-0">
+                    
+                    <button id="close-menu-btn" class="absolute top-6 right-4 p-2 rounded-lg hover:bg-slate-700 lg:hidden">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+
+                    <div class="flex flex-col items-center justify-center h-full gap-8 text-xl lg:flex-row lg:h-auto lg:gap-2 lg:text-base">
+                        <button id="focus-mode-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Modo Concentración">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.62 2.53 9.49 4.22C7.5 7.24 7.5 10.76 9.49 13.78L10.62 15.47"/><path d="m13.38 2.53 1.13 1.69C16.5 7.24 16.5 10.76 14.51 13.78L13.38 15.47"/><path d="M4.22 9.49 2.53 10.62C.84 12.54.84 15.46 2.53 17.38L4.22 18.51"/><path d="M19.78 9.49 21.47 10.62c1.69 1.92 1.69 4.84 0 6.76L19.78 18.51"/></svg>
+                        </button>
+                        <button id="store-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Tienda">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        </button>
+                        <button id="audio-toggle" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Asistencia de Audio">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                        </button>
+                        <button id="dyslexia-toggle" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Modo Dislexia">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6c0-1.1.9-2 2-2h2"/><path d="M16 4h2c1.1 0 2 .9 2 2v2"/><path d="M20 16v2c0 1.1-.9 2-2 2h-2"/><path d="M8 20H6c-1.1 0-2-.9-2-2v-2"/><path d="M7 13h4"/><path d="M10 9v8"/><path d="M17 11h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3H13"/></svg>
+                        </button>
+                        <button id="theme-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Temas">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
+                        </button>
+                        <button id="settings-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Configuración">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2.15l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2.15l.15.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                        <div class="relative">
+                            <button id="lang-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Idioma">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m12 5 10 10"/><path d="M12 20v-5h5"/><path d="M22 16h-5"/></svg>
+                            </button>
+                            <div id="lang-menu" class="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-md shadow-lg z-20 hidden">
+                                <!-- Language options are injected here by JS -->
+                            </div>
+                        </div>
+                        <button id="logout-btn" class="p-2 rounded-lg hover:bg-slate-700 transition-colors" title="Cerrar Sesión">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6 transition-opacity duration-300">
+            <div id="timer-card-wrapper" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 transition-all duration-300">
+                <div class="card rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                    <h2 id="timer-mode" class="text-2xl font-bold mb-4" data-lang="mode_activity">Actividad</h2>
+                    <div id="timer-container">
+                        <div id="timer-visual-container">
+                            <div id="timer-visual-hourglass" class="w-full h-full hidden">
+                                <svg viewBox="0 0 100 150" class="h-full mx-auto">
+                                    <defs><clipPath id="hourglass-mask"><path d="M 20 10 H 80 L 50 75 L 80 140 H 20 L 50 75 Z" /></clipPath></defs>
+                                    <path d="M 20 10 H 80 L 50 75 L 80 140 H 20 L 50 75 Z" stroke="var(--text-muted-color)" stroke-width="2" fill="rgba(148, 163, 184, 0.1)"/>
+                                    <g clip-path="url(#hourglass-mask)">
+                                        <rect id="sand-top" x="0" y="10" width="100" height="65" fill="var(--primary-color)"/>
+                                        <rect id="sand-bottom" x="0" y="75" width="100" height="0" fill="var(--primary-color)"/>
+                                    </g>
+                                    <line id="sand-stream" x1="50" y1="73" x2="50" y2="77" stroke="var(--primary-color)" stroke-width="2" style="display:none;"/>
+                                </svg>
+                            </div>
+                            <div id="timer-visual-rope" class="w-full h-full hidden flex items-center p-8">
+                                <svg viewBox="0 0 200 20" class="w-full">
+                                    <line x1="0" y1="10" x2="200" y2="10" stroke="#a16207" stroke-width="8" stroke-linecap="round"/>
+                                    <line id="rope-burnt" x1="0" y1="10" x2="0" y2="10" stroke="#44403c" stroke-width="8" stroke-linecap="round"/>
+                                    <circle id="rope-spark" cx="0" cy="10" r="6" fill="var(--primary-color)"/>
+                                </svg>
+                            </div>
+                            <div id="timer-visual-candle" class="w-full h-full hidden flex items-center justify-center p-4">
+                                <svg viewBox="0 0 50 150" class="h-full">
+                                    <g id="candle-top-group">
+                                        <path id="candle-flame" d="M25 20 C 20 15, 30 15, 25 5 C 20 15, 30 15, 25 20 Z" fill="var(--primary-color)"/>
+                                        <line id="candle-wick" x1="25" y1="25" x2="25" y2="20" stroke="#1f2937" stroke-width="2"/>
+                                    </g>
+                                    <rect id="candle-body" x="15" y="25" width="20" height="115" rx="5" fill="#e2e8f0"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="timer-display" class="text-7xl sm:text-8xl font-bold">25:00</div>
+                    </div>
+                    <div class="flex gap-4 my-4">
+                        <button id="start-btn" class="btn-primary font-bold py-3 px-8 rounded-lg" data-lang="timer_start">INICIAR</button>
+                        <button id="reset-btn" class="btn-secondary font-bold py-3 px-8 rounded-lg" data-lang="timer_reset">REINICIAR</button>
+                    </div>
+                    <div id="series-display" class="text-slate-400" style="color: var(--text-muted-color);">Serie 1 de 4</div>
+                </div>
+                <div class="card rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold" data-lang="tasks_pending">Tareas Pendientes</h2>
+                        <button id="toggle-completed-tasks-btn" class="text-sm btn-secondary py-1 px-3 rounded-lg flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <span data-lang="tasks_show_completed"></span>
+                        </button>
+                    </div>
+                    <form id="task-form" class="flex flex-col gap-4">
+                        <input type="text" id="task-input" data-lang-placeholder="tasks_placeholder" placeholder="Añadir una nueva tarea..." class="bg-slate-900 border rounded-lg p-3 w-full focus:outline-none focus:ring-2" style="background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color);">
+                        <input type="date" id="task-date" class="bg-slate-900 border rounded-lg p-3 w-full" style="color-scheme: dark; background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color);">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <button type="button" id="breakdown-task-btn" class="btn-secondary font-bold py-3 rounded-lg flex items-center justify-center gap-2">✨ <span data-lang="tasks_breakdown">Desglosar</span></button>
+                            <button type="submit" class="btn-primary font-bold py-3 rounded-lg" data-lang="tasks_add">Añadir Tarea</button>
+                        </div>
+                    </form>
+                    <div id="task-list" class="mt-4 space-y-2 max-h-48 overflow-y-auto"></div>
+                </div>
+            </div>
+            <div class="card rounded-lg p-6 transition-opacity duration-300">
+                <div class="flex justify-between items-center mb-4">
+                    <button id="prev-month" class="p-2 rounded-lg hover:bg-slate-700" style="color: var(--text-color);">&lt;</button>
+                    <h2 id="calendar-header" class="text-xl font-bold"></h2>
+                    <button id="next-month" class="p-2 rounded-lg hover:bg-slate-700" style="color: var(--text-color);">&gt;</button>
+                </div>
+                <div id="calendar-days" class="grid grid-cols-7 text-center font-semibold" style="color: var(--text-muted-color);"></div>
+                <div id="calendar-body" class="grid grid-cols-7 gap-2 mt-2"></div>
+            </div>
+            <div class="lg:col-span-3 card rounded-lg p-6 transition-opacity duration-300">
+                <h2 class="text-2xl font-bold mb-4" data-lang="tasks_weekly">Tareas de la Semana</h2>
+                <div id="weekly-tasks-container" class="flex pb-4 sm:pb-0 sm:grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 overflow-x-auto sm:overflow-x-visible"></div>
+            </div>
+            <div class="lg:col-span-3 card rounded-lg p-6 transition-opacity duration-300">
+                <h2 class="text-2xl font-bold mb-4" data-lang="history_title">Historial de Productividad</h2>
+                <p class="text-sm text-slate-400 mb-4" data-lang="history_subtitle" style="color: var(--text-muted-color);">Sesiones de actividad completadas en los últimos 7 días.</p>
+                <div class="h-64"><canvas id="productivity-chart"></canvas></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODIFICADO: Contenedor del reproductor de música con controles -->
+    <div id="playlist-container">
+        <div id="playlist-player-wrapper">
+             <div id="youtube-player"></div>
+             <iframe id="spotify-player" style="display: none;" class="w-full h-full border-none rounded-t-lg" src="" allow="encrypted-media"></iframe>
+        </div>
+        <div id="playlist-controls" class="w-full p-2">
+            <div id="media-controls" class="flex items-center justify-center gap-4 mb-2">
+                 <button id="playlist-prev" class="media-control-btn" title="Anterior">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                 </button>
+                 <button id="playlist-play" class="media-control-btn w-12 h-12 flex items-center justify-center rounded-full" style="background-color: var(--primary-color);" title="Reproducir/Pausar">
+                     <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                     <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                 </button>
+                 <button id="playlist-next" class="media-control-btn" title="Siguiente">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                 </button>
+            </div>
+            <form id="playlist-form" class="flex items-center gap-2">
+                 <input type="text" id="playlist-url-input" class="w-full p-2 rounded-lg text-sm" data-lang-placeholder="playlist_placeholder" style="background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color); border-width: 1px;">
+                 <button type="submit" class="btn-primary p-2 rounded-lg flex-shrink-0" title="Guardar Playlist">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                 </button>
+            </form>
+        </div>
+      </div>
+
+    <button id="music-toggle-btn" class="is-hidden" title="Mostrar/Ocultar Música">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </button>
+    
+    <button id="exit-focus-btn" class="btn-primary font-bold py-3 px-8 rounded-lg hidden fixed bottom-8 left-1/2 -translate-x-1/2" data-lang="focus_exit">Salir del Modo Concentración</button>
+
+    <!-- Modals -->
+    <div id="delete-profile-modal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h2 class="text-2xl font-bold mb-4" data-lang="delete_profile_title">¿Eliminar Perfil?</h2>
+            <p class="mb-6" data-lang="delete_profile_text">Esta acción es irreversible. Todos los datos, puntos y progresos se perderán para siempre.</p>
+            <div class="flex justify-center gap-4">
+                <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_cancel">Cancelar</button>
+                <button type="button" id="confirm-delete-btn" class="btn-primary font-bold py-2 px-6 rounded-lg opacity-50 cursor-not-allowed" disabled>
+                    <span data-lang="btn_delete">Eliminar</span> (<span id="delete-countdown">10</span>s)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6" data-lang="profile_settings_title">Ajustes del Perfil</h2>
+            <form id="profile-settings-form" class="space-y-4">
+                <div class="flex flex-col items-center gap-2">
+                    <img id="profile-avatar-preview" class="w-24 h-24 rounded-full object-cover bg-slate-700">
+                    <input type="file" id="profile-avatar-input" class="hidden" accept="image/*">
+                    <button type="button" id="change-avatar-btn" class="text-sm text-rose-400 hover:underline" data-lang="change_photo" style="color: var(--primary-color);">Cambiar foto</button>
+                </div>
+                <div>
+                    <label for="profile-name-input" class="block mb-2" data-lang="profile_name">Nombre de Usuario</label>
+                    <input type="text" id="profile-name-input" class="w-full bg-slate-900 p-2 rounded-lg border border-slate-700" required style="background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color);">
+                </div>
+                <div>
+                    <label for="profile-password-input" class="block mb-2" data-lang="profile_new_password">Nueva Contraseña (dejar en blanco para no cambiar)</label>
+                    <input type="password" id="profile-password-input" class="w-full bg-slate-900 p-2 rounded-lg border border-slate-700" style="background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color);">
+                </div>
+                <div id="remove-password-container" class="hidden pt-2">
+                    <button type="button" id="remove-password-btn" class="w-full text-sm text-rose-400 hover:underline" data-lang="btn_remove_password" style="color: var(--primary-color);">Eliminar contraseña actual</button>
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+                    <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-lg" data-lang="btn_save">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-profile-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6" data-lang="profile_create_title">Crear Nuevo Perfil</h2>
+            <form id="add-profile-form" class="space-y-4">
+                <div>
+                    <label class="block mb-2" data-lang="profile_name">Nombre de Usuario</label>
+                    <input type="text" id="new-profile-name" class="w-full bg-slate-900 p-2 rounded-lg" required style="background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color);">
+                </div>
+                <div>
+                    <label class="block mb-2" data-lang="profile_password">Contraseña (Opcional)</label>
+                    <input type="password" id="new-profile-password" class="w-full bg-slate-900 p-2 rounded-lg" style="background-color: var(--background-color); border-color: var(--secondary-color); color: var(--text-color);">
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+                    <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-lg" data-lang="btn_create">Crear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6" data-lang="settings_title">Configuración</h2>
+            <form id="settings-form" class="space-y-6">
+                <div>
+                    <h3 class="font-semibold mb-3" data-lang="settings_timer_type">Tipo de Temporizador</h3>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div class="flex items-center"><input type="radio" id="timer-classic" name="timerStyle" value="classic" class="mr-2"><label for="timer-classic" data-lang="timer_classic">Clásico</label></div>
+                        <div class="flex items-center"><input type="radio" id="timer-hourglass" name="timerStyle" value="hourglass" class="mr-2"><label for="timer-hourglass" data-lang="timer_hourglass">Reloj de Arena</label></div>
+                        <div class="flex items-center"><input type="radio" id="timer-rope" name="timerStyle" value="rope" class="mr-2"><label for="timer-rope" data-lang="timer_rope">Cuerda</label></div>
+                        <div class="flex items-center"><input type="radio" id="timer-candle" name="timerStyle" value="candle" class="mr-2"><label for="timer-candle" data-lang="timer_candle">Vela</label></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-3" data-lang="settings_times">Tiempos y Series</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="setting-activity" class="block text-sm mb-1 flex justify-between">
+                                <span data-lang="settings_activity">Actividad (min)</span>
+                                <span id="setting-activity-value" class="font-bold text-lg" style="color: var(--accent-color);">25</span>
+                            </label>
+                            <input type="range" id="setting-activity" min="1" max="90" step="1" class="w-full">
+                        </div>
+                        <div>
+                            <label for="setting-short-break" class="block text-sm mb-1 flex justify-between">
+                                <span data-lang="settings_short_break">Descanso Corto (min)</span>
+                                <span id="setting-short-break-value" class="font-bold text-lg" style="color: var(--accent-color);">5</span>
+                            </label>
+                            <input type="range" id="setting-short-break" min="1" max="30" step="1" class="w-full">
+                        </div>
+                        <div>
+                            <label for="setting-long-break" class="block text-sm mb-1 flex justify-between">
+                                <span data-lang="settings_long_break">Descanso Largo (min)</span>
+                                <span id="setting-long-break-value" class="font-bold text-lg" style="color: var(--accent-color);">15</span>
+                            </label>
+                            <input type="range" id="setting-long-break" min="1" max="60" step="1" class="w-full">
+                        </div>
+                        <div>
+                            <label for="setting-series" class="block text-sm mb-1 flex justify-between">
+                                <span data-lang="settings_series">Series</span>
+                                <span id="setting-series-value" class="font-bold text-lg" style="color: var(--accent-color);">4</span>
+                            </label>
+                            <input type="range" id="setting-series" min="1" max="12" step="1" class="w-full">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+                    <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-lg" data-lang="btn_save">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="store-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6" data-lang="store_title">Tienda</h2>
+            <div id="store-items" class="space-y-4 max-h-96 overflow-y-auto"></div>
+            <div class="flex justify-end gap-4 pt-4">
+                <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+      <div id="theme-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6" data-lang="theme_title">Temas</h2>
+            <div id="theme-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Theme options will be injected here -->
+            </div>
+            <div class="flex justify-end gap-4 pt-6">
+                <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="theme-customizer-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="theme-customizer-title" class="text-2xl font-bold mb-6"></h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <label for="primary-color-picker" data-lang="customize_primary">Color Primario</label>
+                    <input type="color" id="primary-color-picker">
+                </div>
+                <div class="flex justify-between items-center">
+                    <label for="secondary-color-picker" data-lang="customize_secondary">Color Secundario</label>
+                    <input type="color" id="secondary-color-picker">
+                </div>
+                <div class="flex justify-between items-center">
+                    <label for="background-color-picker" data-lang="customize_background">Color de Fondo</label>
+                    <input type="color" id="background-color-picker">
+                </div>
+            </div>
+            <div class="flex justify-between items-center gap-4 pt-6">
+                <button type="button" id="reset-theme-btn" class="text-sm hover:underline" data-lang="btn_reset_defaults" style="color: var(--primary-color);">Restaurar</button>
+                <div class="flex gap-4">
+                    <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+                    <button type="button" id="save-theme-btn" class="btn-primary font-bold py-2 px-6 rounded-lg" data-lang="btn_save">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gemini Modals -->
+    <div id="gemini-loading-modal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h2 class="text-2xl font-bold mb-4" data-lang="gemini_loading_title">Procesando...</h2>
+            <div class="flex justify-center items-center">
+                <svg class="animate-spin h-8 w-8" style="color: var(--primary-color);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div id="subtasks-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6" data-lang="gemini_subtasks_title">Subtareas Sugeridas</h2>
+            <div id="subtasks-list" class="space-y-2 max-h-64 overflow-y-auto mb-6">
+                <!-- Subtasks will be injected here -->
+            </div>
+            <div class="flex justify-end gap-4 pt-4">
+                <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_cancel">Cancelar</button>
+                <button type="button" id="add-selected-subtasks-btn" class="btn-primary font-bold py-2 px-6 rounded-lg" data-lang="gemini_add_selected">Añadir Seleccionadas</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert-modal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h2 id="alert-modal-title" class="text-2xl font-bold mb-4">Aviso</h2>
+            <p id="alert-modal-text" class="mb-6"></p>
+            <div class="flex justify-center gap-4">
+                <button type="button" class="btn-primary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Prompt Modal -->
+    <div id="password-prompt-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <div id="password-reminder-box" class="absolute inset-0 bg-slate-900 bg-opacity-95 flex flex-col justify-center items-center p-4 rounded-lg hidden">
+                <h3 id="password-reminder-title" class="text-xl font-bold mb-4" data-lang="forgot_password_title"></h3>
+                <p class="text-center mb-4">
+                    <span data-lang="forgot_password_text"></span>
+                    <strong id="password-reminder-text" class="text-amber-400 font-mono text-lg"></strong>
+                </p>
+                <button id="close-reminder-btn" type="button" class="btn-secondary mt-6 py-2 px-6 rounded-lg" data-lang="btn_close"></button>
+            </div>
+            <h2 class="text-2xl font-bold mb-6" data-lang="password_prompt_title">Introducir Contraseña</h2>
+            <form id="password-prompt-form" class="space-y-4">
+                <p id="password-prompt-message" class="text-center mb-4"></p>
+                <div>
+                    <label for="password-input" class="block mb-2" data-lang="profile_password_label">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="password-input" class="w-full bg-slate-900 p-2 rounded-lg pr-10" required>
+                        <button type="button" id="toggle-password-visibility" class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-200" title="Mostrar contraseña">
+                            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        </button>
+                    </div>
+                    <p id="password-error" class="text-red-500 text-sm mt-2 hidden" data-lang="password_error">Contraseña incorrecta.</p>
+                </div>
+                <div class="flex justify-between items-center pt-4">
+                   <button type="button" id="forgot-password-btn" class="text-sm text-rose-400 hover:underline flex items-center gap-1" style="color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                           <path fill-rule="evenodd" d="M18 8a6 6 0 10-12 0v2a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2v-6a2 2 0 00-2-2V8zm-6-4a4 4 0 100 8 4 4 0 000-8zm0 5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clip-rule="evenodd" />
+                        </svg>
+                        <span data-lang="forgot_password"></span>
+                    </button>
+                    <div class="flex gap-4">
+                        <button type="button" class="btn-secondary font-bold py-2 px-6 rounded-lg modal-close-btn" data-lang="btn_cancel">Cancelar</button>
+                        <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-lg" data-lang="btn_enter">Entrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let productivityChartInstance = null;
+        let timerInterval = null;
+        let ytPlayer = null;
+        let ytPlayerReady = false;
+        let initialYtContent = null;
+
+        window.onYouTubeIframeAPIReady = function() {
+            ytPlayerReady = true;
+            if (initialYtContent) {
+                createYtPlayer(initialYtContent);
+                initialYtContent = null; 
+            }
+        };
+
+        // CORRECCIÓN: Función de YouTube simplificada para ser más robusta.
+        function createYtPlayer(content) {
+            // Si ya existe un reproductor, destrúyelo. La API se encargará de eliminar el iframe.
+            if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+                ytPlayer.destroy();
+                ytPlayer = null;
+            }
+            
+            const options = {
+                height: '100%',
+                width: '100%',
+                playerVars: { 'playsinline': 1, 'autoplay': 0, 'controls': 0, 'modestbranding': 1 },
+                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+            };
+
+            if (content.list) {
+                options.playerVars.listType = 'playlist';
+                options.playerVars.list = content.list;
+            } else if (content.videoId) {
+                options.videoId = content.videoId;
+            }
+            
+            // Crea una nueva instancia del reproductor. La API encontrará el div 'youtube-player' y creará un nuevo iframe dentro.
+            ytPlayer = new YT.Player('youtube-player', options);
+        }
+
+        function onPlayerReady(event) {
+            // event.target.playVideo(); // Eliminado para evitar la reproducción automática
+        }
+
+        function onPlayerStateChange(event) {
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            if (event.data == YT.PlayerState.PLAYING) {
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        }
+
+        function showCustomAlert(title, message) {
+            document.getElementById('alert-modal-title').textContent = title;
+            document.getElementById('alert-modal-text').textContent = message;
+            document.getElementById('alert-modal').classList.add('visible');
+        }
+
+        let sounds = {};
+        function setupSounds() {
+            sounds.start = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 } }).toDestination();
+            sounds.complete = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.02, decay: 0.2, sustain: 0.2, release: 0.2 } }).toDestination();
+            sounds.task = new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 2, envelope: { attack: 0.001, decay: 0.1, sustain: 0.01, release: 0.1 } }).toDestination();
+            sounds.click = new Tone.Synth({ volume: -20, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+        }
+
+        function playSound(soundName, note = 'C4', duration = '8n') {
+            const profile = appData.profiles.find(p => p.id === appData.currentProfileId);
+            if (!profile || !profile.settings.audioFeedbackEnabled || !sounds[soundName]) return;
+            
+            if (Tone.context.state !== 'running') {
+                Tone.start();
+            }
+
+            if (sounds[soundName].triggerAttackRelease) {
+                sounds[soundName].triggerAttackRelease(note, duration);
+            }
+        }
+
+        function speak(langKey, replacements = {}) {
+            const profile = appData.currentProfileId ? appData.profiles.find(p => p.id === appData.currentProfileId) : null;
+            if (!profile || !profile.settings.audioFeedbackEnabled) return;
+            
+            const lang = appData.appSettings.language;
+            const currentTranslations = translations[lang] || translations['es'];
+
+            let textToSpeak = currentTranslations[langKey];
+            if (textToSpeak) {
+                Object.entries(replacements).forEach(([key, value]) => {
+                    textToSpeak = textToSpeak.replace(`{{${key}}}`, value);
+                });
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = lang;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        const translations = {
+            'es': {
+                playlist_title: 'Cambiar Playlist',
+                playlist_label: 'URL de la Playlist (YouTube o Spotify)',
+                playlist_placeholder: 'Pega el enlace aquí...',
+                firstDayOfWeek: 1, 
+                theme_customize: 'Personalizar', customize_title: 'Personalizar Tema', customize_primary: 'Color Primario', customize_secondary: 'Color Secundario', customize_background: 'Color de Fondo', btn_reset_defaults: 'Restaurar por Defecto',
+                profile_select_title: 'Seleccionar Perfil', profile_add_btn: 'Crear Nuevo Perfil', points: 'Puntos',
+                mode_activity: 'Actividad', mode_short_break: 'Descanso Corto', mode_long_break: 'Descanso Largo',
+                timer_start: 'INICIAR', timer_pause: 'PAUSAR', timer_continue: 'CONTINUAR', timer_reset: 'REINICIAR',
+                tasks_pending: 'Tareas Pendientes', tasks_add: 'Añadir Tarea', tasks_placeholder: 'Añadir una nueva tarea...',
+                tasks_show_completed: 'Mostrar Completadas', tasks_hide_completed: 'Ocultar Completadas',
+                tasks_weekly: 'Tareas de la Semana', history_title: 'Historial de Productividad',
+                history_subtitle: 'Sesiones de actividad completadas en los últimos 7 días.',
+                profile_create_title: 'Crear Nuevo Perfil', profile_name: 'Nombre de Usuario', profile_password: 'Contraseña (Opcional)',
+                btn_close: 'Cerrar', btn_create: 'Crear', btn_save: 'Guardar', btn_cancel: 'Cancelar', btn_delete: 'Eliminar', btn_enter: 'Entrar', btn_remove_password: 'Eliminar contraseña actual',
+                delete_profile_title: '¿Eliminar Perfil?', delete_profile_text: 'Esta acción es irreversible. Todos los datos, puntos y progresos se perderán para siempre.',
+                store_title: 'Tienda', store_backgrounds: 'Fondos', store_fonts: 'Fuentes',
+                store_buy: 'Comprar', store_equip: 'Equipar', store_equipped: 'Equipado',
+                profile_settings_title: 'Ajustes del Perfil', change_photo: 'Cambiar foto', profile_new_password: 'Nueva Contraseña (dejar en blanco para no cambiar)',
+                settings_title: 'Configuración', settings_timer_type: 'Tipo de Temporizador',
+                theme_title: 'Temas', theme_basico: 'Básico', theme_bosque: 'Bosque', theme_oceania: 'Oceanía', theme_retro: 'Retro', theme_colorido: 'Colorido', theme_sakura: 'Sakura',
+                timer_classic: 'Clásico', timer_hourglass: 'Reloj de Arena', timer_rope: 'Cuerda', timer_candle: 'Vela',
+                settings_times: 'Tiempos y Series', settings_activity: 'Actividad (min)', settings_short_break: 'Descanso Corto (min)',
+                settings_long_break: 'Descanso Largo (min)', settings_series: 'Series',
+                series_prefix: 'Serie', series_of: 'de',
+                calendar_days_short: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
+                calendar_days_long: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+                tasks_no_tasks: 'No hay tareas pendientes.', tasks_no_tasks_weekly: 'Sin tareas', tasks_all_done: '¡Todas las tareas por hoy están completas!',
+                chart_label: 'Sesiones Completadas',
+                bg_default: 'Cine (Por defecto)', bg_sunset: 'Atardecer', bg_sky: 'Cielo', bg_sunrise: 'Amanecer', bg_plains: 'Llanura', bg_sea: 'Mar', bg_sakura: 'Sakura',
+                font_inter: 'Inter (Por defecto)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                tts_audio_enabled: 'Asistencia de audio activada', tts_audio_disabled: 'Asistencia de audio desactivada', tts_timer_started: 'Temporizador iniciado', tts_timer_paused: 'Temporizador pausado', tts_timer_continue: 'Temporizador reanudado', tts_timer_reset: 'Temporizador reiniciado', tts_task_added: 'Tarea añadida', tts_task_deleted: 'Tarea eliminada', tts_settings_open: 'Abriendo configuración', tts_store_open: 'Abriendo tienda', tts_profile_settings_open: 'Abriendo ajustes del perfil', tts_language_menu_open: 'Abriendo menú de idiomas', tts_delete_profile_open: 'Abriendo confirmación para eliminar perfil', tts_dyslexia_mode_on: 'Modo dislexia activado', tts_dyslexia_mode_off: 'Modo dislexia desactivado', tts_profile_selected: 'Perfil seleccionado',
+                tasks_breakdown: 'Desglosar ✨',
+                gemini_loading_title: 'Analizando tu tarea...', gemini_subtasks_title: 'Subtareas Sugeridas', gemini_add_selected: 'Añadir Seleccionadas',
+                gemini_error_title: 'Error de IA', gemini_error_text: 'No se pudieron generar las subtareas. Por favor, revisa tu tarea o inténtalo de nuevo más tarde.',
+                password_prompt_title: 'Introducir Contraseña', profile_password_label: 'Contraseña', password_error: 'Contraseña incorrecta.', password_prompt_for: 'Introducir contraseña para',
+                password_remove_confirm_title: 'Contraseña Eliminada', password_remove_confirm_text: 'La contraseña de tu perfil ha sido eliminada.',
+                forgot_password: 'Contraseña', forgot_password_title: 'Tu Contraseña', forgot_password_text: 'Tu contraseña es: ',
+                cycle_complete_title: '¡Ciclo Completado!', cycle_complete_text: 'Has completado todas tus series y ganado 25 puntos. ¡Buen trabajo!',
+                focus_exit: 'Salir del Modo Concentración', focus_enter: 'Entrar en Modo Concentración',
+            },
+            'en': {
+                playlist_title: 'Change Playlist',
+                playlist_label: 'Playlist URL (YouTube or Spotify)',
+                playlist_placeholder: 'Paste the link here...',
+                firstDayOfWeek: 0, 
+                theme_customize: 'Customize', customize_title: 'Customize Theme', customize_primary: 'Primary Color', customize_secondary: 'Secondary Color', customize_background: 'Background Color', btn_reset_defaults: 'Reset to Default',
+                profile_select_title: 'Select Profile', profile_add_btn: 'Create New Profile', points: 'Points',
+                mode_activity: 'Work', mode_short_break: 'Short Break', mode_long_break: 'Long Break',
+                timer_start: 'START', timer_pause: 'PAUSE', timer_continue: 'CONTINUE', timer_reset: 'RESET',
+                tasks_pending: 'Pending Tasks', tasks_add: 'Add Task', tasks_placeholder: 'Add a new task...',
+                tasks_show_completed: 'Show Completed', tasks_hide_completed: 'Hide Completed',
+                tasks_weekly: 'Tasks of the Week', history_title: 'Productivity History',
+                history_subtitle: 'Work sessions completed in the last 7 days.',
+                profile_create_title: 'Create New Profile', profile_name: 'Username', profile_password: 'Password (Optional)',
+                btn_close: 'Close', btn_create: 'Create', btn_save: 'Save', btn_cancel: 'Cancel', btn_delete: 'Delete', btn_enter: 'Enter', btn_remove_password: 'Remove current password',
+                delete_profile_title: 'Delete Profile?', delete_profile_text: 'This action is irreversible. All data, points, and progress will be lost forever.',
+                store_title: 'Store', store_backgrounds: 'Backgrounds', store_fonts: 'Fonts',
+                store_buy: 'Buy', store_equip: 'Equip', store_equipped: 'Equipped',
+                profile_settings_title: 'Profile Settings', change_photo: 'Change photo', profile_new_password: 'New Password (leave blank to keep current)',
+                settings_title: 'Settings', settings_timer_type: 'Timer Style',
+                theme_title: 'Themes', theme_basico: 'Basic', theme_bosque: 'Forest', theme_oceania: 'Ocean', theme_retro: 'Retro', theme_colorido: 'Colorful', theme_sakura: 'Sakura',
+                timer_classic: 'Classic', timer_hourglass: 'Hourglass', timer_rope: 'Rope', timer_candle: 'Candle',
+                settings_times: 'Times & Series', settings_activity: 'Work (min)', settings_short_break: 'Short Break (min)',
+                settings_long_break: 'Long Break (min)', settings_series: 'Series',
+                series_prefix: 'Series', series_of: 'of',
+                calendar_days_short: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+                calendar_days_long: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                tasks_no_tasks: 'No pending tasks.', tasks_no_tasks_weekly: 'No tasks', tasks_all_done: 'All tasks for today are complete!',
+                chart_label: 'Sessions Completed',
+                bg_default: 'Cinema (Default)', bg_sunset: 'Sunset', bg_sky: 'Sky', bg_sunrise: 'Sunrise', bg_plains: 'Plains', bg_sea: 'Sea', bg_sakura: 'Sakura',
+                font_inter: 'Inter (Default)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                tts_audio_enabled: 'Audio assistance enabled', tts_audio_disabled: 'Audio assistance disabled', tts_timer_started: 'Timer started', tts_timer_paused: 'Timer paused', tts_timer_continue: 'Timer resumed', tts_timer_reset: 'Timer reset', tts_task_added: 'Task added', tts_task_deleted: 'Task deleted', tts_settings_open: 'Opening settings', tts_store_open: 'Opening store', tts_profile_settings_open: 'Opening profile settings', tts_language_menu_open: 'Opening language menu', tts_delete_profile_open: 'Opening delete profile confirmation', tts_dyslexia_mode_on: 'Dyslexia mode on', tts_dyslexia_mode_off: 'Dyslexia mode off', tts_profile_selected: 'Profile selected',
+                tasks_breakdown: 'Break Down ✨',
+                gemini_loading_title: 'Analyzing your task...', gemini_subtasks_title: 'Suggested Subtasks', gemini_add_selected: 'Add Selected',
+                gemini_error_title: 'AI Error', gemini_error_text: 'Could not generate subtasks. Please review your task or try again later.',
+                password_prompt_title: 'Enter Password', profile_password_label: 'Password', password_error: 'Incorrect password.', password_prompt_for: 'Enter password for',
+                password_remove_confirm_title: 'Password Removed', password_remove_confirm_text: 'The password for your profile has been removed.',
+                forgot_password: 'Password', forgot_password_title: 'Your Password', forgot_password_text: 'Your password is: ',
+                cycle_complete_title: 'Cycle Complete!', cycle_complete_text: 'You have completed all your series and earned 25 points. Good job!',
+                focus_exit: 'Exit Focus Mode', focus_enter: 'Enter Focus Mode',
+            },
+            // ... (otras traducciones)
+        };
+
+        let appData = { profiles: [], currentProfileId: null, appSettings: { language: 'es' } };
+        const storeData = {
+            backgrounds: [
+                { id: 'default', cost: 0, langKey: 'bg_default', url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2825&auto=format&fit=crop' },
+                { id: 'sunset', cost: 0, langKey: 'bg_sunset', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop' },
+                { id: 'sky', cost: 0, langKey: 'bg_sky', url: 'https://images.unsplash.com/photo-1488866022504-f2584929ca5f?q=80&w=2940&auto=format&fit=crop' },
+                { id: 'sunrise', cost: 100, langKey: 'bg_sunrise', url: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=2940&auto=format&fit=crop' },
+                { id: 'plains', cost: 150, langKey: 'bg_plains', url: 'https://images.unsplash.com/photo-1473800447596-01729482b8eb?q=80&w=2940&auto=format&fit=crop' },
+                { id: 'sea', cost: 200, langKey: 'bg_sea', url: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?q=80&w=2940&auto=format&fit=crop' },
+                { id: 'sakura', cost: 250, langKey: 'bg_sakura', url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=2942&auto=format&fit=crop' },
+            ],
+            fonts: [
+                { id: 'inter', cost: 0, langKey: 'font_inter', family: "'Inter', sans-serif" },
+                { id: 'lato', cost: 0, langKey: 'font_lato', family: "'Lato', sans-serif" },
+                { id: 'playfair', cost: 0, langKey: 'font_playfair', family: "'Playfair Display', serif" },
+                { id: 'roboto-mono', cost: 50, langKey: 'font_roboto_mono', family: "'Roboto Mono', monospace" },
+                { id: 'special-elite', cost: 75, langKey: 'font_special_elite', family: "'Special Elite', cursive" },
+                { id: 'press-start', cost: 100, langKey: 'font_press_start', family: "'Press Start 2P', cursive" },
+            ]
+        };
+        const themeData = [
+            { id: 'basico', langKey: 'theme_basico', defaults: { primary: '#e11d48', secondary: '#334155', background: '#0f172a' } },
+            { id: 'bosque', langKey: 'theme_bosque', defaults: { primary: '#16a34a', secondary: '#44403c', background: '#1c1917' } },
+            { id: 'oceania', langKey: 'theme_oceania', defaults: { primary: '#2563eb', secondary: '#374151', background: '#111827' } },
+            { id: 'retro', langKey: 'theme_retro', defaults: { primary: '#f97316', secondary: '#5b21b6', background: '#1e1b4b' } },
+            { id: 'colorido', langKey: 'theme_colorido', defaults: { primary: '#d946ef', secondary: '#0891b2', background: '#1a1a2e' } },
+            { id: 'sakura', langKey: 'theme_sakura', defaults: { primary: '#ec4899', secondary: '#6b7280', background: '#fdf2f8' } }
+        ];
+
+        function saveAppData() { localStorage.setItem('pomodoroApp', JSON.stringify(appData)); }
+        function loadAppData() {
+            const data = localStorage.getItem('pomodoroApp');
+            if (data) {
+                try {
+                    appData = JSON.parse(data);
+                } catch (e) {
+                    console.error("Error parsing localStorage data, resetting application data.", e);
+                    localStorage.removeItem('pomodoroApp');
+                    appData = { profiles: [], currentProfileId: null, appSettings: { language: 'es' } };
+                }
+            }
+            if (!appData.appSettings) {
+                appData.appSettings = { language: 'es' };
+            }
+            if (!appData.profiles) appData.profiles = [];
+        }
+
+        // --- LANGUAGE MANAGEMENT & TTS ---
+        function setLanguage(lang) {
+            if (!translations[lang]) lang = 'es'; // Fallback
+            appData.appSettings.language = lang;
+            document.documentElement.lang = lang;
+            saveAppData();
+
+            const currentTranslations = translations[lang] || translations['es'];
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.dataset.lang;
+                if (currentTranslations[key]) el.textContent = currentTranslations[key];
+            });
+
+            document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                const key = el.dataset.langPlaceholder;
+                if (currentTranslations[key]) el.placeholder = currentTranslations[key];
+            });
+        }
+
+
+        // --- PROFILE MANAGEMENT ---
+        const profileSelectionScreen = document.getElementById('profile-selection-screen');
+        const mainApp = document.getElementById('main-app');
+        const profileList = document.getElementById('profile-list');
+        const addProfileModal = document.getElementById('add-profile-modal');
+        const passwordPromptModal = document.getElementById('password-prompt-modal');
+        const passwordPromptForm = document.getElementById('password-prompt-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+        const passwordPromptMessage = document.getElementById('password-prompt-message');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+
+        function renderProfileSelection() {
+            profileList.innerHTML = '';
+            appData.profiles.forEach(profile => {
+                const profileEl = document.createElement('div');
+                profileEl.className = 'profile-card text-center p-4 rounded-lg';
+                
+                let avatarHtml;
+                if (profile.avatar) {
+                    avatarHtml = `<img src="${profile.avatar}" class="w-16 h-16 rounded-full object-cover mx-auto mb-2">`;
+                } else {
+                    avatarHtml = `<div class="w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-2" style="background-color: var(--primary-color);">${profile.name.charAt(0).toUpperCase()}</div>`;
+                }
+
+                const optionsBtn = document.createElement('button');
+                optionsBtn.className = 'profile-options-btn p-1 rounded-full hover:bg-slate-700';
+                optionsBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="text-slate-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`;
+                optionsBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openDeleteModal(profile.id);
+                };
+                
+                let passwordIndicatorHtml = '';
+                if (profile.password) {
+                    passwordIndicatorHtml = `
+                        <div class="password-indicator">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                    `;
+                }
+
+                profileEl.innerHTML = `${avatarHtml}<span class="font-semibold">${profile.name}</span>${passwordIndicatorHtml}`;
+                profileEl.prepend(optionsBtn);
+                profileEl.addEventListener('click', () => selectProfile(profile.id));
+                profileList.appendChild(profileEl);
+            });
+        }
+
+        function selectProfile(profileId) {
+            const profile = appData.profiles.find(p => p.id === profileId);
+            if (!profile) return;
+
+            passwordError.classList.add('hidden');
+            passwordInput.value = '';
+
+            const lang = appData.appSettings.language;
+            const currentTranslations = translations[lang] || translations['es'];
+            const reminderBox = document.getElementById('password-reminder-box');
+            const reminderText = document.getElementById('password-reminder-text');
+
+            function proceedToApp() {
+                appData.currentProfileId = profileId;
+                profileSelectionScreen.classList.add('is-hidden');
+                mainApp.classList.remove('is-hidden');
+                document.getElementById('music-toggle-btn').classList.remove('is-hidden'); 
+                initializeAppForProfile(profileId);
+            }
+
+            if (profile.password) {
+                passwordPromptMessage.textContent = `${currentTranslations.password_prompt_for || 'Enter password for'} ${profile.name}`;
+                passwordPromptModal.classList.add('visible');
+
+                forgotPasswordBtn.onclick = () => {
+                    document.getElementById('password-reminder-title').textContent = currentTranslations.forgot_password_title;
+                    document.querySelector('#password-reminder-box [data-lang="forgot_password_text"]').textContent = currentTranslations.forgot_password_text;
+                    document.querySelector('#password-reminder-box [data-lang="btn_close"]').textContent = currentTranslations.btn_close;
+                    reminderText.textContent = profile.password;
+                    reminderBox.classList.remove('hidden');
+                };
+
+                passwordPromptForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    const enteredPassword = passwordInput.value;
+                    if (enteredPassword === profile.password) {
+                        passwordPromptModal.classList.remove('visible');
+                        passwordPromptForm.onsubmit = null; 
+                        forgotPasswordBtn.onclick = null;
+                        reminderBox.classList.add('hidden');
+                        proceedToApp();
+                    } else {
+                        passwordError.classList.remove('hidden');
+                        passwordError.textContent = currentTranslations.password_error;
+                    }
+                };
+            } else {
+                proceedToApp();
+            }
+        }
+
+        document.getElementById('add-profile-btn').addEventListener('click', () => addProfileModal.classList.add('visible'));
+      document.getElementById('add-profile-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = document.getElementById('new-profile-name').value.trim();
+          const password = document.getElementById('new-profile-password').value;
+          if (name) {
+              // CORREGIDO: Añadido playlistUrl a los perfiles nuevos
+              const newProfile = { 
+                  id: Date.now(), name, password: password || null, avatar: null, points: 50, 
+                  settings: { 
+                      activity: 25, shortBreak: 5, longBreak: 15, series: 4, timerStyle: 'classic', 
+                      activeBackground: 'default', activeFont: 'inter', dyslexiaMode: false, audioFeedbackEnabled: false,
+                        activeTheme: 'basico', customThemes: {},
+                        playlistUrl: null
+                    }, 
+                    tasks: [], completedSessions: {},
+                    unlockedItems: { backgrounds: ['default', 'sunset', 'sky'], fonts: ['inter', 'lato', 'playfair'] } 
+                };
+                appData.profiles.push(newProfile);
+                saveAppData();
+                renderProfileSelection();
+                e.target.reset();
+                addProfileModal.classList.remove('visible');
+            }
+        });
+        
+        // --- DELETE PROFILE MODAL ---
+        const deleteProfileModal = document.getElementById('delete-profile-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        let deleteCountdownInterval = null;
+        let profileIdToDelete = null;
+
+        function openDeleteModal(profileId) {
+            profileIdToDelete = profileId;
+            const lang = appData.appSettings.language;
+            
+            clearInterval(deleteCountdownInterval);
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            const deleteText = (translations[lang] || translations['es']).btn_delete;
+            
+            let countdown = 10;
+            confirmDeleteBtn.innerHTML = `<span data-lang="btn_delete">${deleteText}</span> (<span id="delete-countdown">${countdown}</span>s)`;
+            
+            deleteCountdownInterval = setInterval(() => {
+                countdown--;
+                deleteProfileModal.querySelector('#delete-countdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(deleteCountdownInterval);
+                    confirmDeleteBtn.disabled = false;
+                    confirmDeleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    confirmDeleteBtn.innerHTML = `<span data-lang="btn_delete">${deleteText}</span>`;
+                }
+            }, 1000);
+
+            deleteProfileModal.classList.add('visible');
+        }
+
+        confirmDeleteBtn.onclick = () => {
+            if (profileIdToDelete) {
+                appData.profiles = appData.profiles.filter(p => p.id !== profileIdToDelete);
+                saveAppData();
+                renderProfileSelection();
+                deleteProfileModal.classList.remove('visible');
+                clearInterval(deleteCountdownInterval);
+            }
+        };
+
+        deleteProfileModal.querySelector('.modal-close-btn').addEventListener('click', () => {
+            clearInterval(deleteCountdownInterval);
+        });
+
+
+        // --- MAIN APP INITIALIZATION ---
+        function initializeAppForProfile(profileId) {
+            if (timerInterval) clearInterval(timerInterval);
+
+            let profile = appData.profiles.find(p => p.id === profileId);
+            if (!profile) { window.location.reload(); return; }
+            // Backward compatibility
+            if (!profile.tasks) profile.tasks = [];
+            if (!profile.completedSessions) profile.completedSessions = {};
+            if (!profile.settings) profile.settings = {};
+            if (profile.settings.dyslexiaMode === undefined) profile.settings.dyslexiaMode = false;
+            if (profile.settings.audioFeedbackEnabled === undefined) profile.settings.audioFeedbackEnabled = false;
+            if (!profile.settings.activeTheme) profile.settings.activeTheme = 'basico';
+            if (!profile.settings.customThemes) profile.settings.customThemes = {};
+            if (profile.settings.playlistUrl === undefined) profile.settings.playlistUrl = null;
+
+
+            let timeLeft = (profile.settings.activity || 25) * 60, isRunning = false;
+            timerInterval = null;
+            let currentMode = 'activity', currentSeries = 1, currentDate = new Date();
+            let showCompleted = false;
+            
+            const lang = appData.appSettings.language;
+            const currentTranslations = translations[lang] || translations['es'];
+            
+            speak('tts_profile_selected');
+
+            const modeMap = { 
+                activity: { time: () => profile.settings.activity, langKey: "mode_activity" }, 
+                shortBreak: { time: () => profile.settings.shortBreak, langKey: "mode_short_break" }, 
+                longBreak: { time: () => profile.settings.longBreak, langKey: "mode_long_break" } 
+            };
+            
+            const playlistForm = document.getElementById('playlist-form');
+            const playlistUrlInput = document.getElementById('playlist-url-input');
+            const spotifyPlayer = document.getElementById('spotify-player');
+            const mediaControls = document.getElementById('media-controls');
+
+            const userName = document.getElementById('user-name'), userAvatar = document.getElementById('user-avatar'), userPoints = document.getElementById('user-points');
+            const timerDisplay = document.getElementById('timer-display'), timerModeDisplay = document.getElementById('timer-mode');
+            const startBtn = document.getElementById('start-btn'), resetBtn = document.getElementById('reset-btn'), seriesDisplay = document.getElementById('series-display');
+            const logoutBtn = document.getElementById('logout-btn'), settingsBtn = document.getElementById('settings-btn'), settingsModal = document.getElementById('settings-modal');
+            const settingsForm = document.getElementById('settings-form'), storeBtn = document.getElementById('store-btn'), storeModal = document.getElementById('store-modal');
+            const storeItemsContainer = document.getElementById('store-items'), profileBtn = document.getElementById('profile-btn'), profileSettingsModal = document.getElementById('profile-settings-modal');
+            const profileSettingsForm = document.getElementById('profile-settings-form'), taskForm = document.getElementById('task-form'), taskInput = document.getElementById('task-input');
+            const taskDate = document.getElementById('task-date'), taskList = document.getElementById('task-list'), dyslexiaToggle = document.getElementById('dyslexia-toggle');
+            const audioToggle = document.getElementById('audio-toggle');
+            const timerVisualHourglass = document.getElementById('timer-visual-hourglass'), sandTop = document.getElementById('sand-top'), sandBottom = document.getElementById('sand-bottom');
+            const sandStream = document.getElementById('sand-stream'), timerVisualRope = document.getElementById('timer-visual-rope'), ropeBurnt = document.getElementById('rope-burnt');
+            const ropeSpark = document.getElementById('rope-spark'), timerVisualCandle = document.getElementById('timer-visual-candle'), candleBody = document.getElementById('candle-body'), candleTopGroup = document.getElementById('candle-top-group');
+            const calendarHeader = document.getElementById('calendar-header'), calendarDays = document.getElementById('calendar-days'), calendarBody = document.getElementById('calendar-body');
+            const prevMonthBtn = document.getElementById('prev-month'), nextMonthBtn = document.getElementById('next-month'), weeklyTasksContainer = document.getElementById('weekly-tasks-container');
+            const breakdownTaskBtn = document.getElementById('breakdown-task-btn');
+            const geminiLoadingModal = document.getElementById('gemini-loading-modal');
+            const subtasksModal = document.getElementById('subtasks-modal');
+            const subtasksList = document.getElementById('subtasks-list');
+            const addSelectedSubtasksBtn = document.getElementById('add-selected-subtasks-btn');
+            const themeBtn = document.getElementById('theme-btn');
+            const themeModal = document.getElementById('theme-modal');
+            const toggleCompletedBtn = document.getElementById('toggle-completed-tasks-btn');
+            const focusModeBtn = document.getElementById('focus-mode-btn');
+            const exitFocusBtn = document.getElementById('exit-focus-btn');
+            const mainHeader = document.getElementById('main-header');
+            const mainGrid = document.getElementById('main-grid');
+            const allCards = Array.from(mainGrid.children);
+            const timerCardWrapper = document.getElementById('timer-card-wrapper');
+
+
+            // CORRECCIÓN: Se establece la fecha por defecto sin conversiones de zona horaria.
+            const todayForInput = new Date();
+            taskDate.value = `${todayForInput.getFullYear()}-${String(todayForInput.getMonth() + 1).padStart(2, '0')}-${String(todayForInput.getDate()).padStart(2, '0')}`;
+            
+            // CORREGIDO: Lógica completa para actualizar la playlist
+            function updatePlaylist() {
+                const url = profile.settings.playlistUrl || "https://www.youtube.com/watch?v=jfKfPfyJRdk";
+                const playerWrapper = document.getElementById('playlist-player-wrapper');
+                
+                let youtubePlayerEl = document.getElementById('youtube-player');
+
+                if (url.includes("spotify.com")) {
+                    mediaControls.style.display = 'none';
+                    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+                        ytPlayer.destroy();
+                        ytPlayer = null;
+                    }
+                    if (youtubePlayerEl) youtubePlayerEl.style.display = 'none';
+                    spotifyPlayer.style.display = 'block';
+
+                    const spotifyRegex = /spotify\.com\/playlist\/([a-zA-Z0-9]+)/;
+                    const match = url.match(spotifyRegex);
+                    if (match && match[1]) {
+                       spotifyPlayer.src = `https://open.spotify.com/embed/playlist/${match[1]}`;
+                    }
+                } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                    mediaControls.style.display = 'flex';
+                    spotifyPlayer.style.display = 'none';
+                    spotifyPlayer.src = "";
+
+                    if (!youtubePlayerEl) {
+                        youtubePlayerEl = document.createElement('div');
+                        youtubePlayerEl.id = 'youtube-player';
+                        playerWrapper.prepend(youtubePlayerEl);
+                    }
+                    youtubePlayerEl.style.display = 'block';
+
+                    try {
+                        const videoUrl = new URL(url);
+                        const playlistId = videoUrl.searchParams.get("list");
+                        const videoId = videoUrl.searchParams.get("v") || (videoUrl.pathname.length > 1 ? videoUrl.pathname.substring(1) : null);
+                        
+                        let contentToLoad = null;
+                        if (playlistId) {
+                            contentToLoad = { 'list': playlistId };
+                        } else if (videoId) {
+                            contentToLoad = { 'videoId': videoId };
+                        }
+
+                        if (contentToLoad) {
+                            if (ytPlayerReady) {
+                                createYtPlayer(contentToLoad);
+                            } else {
+                                initialYtContent = contentToLoad;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Invalid URL:", e);
+                    }
+                }
+            }
+            
+            playlistUrlInput.value = profile.settings.playlistUrl || '';
+            
+            playlistForm.onsubmit = (e) => {
+                e.preventDefault();
+                profile.settings.playlistUrl = playlistUrlInput.value.trim();
+                saveAppData();
+                updatePlaylist();
+            };
+
+            document.getElementById('playlist-play').onclick = () => {
+                if(ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+                    const state = ytPlayer.getPlayerState();
+                    if (state === YT.PlayerState.PLAYING) {
+                        ytPlayer.pauseVideo();
+                    } else {
+                        ytPlayer.playVideo();
+                    }
+                }
+            };
+
+            document.getElementById('playlist-prev').onclick = () => {
+                if (ytPlayer && typeof ytPlayer.previousVideo === 'function') {
+                    ytPlayer.previousVideo();
+                }
+            };
+            document.getElementById('playlist-next').onclick = () => {
+                if (ytPlayer && typeof ytPlayer.nextVideo === 'function') {
+                    ytPlayer.nextVideo();
+                }
+            };
+
+            async function callGeminiForSubtasks(taskText) {
+                geminiLoadingModal.classList.add('visible');
+                const lang = appData.appSettings.language;
+                const apiKey = ""; 
+
+                const systemPrompt = `You are a world-class productivity assistant. A user has provided a task. Your job is to break it down into smaller, actionable sub-tasks. Respond with a JSON array of strings, where each string is a sub-task. The response must be in the language with this ISO code: ${lang}. Do not add any introductory text or explanations, just the JSON array.`;
+                const userQuery = `Break down this task: "${taskText}"`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: { type: "ARRAY", items: { type: "STRING" } }
+                    }
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) { throw new Error(`API error: ${response.status}`); }
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        const subtasks = JSON.parse(candidate.content.parts[0].text);
+                        if (Array.isArray(subtasks) && subtasks.length > 0) {
+                            populateSubtasksModal(subtasks);
+                        } else { throw new Error("No subtasks generated."); }
+                    } else { throw new Error("Invalid response structure from API."); }
+
+                } catch (error) {
+                    console.error("Gemini API call failed:", error);
+                    showCustomAlert(currentTranslations.gemini_error_title, currentTranslations.gemini_error_text);
+                } finally {
+                    geminiLoadingModal.classList.remove('visible');
+                }
+            }
+            
+            function populateSubtasksModal(subtasks) {
+                subtasksList.innerHTML = '';
+                subtasks.forEach((taskText, index) => {
+                    const taskEl = document.createElement('div');
+                    taskEl.className = 'flex items-center p-2 rounded-md';
+                    taskEl.style.backgroundColor = 'var(--background-color)';
+                    taskEl.innerHTML = `
+                        <input type="checkbox" id="subtask-${index}" value="${taskText.replace(/"/g, '&quot;')}" class="w-4 h-4 mr-3" style="accent-color: var(--primary-color);" checked>
+                        <label for="subtask-${index}" class="flex-1">${taskText}</label>
+                    `;
+                    subtasksList.appendChild(taskEl);
+                });
+                subtasksModal.classList.add('visible');
+            }
+
+            breakdownTaskBtn.onclick = () => {
+                const text = taskInput.value.trim();
+                if (text) {
+                    callGeminiForSubtasks(text);
+                }
+            };
+
+            addSelectedSubtasksBtn.onclick = () => {
+                const selectedSubtasks = subtasksList.querySelectorAll('input[type="checkbox"]:checked');
+                const date = taskDate.value;
+                selectedSubtasks.forEach(checkbox => {
+                    const text = checkbox.value;
+                    if (text) {
+                        profile.tasks.push({ id: Date.now() + Math.random(), text, date: date || null, completed: false });
+                    }
+                });
+                if (selectedSubtasks.length > 0) {
+                    speak('tts_task_added');
+                    playSound('task', 'C3');
+                    saveAppData();
+                    renderAllDynamicContent();
+                }
+                subtasksModal.classList.remove('visible');
+            };
+            
+            function updateProfileHeader() {
+                userName.textContent = profile.name;
+                userAvatar.innerHTML = profile.avatar ? `<img src="${profile.avatar}" class="w-full h-full object-cover">` : profile.name.charAt(0).toUpperCase();
+                userPoints.textContent = profile.points;
+            }
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60), seconds = timeLeft % 60;
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            
+            function updateSeriesDisplay() {
+                seriesDisplay.textContent = `${currentTranslations.series_prefix} ${currentSeries} ${currentTranslations.series_of} ${profile.settings.series || 4}`;
+            }
+
+            function updateTimerVisualAnimation() {
+                const totalDuration = (modeMap[currentMode].time() || 25) * 60, timeElapsed = totalDuration - timeLeft;
+                let progress = Math.min(1, Math.max(0, timeElapsed / totalDuration));
+                
+                if (profile.settings.timerStyle === 'hourglass') {
+                    const sandH = 65, topH = sandH * (1 - progress), bottomH = sandH * progress;
+                    sandTop.setAttribute('y', 10 + (sandH - topH)); sandTop.setAttribute('height', topH);
+                    sandBottom.setAttribute('y', 140 - bottomH); sandBottom.setAttribute('height', bottomH);
+                } else if (profile.settings.timerStyle === 'rope') {
+                    const ropeW = 200, burntW = ropeW * progress;
+                    ropeBurnt.setAttribute('x2', burntW); ropeSpark.setAttribute('cx', burntW);
+                } else if (profile.settings.timerStyle === 'candle') {
+                    const initialH = 115, newH = initialH * (1 - progress), yOffset = initialH - newH;
+                    candleBody.setAttribute('height', newH); candleBody.setAttribute('y', 25 + yOffset);
+                    candleTopGroup.setAttribute('transform', `translate(0, ${yOffset})`);
+                }
+            }
+
+            function renderTimerStyle() {
+                timerVisualHourglass.classList.add('hidden'); timerVisualRope.classList.add('hidden'); timerVisualCandle.classList.add('hidden');
+                timerDisplay.classList.remove('hidden', 'text-transparent');
+                
+                if (profile.settings.timerStyle !== 'classic') {
+                    timerDisplay.classList.add('text-transparent');
+                    document.getElementById(`timer-visual-${profile.settings.timerStyle}`).classList.remove('hidden');
+                    updateTimerVisualAnimation();
+                }
+            }
+
+            function switchMode(newMode) {
+                clearInterval(timerInterval); isRunning = false;
+                startBtn.textContent = currentTranslations.timer_start; startBtn.dataset.lang = "timer_start"
+                currentMode = newMode;
+                timeLeft = (modeMap[newMode].time() || 25) * 60;
+                const modeText = currentTranslations[modeMap[newMode].langKey];
+                timerModeDisplay.textContent = modeText;
+                speak(modeMap[newMode].langKey.replace('mode_', 'tts_mode_'));
+                updateTimerDisplay(); renderTimerStyle();
+            }
+
+            function toggleTimerActiveState(active) {
+                sandStream.style.display = active && profile.settings.timerStyle === 'hourglass' ? 'block' : 'none';
+                ropeSpark.style.display = active && profile.settings.timerStyle === 'rope' ? 'block' : 'none';
+                candleTopGroup.style.display = active && profile.settings.timerStyle === 'candle' ? 'block' : 'none';
+            }
+
+            function startTimer() {
+                if (isRunning) return; isRunning = true;
+                startBtn.textContent = currentTranslations.timer_pause; startBtn.dataset.lang = "timer_pause";
+                speak('tts_timer_started');
+                playSound('start', 'C5', '16n');
+                timerInterval = setInterval(tick, 1000);
+                toggleTimerActiveState(true);
+            }
+
+            function pauseTimer() {
+                if (!isRunning) return; isRunning = false;
+                startBtn.textContent = currentTranslations.timer_continue; startBtn.dataset.lang = "timer_continue";
+                speak('tts_timer_paused');
+                clearInterval(timerInterval);
+                toggleTimerActiveState(false);
+            }
+            
+            function tick() {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    updateTimerVisualAnimation();
+                } else {
+                    playSound('complete', 'G5', '4n');
+                    if (currentMode === 'activity') {
+                        profile.points += 10;
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        profile.completedSessions[todayStr] = (profile.completedSessions[todayStr] || 0) + 1;
+                        renderProductivityChart();
+                        updateProfileHeader();
+                        saveAppData();
+
+                        if (currentSeries < profile.settings.series) {
+                            switchMode('shortBreak');
+                            currentSeries++;
+                            updateSeriesDisplay();
+                            startTimer();
+                        } else {
+                            switchMode('longBreak');
+                            updateSeriesDisplay();
+                            startTimer();
+                        }
+                    } else if (currentMode === 'shortBreak') {
+                        switchMode('activity');
+                        updateSeriesDisplay();
+                        startTimer();
+                    } else if (currentMode === 'longBreak') {
+                        profile.points += 25;
+                        currentSeries = 1; // Reset for next time
+                        switchMode('activity'); // Resets timer display and state
+                        updateProfileHeader();
+                        saveAppData();
+                        updateSeriesDisplay();
+                        showCustomAlert(currentTranslations.cycle_complete_title, currentTranslations.cycle_complete_text);
+                    }
+                }
+            }
+            
+            startBtn.onclick = () => {
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    if (startBtn.textContent === currentTranslations.timer_continue) {
+                        speak('tts_timer_continue');
+                    }
+                    startTimer();
+                }
+            };
+
+            resetBtn.onclick = () => {
+                speak('tts_timer_reset');
+                playSound('click', 'C3', '16n');
+                switchMode(currentMode);
+            };
+
+            logoutBtn.onclick = () => {
+                if (isRunning) pauseTimer();
+                appData.currentProfileId = null;
+                saveAppData(); // Clear the current profile ID from storage
+                mainApp.classList.add('is-hidden'); 
+                document.getElementById('playlist-container').classList.remove('visible');
+                document.getElementById('music-toggle-btn').classList.add('is-hidden'); 
+                profileSelectionScreen.classList.remove('is-hidden');
+                renderProfileSelection();
+            };
+            
+            window.toggleTask = (taskId) => {
+                const task = profile.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    if (task.completed) {
+                        playSound('task', 'C4');
+                    }
+                    saveAppData();
+                    renderAllDynamicContent();
+                }
+            };
+
+            function renderTasks() {
+                taskList.innerHTML = '';
+                
+                const tasksToRender = profile.tasks
+                    .filter(task => showCompleted || !task.completed)
+                    .sort((a, b) => {
+                        if (a.completed !== b.completed) return a.completed - b.completed;
+                        if (a.date && b.date) return new Date(a.date) - new Date(b.date);
+                        if (a.date) return -1;
+                        if (b.date) return 1;
+                        return 0;
+                    });
+                    
+                if (tasksToRender.length === 0 && !showCompleted && profile.tasks.some(t => t.completed)) {
+                    taskList.innerHTML = `<p class="text-slate-500 text-center" style="color: var(--text-muted-color);">${currentTranslations.tasks_all_done}</p>`;
+                } else if (tasksToRender.length === 0) {
+                    taskList.innerHTML = `<p class="text-slate-500 text-center" style="color: var(--text-muted-color);">${currentTranslations.tasks_no_tasks}</p>`;
+                    return;
+                }
+
+                tasksToRender.forEach((task) => {
+                    const taskEl = document.createElement('div');
+                    taskEl.className = `flex justify-between items-center p-3 rounded-md transition-all duration-300 ${task.completed ? 'opacity-50' : 'opacity-100'}`;
+                    taskEl.style.backgroundColor = 'rgba(0,0,0,0.2)';
+                    
+                    const dateHtml = task.date ? `<span class="text-xs block" style="color: var(--text-muted-color);">${new Date(task.date + 'T00:00:00').toLocaleDateString(lang, { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
+                    
+                    taskEl.innerHTML = `
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <input type="checkbox" onchange="toggleTask(${task.id})" ${task.completed ? 'checked' : ''} class="w-5 h-5 rounded" style="accent-color: var(--primary-color);">
+                            <div class="flex-1 min-w-0">
+                                <span class="task-text font-semibold block truncate cursor-pointer ${task.completed ? 'line-through' : ''}" data-task-id="${task.id}">${task.text}</span>
+                                ${dateHtml}
+                            </div>
+                        </div>
+                        <button class="text-2xl font-bold text-slate-500 hover:text-rose-400 ml-4" onclick="deleteTask(${task.id})">&times;</button>
+                    `;
+                    taskList.appendChild(taskEl);
+                });
+            }
+
+            window.deleteTask = (taskId) => {
+                speak('tts_task_deleted');
+                profile.tasks = profile.tasks.filter(t => t.id !== taskId);
+                saveAppData(); renderAllDynamicContent();
+            };
+
+            taskForm.onsubmit = (e) => {
+                e.preventDefault();
+                const text = taskInput.value.trim(), date = taskDate.value;
+                if (text) {
+                    speak('tts_task_added');
+                    playSound('task', 'C3');
+                    profile.tasks.push({ id: Date.now(), text, date: date || null, completed: false });
+                    saveAppData(); renderAllDynamicContent(); taskForm.reset();
+                    taskDate.value = new Date().toISOString().split('T')[0];
+                }
+            };
+            
+            toggleCompletedBtn.onclick = () => {
+                showCompleted = !showCompleted;
+                renderTasks();
+                toggleCompletedBtn.querySelector('span').setAttribute('data-lang', showCompleted ? 'tasks_hide_completed' : 'tasks_show_completed');
+                setLanguage(appData.appSettings.language); // To update the button text
+            };
+
+            function renderAllDynamicContent() {
+                setLanguage(appData.appSettings.language); 
+                renderTasks(); renderCalendar(); renderWeeklyTasks(); renderProductivityChart();
+            }
+
+            function renderCalendar() {
+                const month = currentDate.getMonth(), year = currentDate.getFullYear();
+                calendarHeader.textContent = currentDate.toLocaleDateString(lang, { month: 'long', year: 'numeric' });
+                calendarDays.innerHTML = currentTranslations.calendar_days_short.map(day => `<div>${day}</div>`).join('');
+                calendarBody.innerHTML = '';
+                const firstDayOfWeek = currentTranslations.firstDayOfWeek || 0;
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                let startOffset = firstDayOfMonth - firstDayOfWeek;
+                if(startOffset < 0) startOffset += 7;
+                
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                for (let i = 0; i < startOffset; i++) calendarBody.innerHTML += '<div></div>';
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.textContent = day; dayEl.className = 'calendar-day p-1 cursor-pointer hover:bg-slate-700 rounded-full text-center transition-colors';
+                    const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    if(profile.tasks.some(task => task.date === currentDateStr && !task.completed)) dayEl.classList.add('has-task');
+                    if (currentDateStr === todayStr) dayEl.classList.add('today');
+                    calendarBody.appendChild(dayEl);
+                }
+            }
+            
+            function renderWeeklyTasks() {
+                weeklyTasksContainer.innerHTML = '';
+                const firstDayOfWeek = currentTranslations.firstDayOfWeek || 0;
+                const today = new Date();
+                let dayOfWeek = today.getDay(); 
+                let offset = dayOfWeek - firstDayOfWeek;
+                if (offset < 0) offset += 7;
+                
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - offset);
+                weekStart.setHours(0,0,0,0);
+                
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(weekStart);
+                    dayDate.setDate(weekStart.getDate() + i);
+                    
+                    // CORRECCIÓN DEFINITIVA: Se genera el string de fecha sin conversiones de zona horaria para evitar errores.
+                    const y = dayDate.getFullYear();
+                    const m = String(dayDate.getMonth() + 1).padStart(2, '0');
+                    const d = String(dayDate.getDate()).padStart(2, '0');
+                    const dayStr = `${y}-${m}-${d}`;
+
+                    const dayTasks = profile.tasks.filter(task => task.date === dayStr);
+                    
+                    let tasksHtml = dayTasks.map(task => `<div class="text-xs bg-slate-800 p-1 rounded ${task.completed ? 'line-through opacity-50' : ''}" style="background-color: rgba(0,0,0,0.3);">${task.text}</div>`).join('') || `<div class="text-xs text-slate-600 italic">${currentTranslations.tasks_no_tasks_weekly}</div>`;
+                    
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'p-2 rounded-lg w-3/4 sm:w-auto flex-shrink-0 sm:flex-shrink'; 
+                    dayEl.style.backgroundColor = 'var(--background-color)';
+                    
+                    // CORRECCIÓN DEFINITIVA: Se calcula el índice del nombre del día de forma robusta.
+                    const jsDayIndex = dayDate.getDay(); // 0 para Domingo, 1 para Lunes, etc.
+                    let dayName;
+
+                    if (firstDayOfWeek === 1) { // Si la semana empieza en Lunes (ej. Español)
+                        // Mapea el índice de JS (Dom=0, Lun=1...) al del array de traducciones (Lun=0, Mar=1...)
+                        dayName = currentTranslations.calendar_days_long[(jsDayIndex + 6) % 7];
+                    } else { // Si la semana empieza en Domingo (ej. Inglés)
+                        // Los índices ya coinciden
+                        dayName = currentTranslations.calendar_days_long[jsDayIndex];
+                    }
+
+                    dayEl.innerHTML = `<h4 class="font-bold text-sm mb-2">${dayName} <span class="font-normal" style="color:var(--text-muted-color);">${dayDate.getDate()}</span></h4><div class="space-y-1">${tasksHtml}</div>`;
+                    
+                    weeklyTasksContainer.appendChild(dayEl);
+                }
+            }
+
+            function renderProductivityChart() {
+                const ctx = document.getElementById('productivity-chart').getContext('2d');
+                const labels = [], data = [];
+                const styles = getComputedStyle(document.body);
+                const chartBgColor = styles.getPropertyValue('--chart-bg-color').trim();
+                const chartBorderColor = styles.getPropertyValue('--chart-border-color').trim();
+                const textColor = styles.getPropertyValue('--text-muted-color').trim();
+
+
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(); d.setDate(d.getDate() - i);
+                    // CORRECCIÓN: Se genera el string de fecha sin conversiones de zona horaria.
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const dateStr = `${y}-${m}-${day}`;
+                    labels.push(d.toLocaleDateString(lang, { weekday: 'short', day: 'numeric' }));
+                    data.push(profile.completedSessions[dateStr] || 0);
+                }
+                if (productivityChartInstance) productivityChartInstance.destroy();
+                productivityChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: currentTranslations.chart_label, data, backgroundColor: chartBgColor, borderColor: chartBorderColor, borderWidth: 1, borderRadius: 4, }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 }, grid: { color: 'rgba(148, 163, 184, 0.1)'} }, x: { ticks: { color: textColor }, grid: { color: 'rgba(148, 163, 184, 0.1)'} } }, plugins: { legend: { display: false } } } });
+            }
+
+            prevMonthBtn.onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); };
+            nextMonthBtn.onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); };
+            
+            const avatarPreview = document.getElementById('profile-avatar-preview'), avatarInput = document.getElementById('profile-avatar-input'), changeAvatarBtn = document.getElementById('change-avatar-btn');
+            changeAvatarBtn.onclick = () => avatarInput.click();
+            avatarInput.onchange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { avatarPreview.src = e.target.result; };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            profileBtn.onclick = () => {
+                speak('tts_profile_settings_open');
+                
+                const removePasswordContainer = document.getElementById('remove-password-container');
+                const removePasswordBtn = document.getElementById('remove-password-btn');
+
+                if (profile.password) {
+                    removePasswordContainer.classList.remove('hidden');
+                } else {
+                    removePasswordContainer.classList.add('hidden');
+                }
+
+                removePasswordBtn.onclick = () => {
+                    profile.password = null;
+                    saveAppData();
+                    renderProfileSelection();
+                    removePasswordContainer.classList.add('hidden');
+                    profileSettingsModal.classList.remove('visible');
+                    showCustomAlert(currentTranslations.password_remove_confirm_title, currentTranslations.password_remove_confirm_text);
+                };
+
+                document.getElementById('profile-name-input').value = profile.name;
+                document.getElementById('profile-password-input').value = '';
+                if (profile.avatar) {
+                    avatarPreview.src = profile.avatar;
+                } else {
+                    const initial = profile.name.charAt(0).toUpperCase();
+                    const color = getComputedStyle(document.body).getPropertyValue('--secondary-hover').trim().replace('#', '%23');
+                    avatarPreview.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96" 96"><rect width="100%" height="100%" fill="${color}"></rect><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="48" fill="white">${initial}</text></svg>`;
+                }
+                profileSettingsModal.classList.add('visible');
+            };
+
+            profileSettingsForm.onsubmit = (e) => {
+                e.preventDefault();
+                const newName = document.getElementById('profile-name-input').value.trim();
+                const newPassword = document.getElementById('profile-password-input').value;
+                const newAvatarSrc = avatarPreview.src;
+                if (newName) profile.name = newName;
+                if (newPassword) {
+                    profile.password = newPassword;
+                }
+                if (!newAvatarSrc.includes('//www.w3.org/2000/svg')) profile.avatar = newAvatarSrc;
+                saveAppData(); 
+                updateProfileHeader(); 
+                renderProfileSelection(); 
+                profileSettingsModal.classList.remove('visible');
+            };
+
+            settingsBtn.onclick = () => {
+                speak('tts_settings_open');
+                
+                const settingActivity = document.getElementById('setting-activity');
+                const settingShortBreak = document.getElementById('setting-short-break');
+                const settingLongBreak = document.getElementById('setting-long-break');
+                const settingSeries = document.getElementById('setting-series');
+
+                const settingActivityValue = document.getElementById('setting-activity-value');
+                const settingShortBreakValue = document.getElementById('setting-short-break-value');
+                const settingLongBreakValue = document.getElementById('setting-long-break-value');
+                const settingSeriesValue = document.getElementById('setting-series-value');
+
+                document.querySelector(`input[name="timerStyle"][value="${profile.settings.timerStyle}"]`).checked = true;
+                
+                settingActivity.value = profile.settings.activity;
+                settingShortBreak.value = profile.settings.shortBreak;
+                settingLongBreak.value = profile.settings.longBreak;
+                settingSeries.value = profile.settings.series;
+
+                settingActivityValue.textContent = profile.settings.activity;
+                settingShortBreakValue.textContent = profile.settings.shortBreak;
+                settingLongBreakValue.textContent = profile.settings.longBreak;
+                settingSeriesValue.textContent = profile.settings.series;
+
+                settingActivity.oninput = () => settingActivityValue.textContent = settingActivity.value;
+                settingShortBreak.oninput = () => settingShortBreakValue.textContent = settingShortBreak.value;
+                settingLongBreak.oninput = () => settingLongBreakValue.textContent = settingLongBreak.value;
+                settingSeries.oninput = () => settingSeriesValue.textContent = settingSeries.value;
+
+                settingsModal.classList.add('visible');
+            };
+
+            settingsForm.onsubmit = (e) => {
+                e.preventDefault();
+                profile.settings.timerStyle = document.querySelector('input[name="timerStyle"]:checked').value;
+                profile.settings.activity = parseInt(document.getElementById('setting-activity').value, 10);
+                profile.settings.shortBreak = parseInt(document.getElementById('setting-short-break').value, 10);
+                profile.settings.longBreak = parseInt(document.getElementById('setting-long-break').value, 10);
+                profile.settings.series = parseInt(document.getElementById('setting-series').value, 10);
+                saveAppData(); 
+                switchMode(currentMode); 
+                updateSeriesDisplay(); 
+                settingsModal.classList.remove('visible');
+            };
+            
+            dyslexiaToggle.onclick = () => {
+                profile.settings.dyslexiaMode = !profile.settings.dyslexiaMode;
+                saveAppData();
+                applyAppearance();
+                speak(profile.settings.dyslexiaMode ? 'tts_dyslexia_mode_on' : 'tts_dyslexia_mode_off');
+            };
+            
+            audioToggle.onclick = () => {
+                profile.settings.audioFeedbackEnabled = !profile.settings.audioFeedbackEnabled;
+                saveAppData();
+                applyAppearance();
+                // This user interaction is a great place to initialize Tone.js
+                if (profile.settings.audioFeedbackEnabled && Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                speak(profile.settings.audioFeedbackEnabled ? 'tts_audio_enabled' : 'tts_audio_disabled');
+            };
+
+            function renderStore() {
+                const lang = appData.appSettings.language;
+                const currentTranslations = translations[lang] || translations['es'];
+                storeItemsContainer.innerHTML = `<div><h3 class="font-bold text-lg mb-2">${currentTranslations.store_backgrounds}</h3></div>`;
+                storeData.backgrounds.forEach(item => {
+                    const isUnlocked = profile.unlockedItems.backgrounds.includes(item.id), isEquipped = profile.settings.activeBackground === item.id;
+                    let buttonHtml;
+                    if (isEquipped) buttonHtml = `<button class="btn-secondary w-32 text-sm py-1 px-3 rounded-md" disabled>${currentTranslations.store_equipped}</button>`;
+                    else if (isUnlocked) buttonHtml = `<button class="btn-primary w-32 text-sm py-1 px-3 rounded-md" onclick="equipItem('backgrounds', '${item.id}')">${currentTranslations.store_equip}</button>`;
+                    else if (profile.points >= item.cost) buttonHtml = `<button class="btn-primary w-32 text-sm py-1 px-3 rounded-md" onclick="buyItem('backgrounds', '${item.id}')">${currentTranslations.store_buy} (${item.cost}p)</button>`;
+                    else buttonHtml = `<button class="btn-secondary w-32 text-sm py-1 px-3 rounded-md" disabled>(${item.cost}p)</button>`;
+                    storeItemsContainer.innerHTML += `<div class="flex justify-between items-center p-2 rounded-md hover:bg-slate-800"><span>${currentTranslations[item.langKey]}</span>${buttonHtml}</div>`;
+                });
+                storeItemsContainer.innerHTML += `<div class="pt-4"><h3 class="font-bold text-lg mb-2">${currentTranslations.store_fonts}</h3></div>`;
+                storeData.fonts.forEach(item => {
+                    const isUnlocked = profile.unlockedItems.fonts.includes(item.id), isEquipped = profile.settings.activeFont === item.id;
+                    let buttonHtml;
+                    if (isEquipped) buttonHtml = `<button class="btn-secondary w-32 text-sm py-1 px-3 rounded-md" disabled>${currentTranslations.store_equipped}</button>`;
+                    else if (isUnlocked) buttonHtml = `<button class="btn-primary w-32 text-sm py-1 px-3 rounded-md" onclick="equipItem('fonts', '${item.id}')">${currentTranslations.store_equip}</button>`;
+                    else if (profile.points >= item.cost) buttonHtml = `<button class="btn-primary w-32 text-sm py-1 px-3 rounded-md" onclick="buyItem('fonts', '${item.id}')">${currentTranslations.store_buy} (${item.cost}p)</button>`;
+                    else buttonHtml = `<button class="btn-secondary w-32 text-sm py-1 px-3 rounded-md" disabled>(${item.cost}p)</button>`;
+                    storeItemsContainer.innerHTML += `<div class="flex justify-between items-center p-2 rounded-md hover:bg-slate-800"><span>${currentTranslations[item.langKey]}</span>${buttonHtml}</div>`;
+                });
+            }
+
+            window.buyItem = (type, itemId) => {
+                const item = storeData[type].find(i => i.id === itemId);
+                if (item && profile.points >= item.cost) {
+                    profile.points -= item.cost; profile.unlockedItems[type].push(itemId);
+                    saveAppData(); updateProfileHeader(); renderStore();
+                }
+            };
+
+            window.equipItem = (type, itemId) => {
+                if (type === 'backgrounds') profile.settings.activeBackground = itemId;
+                if (type === 'fonts') profile.settings.activeFont = itemId;
+                saveAppData(); applyAppearance(); renderStore();
+            };
+
+            storeBtn.onclick = () => { speak('tts_store_open'); renderStore(); storeModal.classList.add('visible'); };
+            
+            // --- THEME CUSTOMIZATION FUNCTIONS (Correct Scope) --- //
+            function applyAppearance() {
+                const activeThemeId = profile.settings.activeTheme || 'basico';
+                document.body.dataset.theme = activeThemeId;
+
+                const bg = storeData.backgrounds.find(b => b.id === profile.settings.activeBackground);
+                document.body.style.backgroundImage = bg && bg.url ? `url(${bg.url})` : '';
+                
+                document.body.style.fontSize = ''; 
+                if (profile.settings.dyslexiaMode) {
+                    document.body.classList.add('dyslexia-mode');
+                    document.body.style.fontFamily = '';
+                } else {
+                    document.body.classList.remove('dyslexia-mode');
+                    if (document.body.dataset.theme === 'retro') {
+                         document.body.style.fontFamily = "'Press Start 2P', cursive";
+                    } else {
+                        const font = storeData.fonts.find(f => f.id === profile.settings.activeFont);
+                        document.body.style.fontFamily = font ? font.family : "var(--font-main)";
+                    }
+                }
+                
+                const customThemeSettings = profile.settings.customThemes ? profile.settings.customThemes[activeThemeId] : null;
+
+                const style = document.body.style;
+                // Clear any inline styles first
+                ['--primary-color', '--primary-hover', '--secondary-color', '--secondary-hover', '--background-color', '--card-bg-color', '--text-color', '--text-muted-color', '--accent-color', '--chart-bg-color', '--chart-border-color'].forEach(prop => style.removeProperty(prop));
+
+                if (customThemeSettings) {
+                    applyCustomColors(customThemeSettings);
+                }
+                
+                dyslexiaToggle.classList.toggle('is-active', profile.settings.dyslexiaMode);
+                audioToggle.classList.toggle('is-active', profile.settings.audioFeedbackEnabled);
+
+                // Delay chart rendering slightly to ensure styles are applied
+                setTimeout(renderProductivityChart, 50);
+            }
+
+            function renderThemeModal() {
+                const themeOptionsContainer = document.getElementById('theme-options');
+                themeOptionsContainer.innerHTML = '';
+                
+                themeData.forEach(theme => {
+                    const themeCard = document.createElement('div');
+                    themeCard.className = 'theme-card';
+                    if (theme.id === profile.settings.activeTheme) {
+                        themeCard.classList.add('active');
+                    }
+                    
+                    const swatches = Object.values(theme.defaults).map(color => 
+                        `<span class="color-swatch" style="background-color: ${color};"></span>`
+                    ).join('');
+
+                    themeCard.innerHTML = `
+                        <div class="theme-card-content flex items-center mb-2" onclick="selectTheme('${theme.id}')">
+                            ${swatches}
+                            <span class="ml-2 font-semibold">${currentTranslations[theme.langKey]}</span>
+                        </div>
+                        <button class="btn-secondary text-xs w-full py-1 rounded-md" onclick="openThemeCustomizer('${theme.id}')" data-lang="theme_customize">${currentTranslations.theme_customize}</button>
+                    `;
+                    themeOptionsContainer.appendChild(themeCard);
+                });
+            }
+
+            window.selectTheme = (themeId) => {
+                profile.settings.activeTheme = themeId;
+                saveAppData();
+                applyAppearance();
+                renderThemeModal(); 
+            }
+            
+            function applyCustomColors({ primary, secondary, background }) {
+                // Helper to adjust brightness
+                const adjustColor = (hex, percent) => {
+                    const f = parseInt(hex.slice(1), 16),
+                          t = percent < 0 ? 0 : 255,
+                          p = percent < 0 ? percent * -1 : percent,
+                          R = f >> 16,
+                          G = (f >> 8) & 0x00FF,
+                          B = f & 0x0000FF;
+                    return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
+                };
+
+                const style = document.body.style;
+                style.setProperty('--primary-color', primary);
+                style.setProperty('--primary-hover', adjustColor(primary, 0.1));
+                style.setProperty('--secondary-color', secondary);
+                style.setProperty('--secondary-hover', adjustColor(secondary, 0.1));
+                style.setProperty('--background-color', background);
+
+                // Determine text color based on background brightness
+                const bgLuminance = (parseInt(background.slice(1,3), 16) * 0.299 + parseInt(background.slice(3,5), 16) * 0.587 + parseInt(background.slice(5,7), 16) * 0.114);
+                const isDarkBg = bgLuminance < 140;
+                
+                style.setProperty('--text-color', isDarkBg ? '#f1f5f9' : '#1e293b');
+                style.setProperty('--text-muted-color', isDarkBg ? '#94a3b8' : '#475569');
+                style.setProperty('--card-bg-color', isDarkBg ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.7)');
+            }
+
+            window.openThemeCustomizer = (themeId) => {
+                const theme = themeData.find(t => t.id === themeId);
+                const modal = document.getElementById('theme-customizer-modal');
+                
+                document.getElementById('theme-customizer-title').textContent = `${currentTranslations.customize_title}: ${currentTranslations[theme.langKey]}`;
+                
+                const primaryPicker = document.getElementById('primary-color-picker');
+                const secondaryPicker = document.getElementById('secondary-color-picker');
+                const backgroundPicker = document.getElementById('background-color-picker');
+
+                const currentColors = (profile.settings.customThemes && profile.settings.customThemes[themeId]) || theme.defaults;
+                
+                primaryPicker.value = currentColors.primary;
+                secondaryPicker.value = currentColors.secondary;
+                backgroundPicker.value = currentColors.background;
+
+                const liveUpdate = () => {
+                    applyCustomColors({
+                        primary: primaryPicker.value,
+                        secondary: secondaryPicker.value,
+                        background: backgroundPicker.value,
+                    });
+                };
+
+                primaryPicker.oninput = liveUpdate;
+                secondaryPicker.oninput = liveUpdate;
+                backgroundPicker.oninput = liveUpdate;
+
+                document.getElementById('save-theme-btn').onclick = () => {
+                    if (!profile.settings.customThemes) {
+                        profile.settings.customThemes = {};
+                    }
+                    profile.settings.customThemes[themeId] = {
+                        primary: primaryPicker.value,
+                        secondary: secondaryPicker.value,
+                        background: backgroundPicker.value,
+                    };
+                    saveAppData();
+                    applyAppearance();
+                    modal.classList.remove('visible');
+                };
+
+                document.getElementById('reset-theme-btn').onclick = () => {
+                    if (profile.settings.customThemes && profile.settings.customThemes[themeId]) {
+                        delete profile.settings.customThemes[themeId];
+                        saveAppData();
+                    }
+                    applyAppearance();
+                    primaryPicker.value = theme.defaults.primary;
+                    secondaryPicker.value = theme.defaults.secondary;
+                    backgroundPicker.value = theme.defaults.background;
+                };
+                
+                modal.classList.add('visible');
+            }
+
+
+            themeBtn.onclick = () => {
+                renderThemeModal();
+                themeModal.classList.add('visible');
+            };
+
+            // Focus Mode Logic
+            focusModeBtn.onclick = (e) => {
+                e.stopPropagation();
+                document.body.classList.add('focus-mode');
+                mainHeader.classList.add('opacity-0', 'pointer-events-none');
+                allCards.forEach(card => {
+                    if (card !== timerCardWrapper) {
+                        card.classList.add('opacity-0', 'pointer-events-none');
+                    }
+                });
+                timerCardWrapper.classList.remove('lg:col-span-2');
+                timerCardWrapper.classList.add('lg:col-span-3');
+                exitFocusBtn.classList.remove('hidden');
+            };
+            exitFocusBtn.onclick = () => {
+                document.body.classList.remove('focus-mode');
+                mainHeader.classList.remove('opacity-0', 'pointer-events-none');
+                allCards.forEach(card => {
+                    card.classList.remove('opacity-0', 'pointer-events-none');
+                });
+                timerCardWrapper.classList.add('lg:col-span-2');
+                timerCardWrapper.classList.remove('lg:col-span-3');
+                exitFocusBtn.classList.add('hidden');
+            };
+            
+            // Task Editing Logic
+            taskList.addEventListener('click', (e) => {
+                if (e.target && e.target.classList.contains('task-text')) {
+                    const taskId = e.target.dataset.taskId;
+                    editTask(e.target, taskId);
+                }
+            });
+
+            function editTask(element, taskId) {
+                const task = profile.tasks.find(t => t.id === Number(taskId));
+                if (!task || task.completed) return; // Don't edit completed tasks
+
+                const currentText = element.textContent;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentText;
+                input.className = 'w-full p-0 rounded-sm border focus:ring-1';
+                input.style.backgroundColor = 'var(--background-color)';
+                input.style.color = 'var(--text-color)';
+                input.style.borderColor = 'var(--primary-color)';
+
+                element.replaceWith(input);
+                input.focus();
+
+                const save = () => {
+                    const newText = input.value.trim();
+                    if (newText) {
+                        task.text = newText;
+                        saveAppData();
+                    }
+                    renderTasks();
+                };
+
+                input.addEventListener('blur', save);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') input.blur();
+                    else if (e.key === 'Escape') {
+                        input.removeEventListener('blur', save);
+                        renderTasks();
+                    }
+                });
+            }
+
+            updateProfileHeader();
+            switchMode('activity');
+            updateSeriesDisplay();
+            applyAppearance();
+            renderAllDynamicContent();
+            updatePlaylist(); 
+        }
+
+        // --- GLOBAL INITIALIZATION ---
+        function init() {
+            loadAppData();
+            setupSounds();
+            
+            const langMenu = document.getElementById('lang-menu');
+            const langBtn = document.getElementById('lang-btn');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const mainMenu = document.getElementById('main-menu');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const passwordReminderBox = document.getElementById('password-reminder-box');
+            const closeReminderBtn = document.getElementById('close-reminder-btn');
+
+            hamburgerBtn.addEventListener('click', () => mainMenu.classList.remove('hidden'));
+            closeMenuBtn.addEventListener('click', () => mainMenu.classList.add('hidden'));
+            closeReminderBtn.addEventListener('click', () => passwordReminderBox.classList.add('hidden'));
+
+            mainMenu.addEventListener('click', (e) => {
+                if (e.target.closest('button') && window.innerWidth < 1024) {
+                    if (e.target.closest('#lang-btn')) return;
+                    mainMenu.classList.add('hidden');
+                }
+            });
+
+            const languages = { 'es': 'Español', 'en': 'English', 'pl': 'Polski', 'pt': 'Português', 'de': 'Deutsch', 'fr': 'Français' };
+            langMenu.innerHTML = Object.entries(languages).map(([code, name]) => `<a href="#" class="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700" data-lang-code="${code}">${name}</a>`).join('');
+            
+            langBtn.addEventListener('click', (e) => { 
+                e.stopPropagation();
+                speak('tts_language_menu_open');
+                langMenu.classList.toggle('hidden'); 
+            });
+            document.addEventListener('click', () => langMenu.classList.add('hidden'));
+            langMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const langCode = e.target.dataset.langCode;
+                if (langCode) {
+                    setLanguage(langCode);
+                    langMenu.classList.add('hidden');
+                    if (appData.currentProfileId) {
+                        initializeAppForProfile(appData.currentProfileId);
+                    }
+                }
+            });
+
+            setLanguage(appData.appSettings.language);
+
+            appData.currentProfileId = null;
+            saveAppData();
+            renderProfileSelection();
+
+            document.querySelectorAll('.modal-close-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modal = e.target.closest('.modal-overlay');
+                    if (modal.id === 'theme-customizer-modal') {
+                        // Find the current profile to revert appearance
+                        if(appData.currentProfileId) {
+                               const profile = appData.profiles.find(p => p.id === appData.currentProfileId);
+                               if (profile) {
+                                   const activeThemeId = profile.settings.activeTheme || 'basico';
+                                   document.body.dataset.theme = activeThemeId;
+                                   const customThemeSettings = profile.settings.customThemes ? profile.settings.customThemes[activeThemeId] : null;
+                                   const style = document.body.style;
+                                    ['--primary-color', '--primary-hover', '--secondary-color', '--secondary-hover', '--background-color', '--card-bg-color', '--text-color', '--text-muted-color', '--accent-color', '--chart-bg-color', '--chart-border-color'].forEach(prop => style.removeProperty(prop));
+                                   if (customThemeSettings) {
+                                       // applyCustomColors is not available here, so we manually reset.
+                                   }
+                               }
+                        }
+                    }
+                    modal.classList.remove('visible');
+                    
+                    if (modal.id === 'password-prompt-modal') {
+                        passwordPromptForm.onsubmit = null;
+                        forgotPasswordBtn.onclick = null;
+                        passwordReminderBox.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
+            const passwordInputForToggle = document.getElementById('password-input');
+            const eyeIcon = document.getElementById('eye-icon');
+            const eyeOffIcon = document.getElementById('eye-off-icon');
+
+            togglePasswordVisibilityBtn.addEventListener('click', () => {
+                const isPassword = passwordInputForToggle.type === 'password';
+                passwordInputForToggle.type = isPassword ? 'text' : 'password';
+                eyeIcon.classList.toggle('hidden', isPassword);
+                eyeOffIcon.classList.toggle('hidden', !isPassword);
+            });
+
+            // Lógica para el botón flotante de música
+            const musicToggleBtn = document.getElementById('music-toggle-btn');
+            const playlistContainer = document.getElementById('playlist-container');
+
+            musicToggleBtn.addEventListener('click', () => {
+                playlistContainer.classList.toggle('visible');
+            });
+        }
+        
+
+        init();
+    });
+    </script>
+</body>
+</html>
+
+
+
+
+

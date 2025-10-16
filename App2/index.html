@@ -84,9 +84,9 @@
 
         @media (min-width: 1024px) { /* lg */
             #main-menu > div {
-                background-color: rgba(30, 41, 59, 0.4); /* Fondo semi-transparente oscuro */
+                background-color: var(--card-bg-color); /* CORRECCIÓN: Usa el color de fondo de las tarjetas del tema */
                 backdrop-filter: blur(8px); /* Efecto de cristal */
-                border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+                border: 1px solid var(--secondary-color); /* CORRECCIÓN: Usa el color secundario del tema para el borde */
                 padding: 0.25rem 0.5rem;
                 border-radius: 9999px; /* Forma de píldora */
             }
@@ -2398,6 +2398,7 @@
     </script>
 </body>
 </html>
+
 
 
 

@@ -84,15 +84,36 @@
 
         @media (min-width: 1024px) { /* lg */
             #main-menu > div {
-                background-color: var(--card-bg-color); /* CORRECCIÓN: Usa el color de fondo de las tarjetas del tema */
-                backdrop-filter: blur(8px); /* Efecto de cristal */
-                border: 1px solid var(--secondary-color); /* CORRECCIÓN: Usa el color secundario del tema para el borde */
+                background-color: var(--card-bg-color);
+                backdrop-filter: blur(8px);
+                border: 1px solid var(--secondary-color);
                 padding: 0.25rem 0.5rem;
-                border-radius: 9999px; /* Forma de píldora */
+                border-radius: 9999px;
+            }
+        }
+        
+        /* Fix de legibilidad para el tema Sakura */
+        body[data-theme="sakura"] #main-menu {
+            /* Fondo claro para el menú overlay en móvil/tablet */
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        body[data-theme="sakura"] #main-menu button:hover {
+            background-color: rgba(236, 72, 153, 0.1);
+        }
+        @media (min-width: 1024px) {
+             /* En escritorio, #main-menu es solo un contenedor transparente,
+                así que restauramos ese comportamiento. */
+            body[data-theme="sakura"] #main-menu {
+                background-color: transparent;
+            }
+            /* Y estilizamos la "píldora" interior del menú de escritorio */
+            body[data-theme="sakura"] #main-menu > div {
+                background-color: rgba(255, 255, 255, 0.9);
+                border-color: #fbcfe8;
             }
         }
 
-        html, body { height: 100%; overflow: hidden; }
+        html, body { height: 100%; }
         body {
             font-family: var(--font-main);
             background-color: var(--background-color); color: var(--text-color);
@@ -296,7 +317,7 @@
 
     <!-- Contenido Principal de la App -->
     <div id="main-app" class="screen is-hidden p-4 sm:p-6 lg:p-8">
-        <header id="main-header" class="flex justify-between items-center gap-4 mb-6 transition-opacity duration-300">
+        <header id="main-header" class="flex justify-between items-center gap-2 sm:gap-4 mb-6 transition-opacity duration-300">
             <div id="profile-btn" class="flex items-center gap-4 cursor-pointer p-2 -m-2 rounded-xl transition-colors duration-200 hover:bg-slate-700">
                 <div id="user-avatar" class="w-10 h-10 bg-rose-600 rounded-full flex items-center justify-center font-bold text-white overflow-hidden" style="background-color: var(--primary-color);"></div>
                 <div>
@@ -351,7 +372,7 @@
             </div>
         </header>
 
-        <main id="main-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6 transition-opacity duration-300">
+        <main id="main-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 transition-opacity duration-300">
             <div id="timer-card-wrapper" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 transition-all duration-300">
                 <div class="card rounded-lg p-6 flex flex-col justify-center items-center text-center">
                     <h2 id="timer-mode" class="text-2xl font-bold mb-4" data-lang="mode_activity">Actividad</h2>
@@ -385,7 +406,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div id="timer-display" class="text-7xl sm:text-8xl font-bold">25:00</div>
+                        <div id="timer-display" class="text-6xl sm:text-7xl lg:text-8xl font-bold">25:00</div>
                     </div>
                     <div class="flex gap-4 my-4">
                         <button id="start-btn" class="btn-primary font-bold py-3 px-8 rounded-lg" data-lang="timer_start">INICIAR</button>
@@ -716,6 +737,7 @@
         let ytPlayer = null;
         let ytPlayerReady = false;
         let initialYtContent = null;
+        let currentApplyAppearance = () => {}; // Para revertir el personalizador de temas
 
         window.onYouTubeIframeAPIReady = function() {
             ytPlayerReady = true;
@@ -763,7 +785,7 @@
                 pauseIcon.classList.remove('hidden');
             } else {
                 playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
+                pauseIcon.add('hidden');
             }
         }
 
@@ -844,7 +866,7 @@
                 tasks_no_tasks: 'No hay tareas pendientes.', tasks_no_tasks_weekly: 'Sin tareas', tasks_all_done: '¡Todas las tareas por hoy están completas!',
                 chart_label: 'Sesiones Completadas',
                 bg_default: 'Cine (Por defecto)', bg_sunset: 'Atardecer', bg_sky: 'Cielo', bg_sunrise: 'Amanecer', bg_plains: 'Llanura', bg_sea: 'Mar', bg_sakura: 'Sakura',
-                font_inter: 'Inter (Por defecto)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                font_inter: 'Inter (Por defecto)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Letra retro',
                 tts_audio_enabled: 'Asistencia de audio activada', tts_audio_disabled: 'Asistencia de audio desactivada', tts_timer_started: 'Temporizador iniciado', tts_timer_paused: 'Temporizador pausado', tts_timer_continue: 'Temporizador reanudado', tts_timer_reset: 'Temporizador reiniciado', tts_task_added: 'Tarea añadida', tts_task_deleted: 'Tarea eliminada', tts_settings_open: 'Abriendo configuración', tts_store_open: 'Abriendo tienda', tts_profile_settings_open: 'Abriendo ajustes del perfil', tts_language_menu_open: 'Abriendo menú de idiomas', tts_delete_profile_open: 'Abriendo confirmación para eliminar perfil', tts_dyslexia_mode_on: 'Modo dislexia activado', tts_dyslexia_mode_off: 'Modo dislexia desactivado', tts_profile_selected: 'Perfil seleccionado',
                 tasks_breakdown: 'Desglosar ✨',
                 gemini_loading_title: 'Analizando tu tarea...', gemini_subtasks_title: 'Subtareas Sugeridas', gemini_add_selected: 'Añadir Seleccionadas',
@@ -885,7 +907,7 @@
                 tasks_no_tasks: 'No pending tasks.', tasks_no_tasks_weekly: 'No tasks', tasks_all_done: 'All tasks for today are complete!',
                 chart_label: 'Sessions Completed',
                 bg_default: 'Cinema (Default)', bg_sunset: 'Sunset', bg_sky: 'Sky', bg_sunrise: 'Sunrise', bg_plains: 'Plains', bg_sea: 'Sea', bg_sakura: 'Sakura',
-                font_inter: 'Inter (Default)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                font_inter: 'Inter (Default)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Retro Font',
                 tts_audio_enabled: 'Audio assistance enabled', tts_audio_disabled: 'Audio assistance disabled', tts_timer_started: 'Timer started', tts_timer_paused: 'Timer paused', tts_timer_continue: 'Timer resumed', tts_timer_reset: 'Timer reset', tts_task_added: 'Task added', tts_task_deleted: 'Task deleted', tts_settings_open: 'Opening settings', tts_store_open: 'Opening store', tts_profile_settings_open: 'Opening profile settings', tts_language_menu_open: 'Opening language menu', tts_delete_profile_open: 'Opening delete profile confirmation', tts_dyslexia_mode_on: 'Dyslexia mode on', tts_dyslexia_mode_off: 'Dyslexia mode off', tts_profile_selected: 'Profile selected',
                 tasks_breakdown: 'Break Down ✨',
                 gemini_loading_title: 'Analyzing your task...', gemini_subtasks_title: 'Suggested Subtasks', gemini_add_selected: 'Add Selected',
@@ -926,7 +948,7 @@
                 tasks_no_tasks: 'Nenhuma tarefa pendente.', tasks_no_tasks_weekly: 'Sem tarefas', tasks_all_done: 'Todas as tarefas de hoje estão concluídas!',
                 chart_label: 'Sessões Concluídas',
                 bg_default: 'Cinema (Padrão)', bg_sunset: 'Pôr do sol', bg_sky: 'Céu', bg_sunrise: 'Nascer do sol', bg_plains: 'Planícies', bg_sea: 'Mar', bg_sakura: 'Sakura',
-                font_inter: 'Inter (Padrão)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                font_inter: 'Inter (Padrão)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Fonte retrô',
                 tts_audio_enabled: 'Assistência de áudio ativada', tts_audio_disabled: 'Assistência de áudio desativada', tts_timer_started: 'Temporizador iniciado', tts_timer_paused: 'Temporizador pausado', tts_timer_continue: 'Temporizador retomado', tts_timer_reset: 'Temporizador reiniciado', tts_task_added: 'Tarefa adicionada', tts_task_deleted: 'Tarefa excluída', tts_settings_open: 'Abrindo configurações', tts_store_open: 'Abrindo a loja', tts_profile_settings_open: 'Abrindo configurações do perfil', tts_language_menu_open: 'Abrindo menu de idiomas', tts_delete_profile_open: 'Abrindo confirmação para excluir perfil', tts_dyslexia_mode_on: 'Modo dislexia ativado', tts_dyslexia_mode_off: 'Modo dislexia desativado', tts_profile_selected: 'Perfil selecionado',
                 tasks_breakdown: 'Detalhar ✨',
                 gemini_loading_title: 'Analisando sua tarefa...', gemini_subtasks_title: 'Subtarefas Sugeridas', gemini_add_selected: 'Adicionar Selecionadas',
@@ -967,7 +989,7 @@
                 tasks_no_tasks: 'Brak oczekujących zadań.', tasks_no_tasks_weekly: 'Brak zadań', tasks_all_done: 'Wszystkie zadania na dzisiaj ukończone!',
                 chart_label: 'Ukończone sesje',
                 bg_default: 'Kino (Domyślne)', bg_sunset: 'Zachód słońca', bg_sky: 'Niebo', bg_sunrise: 'Wschód słońca', bg_plains: 'Równiny', bg_sea: 'Morze', bg_sakura: 'Sakura',
-                font_inter: 'Inter (Domyślna)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                font_inter: 'Inter (Domyślna)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Czcionka retro',
                 tts_audio_enabled: 'Asystent audio włączony', tts_audio_disabled: 'Asystent audio wyłączony', tts_timer_started: 'Zegar uruchomiony', tts_timer_paused: 'Zegar wstrzymany', tts_timer_continue: 'Zegar wznowiony', tts_timer_reset: 'Zegar zresetowany', tts_task_added: 'Zadanie dodane', tts_task_deleted: 'Zadanie usunięte', tts_settings_open: 'Otwieranie ustawień', tts_store_open: 'Otwieranie sklepu', tts_profile_settings_open: 'Otwieranie ustawień profilu', tts_language_menu_open: 'Otwieranie menu języków', tts_delete_profile_open: 'Otwieranie potwierdzenia usunięcia profilu', tts_dyslexia_mode_on: 'Tryb dysleksji włączony', tts_dyslexia_mode_off: 'Tryb dysleksji wyłączony', tts_profile_selected: 'Profil wybrany',
                 tasks_breakdown: 'Podziel ✨',
                 gemini_loading_title: 'Analizowanie zadania...', gemini_subtasks_title: 'Sugerowane podzadania', gemini_add_selected: 'Dodaj wybrane',
@@ -1008,7 +1030,7 @@
                 tasks_no_tasks: 'Keine anstehenden Aufgaben.', tasks_no_tasks_weekly: 'Keine Aufgaben', tasks_all_done: 'Alle Aufgaben für heute erledigt!',
                 chart_label: 'Abgeschlossene Sitzungen',
                 bg_default: 'Kino (Standard)', bg_sunset: 'Sonnenuntergang', bg_sky: 'Himmel', bg_sunrise: 'Sonnenaufgang', bg_plains: 'Ebenen', bg_sea: 'Meer', bg_sakura: 'Sakura',
-                font_inter: 'Inter (Standard)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                font_inter: 'Inter (Standard)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Retro-Schriftart',
                 tts_audio_enabled: 'Audio-Assistenz aktiviert', tts_audio_disabled: 'Audio-Assistenz deaktiviert', tts_timer_started: 'Timer gestartet', tts_timer_paused: 'Timer angehalten', tts_timer_continue: 'Timer fortgesetzt', tts_timer_reset: 'Timer zurückgesetzt', tts_task_added: 'Aufgabe hinzugefügt', tts_task_deleted: 'Aufgabe gelöscht', tts_settings_open: 'Einstellungen öffnen', tts_store_open: 'Shop öffnen', tts_profile_settings_open: 'Profileinstellungen öffnen', tts_language_menu_open: 'Sprachmenü öffnen', tts_delete_profile_open: 'Löschbestätigung für Profil öffnen', tts_dyslexia_mode_on: 'Legasthenie-Modus aktiviert', tts_dyslexia_mode_off: 'Legasthenie-Modus deaktiviert', tts_profile_selected: 'Profil ausgewählt',
                 tasks_breakdown: 'Aufteilen ✨',
                 gemini_loading_title: 'Analysiere deine Aufgabe...', gemini_subtasks_title: 'Vorgeschlagene Teilaufgaben', gemini_add_selected: 'Ausgewählte hinzufügen',
@@ -1049,7 +1071,7 @@
                 tasks_no_tasks: 'Aucune tâche en attente.', tasks_no_tasks_weekly: 'Aucune tâche', tasks_all_done: 'Toutes les tâches pour aujourd\'hui sont terminées !',
                 chart_label: 'Sessions terminées',
                 bg_default: 'Cinéma (Défaut)', bg_sunset: 'Coucher de soleil', bg_sky: 'Ciel', bg_sunrise: 'Lever de soleil', bg_plains: 'Plaines', bg_sea: 'Mer', bg_sakura: 'Sakura',
-                font_inter: 'Inter (Défaut)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Press Start 2P',
+                font_inter: 'Inter (Défaut)', font_lato: 'Lato', font_playfair: 'Playfair Display', font_roboto_mono: 'Roboto Mono', font_special_elite: 'Special Elite', font_press_start: 'Police rétro',
                 tts_audio_enabled: 'Assistance audio activée', tts_audio_disabled: 'Assistance audio désactivée', tts_timer_started: 'Minuteur démarré', tts_timer_paused: 'Minuteur en pause', tts_timer_continue: 'Minuteur repris', tts_timer_reset: 'Minuteur réinitialisé', tts_task_added: 'Tâche ajoutée', tts_task_deleted: 'Tâche supprimée', tts_settings_open: 'Ouverture des paramètres', tts_store_open: 'Ouverture de la boutique', tts_profile_settings_open: 'Ouverture des paramètres du profil', tts_language_menu_open: 'Ouverture du menu des langues', tts_delete_profile_open: 'Ouverture de la confirmation de suppression du profil', tts_dyslexia_mode_on: 'Mode dyslexie activé', tts_dyslexia_mode_off: 'Mode dyslexie désactivé', tts_profile_selected: 'Profil sélectionné',
                 tasks_breakdown: 'Détailler ✨',
                 gemini_loading_title: 'Analyse de votre tâche...', gemini_subtasks_title: 'Sous-tâches suggérées', gemini_add_selected: 'Ajouter la sélection',
@@ -1240,7 +1262,6 @@
           const name = document.getElementById('new-profile-name').value.trim();
           const password = document.getElementById('new-profile-password').value;
           if (name) {
-              // CORREGIDO: Añadido playlistUrl a los perfiles nuevos
               const newProfile = { 
                   id: Date.now(), name, password: password || null, avatar: null, points: 50, 
                   settings: { 
@@ -1475,7 +1496,7 @@
 
                 const systemPrompt = `You are a world-class productivity assistant. A user has provided a task. Your job is to break it down into smaller, actionable sub-tasks. Respond with a JSON array of strings, where each string is a sub-task. The response must be in the language with this ISO code: ${lang}. Do not add any introductory text or explanations, just the JSON array.`;
                 const userQuery = `Break down this task: "${taskText}"`;
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
                 const payload = {
                     contents: [{ parts: [{ text: userQuery }] }],
@@ -2053,7 +2074,6 @@
 
             storeBtn.onclick = () => { speak('tts_store_open'); renderStore(); storeModal.classList.add('visible'); };
             
-            // --- THEME CUSTOMIZATION FUNCTIONS (Correct Scope) --- //
             function applyAppearance() {
                 const activeThemeId = profile.settings.activeTheme || 'basico';
                 document.body.dataset.theme = activeThemeId;
@@ -2072,6 +2092,9 @@
                     } else {
                         const font = storeData.fonts.find(f => f.id === profile.settings.activeFont);
                         document.body.style.fontFamily = font ? font.family : "var(--font-main)";
+                        if (font && font.id === 'press-start') {
+                            document.body.style.fontSize = '12px';
+                        }
                     }
                 }
                 
@@ -2091,6 +2114,9 @@
                 // Delay chart rendering slightly to ensure styles are applied
                 setTimeout(renderProductivityChart, 50);
             }
+
+            // Asigna la función al closure para poder llamarla desde fuera
+            currentApplyAppearance = applyAppearance;
 
             function renderThemeModal() {
                 const themeOptionsContainer = document.getElementById('theme-options');
@@ -2294,6 +2320,31 @@
         // --- GLOBAL INITIALIZATION ---
         function init() {
             loadAppData();
+            
+            // Añadir perfil de "Prueba" con todo desbloqueado si no existe
+            if (!appData.profiles.some(p => p.id === 'prueba-profile')) {
+                const pruebaProfile = {
+                    id: 'prueba-profile',
+                    name: 'Prueba',
+                    password: null,
+                    avatar: null,
+                    points: 9999,
+                    settings: { 
+                        activity: 25, shortBreak: 5, longBreak: 15, series: 4, timerStyle: 'classic', 
+                        activeBackground: 'default', activeFont: 'inter', dyslexiaMode: false, audioFeedbackEnabled: false,
+                        activeTheme: 'basico', customThemes: {},
+                        playlistUrl: null
+                    }, 
+                    tasks: [], 
+                    completedSessions: {},
+                    unlockedItems: { 
+                        backgrounds: storeData.backgrounds.map(item => item.id), 
+                        fonts: storeData.fonts.map(item => item.id) 
+                    } 
+                };
+                appData.profiles.unshift(pruebaProfile); // unshift para añadirlo al principio
+            }
+
             setupSounds();
             
             const langMenu = document.getElementById('lang-menu');
@@ -2345,22 +2396,14 @@
             document.querySelectorAll('.modal-close-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const modal = e.target.closest('.modal-overlay');
+
+                    // CORRECCIÓN: Al cerrar el personalizador de temas, revierte los cambios en vivo.
                     if (modal.id === 'theme-customizer-modal') {
-                        // Find the current profile to revert appearance
-                        if(appData.currentProfileId) {
-                               const profile = appData.profiles.find(p => p.id === appData.currentProfileId);
-                               if (profile) {
-                                   const activeThemeId = profile.settings.activeTheme || 'basico';
-                                   document.body.dataset.theme = activeThemeId;
-                                   const customThemeSettings = profile.settings.customThemes ? profile.settings.customThemes[activeThemeId] : null;
-                                   const style = document.body.style;
-                                    ['--primary-color', '--primary-hover', '--secondary-color', '--secondary-hover', '--background-color', '--card-bg-color', '--text-color', '--text-muted-color', '--accent-color', '--chart-bg-color', '--chart-border-color'].forEach(prop => style.removeProperty(prop));
-                                   if (customThemeSettings) {
-                                       // applyCustomColors is not available here, so we manually reset.
-                                   }
-                               }
+                        if (appData.currentProfileId) {
+                            currentApplyAppearance();
                         }
                     }
+
                     modal.classList.remove('visible');
                     
                     if (modal.id === 'password-prompt-modal') {
@@ -2398,17 +2441,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 

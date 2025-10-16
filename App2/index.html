@@ -767,7 +767,7 @@
             const options = {
                 height: '100%',
                 width: '100%',
-                playerVars: { 'playsinline': 1, 'autoplay': 0, 'controls': 0, 'modestbranding': 1 },
+                playerVars: { 'playsinline': 1, 'autoplay': 1, 'controls': 0, 'modestbranding': 1 },
                 events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
             };
 
@@ -783,7 +783,7 @@
         }
 
         function onPlayerReady(event) {
-            // event.target.playVideo(); // Eliminado para evitar la reproducción automática
+            // La reproducción automática ahora se maneja con el parámetro 'autoplay': 1.
         }
 
         function onPlayerStateChange(event) {
@@ -1437,10 +1437,12 @@
                     if (youtubePlayerEl) youtubePlayerEl.style.display = 'none';
                     spotifyIframe.style.display = 'block';
 
-                    const spotifyRegex = /spotify\.com\/playlist\/([a-zA-Z0-9]+)/;
+                    const spotifyRegex = /spotify\.com\/(playlist|track|album)\/([a-zA-Z0-9]+)/;
                     const match = url.match(spotifyRegex);
-                    if (match && match[1]) {
-                       spotifyIframe.src = `https://open.spotify.com/embed/playlist/${match[1]}`;
+                    if (match && match[1] && match[2]) {
+                       const type = match[1]; // 'playlist', 'track', or 'album'
+                       const id = match[2];
+                       spotifyIframe.src = `https://open.spotify.com/embed/${type}/${id}`;
                     } else {
                         spotifyIframe.src = ""; // Clear Spotify iframe if URL is invalid
                     }
@@ -2518,4 +2520,5 @@
     </script>
 </body>
 </html>
+
 

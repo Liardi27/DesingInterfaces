@@ -121,6 +121,14 @@
             transition: background-color 0.5s ease-in-out, background-image 0.5s ease-in-out, font-family 0.3s;
             font-size: 1rem;
         }
+
+        /* CORRECCIÓN: Mejora el rendimiento y la visualización de fondos en móviles */
+        @media (max-width: 1023px) {
+            body {
+                background-attachment: scroll; /* 'fixed' causa problemas en móviles */
+            }
+        }
+
         .dyslexia-mode { font-family: var(--font-dyslexia) !important; letter-spacing: 0.1em; word-spacing: 0.3em; }
 
         .card { background-color: var(--card-bg-color); border: 1px solid var(--secondary-color); backdrop-filter: blur(10px); }
@@ -767,8 +775,12 @@
             const options = {
                 height: '100%',
                 width: '100%',
-                playerVars: { 'playsinline': 1, 'autoplay': 1, 'controls': 0, 'modestbranding': 1 },
-                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+                playerVars: { 'playsinline': 1, 'autoplay': 0, 'controls': 0, 'modestbranding': 1 },
+                events: { 
+                    'onReady': onPlayerReady, 
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError // Manejador de errores añadido
+                }
             };
 
             if (content.list) {
@@ -782,8 +794,23 @@
             ytPlayer = new YT.Player('youtube-player', options);
         }
 
+        function updatePlaylistNavButtons() {
+            if (!ytPlayer || typeof ytPlayer.getPlaylist !== 'function') {
+                return;
+            }
+            
+            const playlist = ytPlayer.getPlaylist();
+            const prevBtn = document.getElementById('playlist-prev');
+            const nextBtn = document.getElementById('playlist-next');
+
+            const isPlaylist = playlist && Array.isArray(playlist) && playlist.length > 1;
+
+            prevBtn.disabled = !isPlaylist;
+            nextBtn.disabled = !isPlaylist;
+        }
+
         function onPlayerReady(event) {
-            // La reproducción automática ahora se maneja con el parámetro 'autoplay': 1.
+            updatePlaylistNavButtons();
         }
 
         function onPlayerStateChange(event) {
@@ -795,6 +822,24 @@
             } else {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
+            }
+            updatePlaylistNavButtons();
+        }
+
+        // NUEVA FUNCIÓN para manejar errores del reproductor
+        function onPlayerError(event) {
+            console.error("Error del reproductor de YouTube:", event.data);
+            // Los códigos de error 100, 101, 150 son para vídeos no disponibles o privados.
+            // Intentamos saltar al siguiente vídeo de la lista de reproducción.
+            if (event.data === 100 || event.data === 101 || event.data === 150) {
+                if (ytPlayer && typeof ytPlayer.nextVideo === 'function') {
+                    // Comprueba si es una lista antes de saltar
+                    const playlist = ytPlayer.getPlaylist();
+                    if (playlist && Array.isArray(playlist) && playlist.length > 1) {
+                        console.log("Saltando vídeo no disponible...");
+                        ytPlayer.nextVideo();
+                    }
+                }
             }
         }
 
@@ -1269,7 +1314,7 @@
         }
 
         document.getElementById('add-profile-btn').addEventListener('click', () => addProfileModal.classList.add('visible'));
-      document.getElementById('add-profile-form').addEventListener('submit', (e) => {
+        document.getElementById('add-profile-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('new-profile-name').value.trim();
             const password = document.getElementById('new-profile-password').value;
@@ -1280,7 +1325,7 @@
                         activity: 25, shortBreak: 5, longBreak: 15, series: 4, timerStyle: 'classic', 
                         activeBackground: 'default', activeFont: 'inter', dyslexiaMode: false, audioFeedbackEnabled: false,
                         activeTheme: 'basico', customThemes: {},
-                        playlistUrl: null
+                        playlistUrl: "https://www.youtube.com/playlist?list=PLofI_l_Rso9v-2kf6s6xLSyOa2oM3f2j9"
                     }, 
                     tasks: [], completedSessions: {},
                     unlockedItems: { backgrounds: ['default', 'sunset', 'sky'], fonts: ['inter', 'lato', 'playfair'] } 
@@ -1422,7 +1467,7 @@
             
             // CORREGIDO: Lógica completa para actualizar la playlist
             function updatePlaylist() {
-                const url = profile.settings.playlistUrl || "https://www.youtube.com/watch?v=jfKfPfyJRdk";
+                const url = profile.settings.playlistUrl || "https://www.youtube.com/playlist?list=PLofI_l_Rso9v-2kf6s6xLSyOa2oM3f2j9";
                 const playerWrapper = document.getElementById('playlist-player-wrapper');
                 
                 let youtubePlayerEl = document.getElementById('youtube-player');
@@ -1457,7 +1502,11 @@
                     try {
                         const videoUrl = new URL(url);
                         const playlistId = videoUrl.searchParams.get("list");
-                        const videoId = videoUrl.searchParams.get("v") || (videoUrl.pathname.length > 1 && !videoUrl.pathname.includes('/') ? videoUrl.pathname.substring(1) : null);
+                        let videoId = videoUrl.searchParams.get("v");
+                        if (!videoId && (videoUrl.hostname === 'youtu.be' || videoUrl.hostname === 'www.youtu.be')) {
+                           // Extrae el ID del path para enlaces cortos
+                           videoId = videoUrl.pathname.split('/')[1];
+                        }
                         
                         let contentToLoad = null;
                         if (playlistId) {
@@ -1521,12 +1570,16 @@
             };
 
             document.getElementById('playlist-prev').onclick = () => {
-                if (ytPlayer && typeof ytPlayer.previousVideo === 'function') {
+                // CORRECCIÓN: Comprobar si es una lista de reproducción antes de intentar navegar
+                const playlist = ytPlayer && typeof ytPlayer.getPlaylist === 'function' ? ytPlayer.getPlaylist() : null;
+                if (playlist && Array.isArray(playlist) && playlist.length > 1) {
                     ytPlayer.previousVideo();
                 }
             };
             document.getElementById('playlist-next').onclick = () => {
-                if (ytPlayer && typeof ytPlayer.nextVideo === 'function') {
+                // CORRECCIÓN: Comprobar si es una lista de reproducción antes de intentar navegar
+                const playlist = ytPlayer && typeof ytPlayer.getPlaylist === 'function' ? ytPlayer.getPlaylist() : null;
+                if (playlist && Array.isArray(playlist) && playlist.length > 1) {
                     ytPlayer.nextVideo();
                 }
             };
@@ -2412,7 +2465,7 @@
                         activity: 25, shortBreak: 5, longBreak: 15, series: 4, timerStyle: 'classic', 
                         activeBackground: 'default', activeFont: 'inter', dyslexiaMode: false, audioFeedbackEnabled: false,
                         activeTheme: 'basico', customThemes: {},
-                        playlistUrl: null
+                        playlistUrl: "https://www.youtube.com/playlist?list=PLofI_l_Rso9v-2kf6s6xLSyOa2oM3f2j9"
                     }, 
                     tasks: [], 
                     completedSessions: {},
@@ -2520,5 +2573,4 @@
     </script>
 </body>
 </html>
-
 

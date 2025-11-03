@@ -4,194 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú de Aplicaciones</title>
+    <!-- Carga de Tailwind CSS para un diseño limpio y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* * === ESTILOS CSS ===
-         * Como desarrollador senior, prefiero un diseño limpio y funcional.
-         * He optado por un enfoque "mobile-first", asegurando que la experiencia
-         * sea óptima en cualquier dispositivo.
-         */
-
-        /* Reseteo básico y fuentes */
-        :root {
-            --primary-color: #0056b3;
-            --secondary-color: #6c757d;
-            --background-color: #f4f7f9;
-            --card-background: #ffffff;
-            --text-color: #333;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-        }
-
+        /* Configuración de color y fuente global */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-            box-sizing: border-box;
-        }
-
-        /* Contenedor principal del menú */
-        .menu-container {
-            background-color: var(--card-background);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px var(--shadow-color);
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        header h1 {
-            color: var(--primary-color);
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            font-size: 2rem;
-            font-weight: 600;
-        }
-
-        /* Estilo para las tarjetas de cada aplicación */
-        .app-card {
-            background-color: #fdfdfd;
-            border: 1px solid #eef;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .app-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px var(--shadow-color);
-        }
-        
-        .app-card:last-child {
-            margin-bottom: 0;
-        }
-
-        .app-card h2 {
-            font-size: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 0.5rem;
-            color: #343a40;
-        }
-
-        .app-card p {
-            color: #555;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        /* Contenedor para los botones */
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        /* Estilos de los botones */
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            text-decoration: none; /* Para que parezca un botón aunque sea un enlace */
-            display: inline-block;
-        }
-
-        .btn:hover {
-            background-color: #004494;
-            transform: scale(1.03);
-        }
-
-        .btn.secondary {
-            background-color: var(--secondary-color);
-        }
-
-        .btn.secondary:hover {
-            background-color: #5a6268;
-        }
-
-        /* Media query para pantallas más grandes */
-        @media (min-width: 500px) {
-            .button-group {
-                flex-direction: row;
-                justify-content: center;
-            }
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9; /* var(--background-color) */
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex justify-center items-center p-4">
 
-    <main class="menu-container">
-        <header>
-            <h1>Menú de Aplicaciones</h1>
+    <!-- Contenedor principal del menú -->
+    <main class="menu-container bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl text-center">
+        <header class="mb-8">
+            <h1 class="text-blue-700 text-3xl font-semibold">Menú de Aplicaciones</h1>
         </header>
 
-        <!-- Tarjeta para el Repositorio de GitHub -->
-        <section class="app-card">
-            <h2>Repositorio del Proyecto</h2>
-            <p>Explora el código fuente completo de estos proyectos y más en el repositorio oficial.</p>
-            <div class="button-group">
-                <a href="https://github.com/Liardi27/DesingInterfaces" target="_blank" class="btn secondary">GitHub</a>
+        <!-- Tarjeta para el Repositorio de GitHub y Documentación (ACTUALIZADA) -->
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
+            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Código y Documentación del Proyecto</h2>
+            <p class="text-gray-600 mb-6 leading-relaxed">Accede al repositorio con el código fuente de las aplicaciones y a la documentación detallada del proyecto.</p>
+            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
+                <!-- Botón Principal: Código de Aplicaciones (El link que ya tenías) -->
+                <a href="https://github.com/Liardi27/DesingInterfaces" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Código de Aplicaciones</a>
+                <!-- Botón Secundario: Documentación Web (El link que solicitaste) -->
+                <a href="https://liardi27.github.io/DocumentationWebPages/" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación Web</a>
             </div>
         </section>
 
         <!-- Tarjeta para la Aplicación 1: Contador de Personas -->
-        <section class="app-card">
-            <h2>Contador de Personas</h2>
-            <p>Una herramienta sencilla y eficaz para llevar la cuenta de asistentes a cualquier evento.</p>
-            <div class="button-group">
-                <a href="https://liardi27.github.io/DesingInterfaces/App1/index.html" target="_blank" class="btn">Abrir Aplicación</a>
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
+            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Contador de Personas</h2>
+            <p class="text-gray-600 mb-6 leading-relaxed">Una herramienta sencilla y eficaz para llevar la cuenta de asistentes a cualquier evento.</p>
+            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
+                <a href="https://liardi27.github.io/DesingInterfaces/App1/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Abrir Aplicación</a>
             </div>
         </section>
 
         <!-- Tarjeta para la Aplicación 2: Pomodoro -->
-        <section class="app-card">
-            <h2>Pomodoro</h2>
-            <p>Aumenta tu productividad y concentración utilizando la famosa técnica Pomodoro.</p>
-            <div class="button-group">
-                <a href="https://liardi27.github.io/DesingInterfaces/App2/index.html" target="_blank" class="btn">Iniciar Pomodoro</a>
-                <!-- Este botón también redirige a la aplicación, como se solicitó -->
-                <a href="https://liardi27.github.io/DocumentationWebPages/" target="_blank" class="btn secondary">Documentación</a>
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
+            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Pomodoro</h2>
+            <p class="text-gray-600 mb-6 leading-relaxed">Aumenta tu productividad y concentración utilizando la famosa técnica Pomodoro.</p>
+            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
+                <a href="https://liardi27.github.io/DesingInterfaces/App2/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Iniciar Pomodoro</a>
+                <a href="https://liardi27.github.io/DocumentationWebPages/" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación</a>
             </div>
         </section>
-         <!-- Tarjeta para la Aplicación 2: Pomodoro -->
-        <section class="app-card">
-            <h2>Calendario Musical </h2>
-            <p>Manten tus citas al día con música.</p>
-            <div class="button-group">
-                <a href="https://liardi27.github.io/DesingInterfaces/App3/index.html" target="_blank" class="btn">Iniciar Pomodoro</a>
-                <!-- Este botón también redirige a la aplicación, como se solicitó -->
-                <a href="https://liardi27.github.io/DocumentationWebPages/" target="_blank" class="btn secondary">Documentación</a>
+        
+        <!-- Tarjeta para la Aplicación 3: Calendario Musical -->
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
+            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Calendario Musical </h2>
+            <p class="text-gray-600 mb-6 leading-relaxed">Manten tus citas al día con música.</p>
+            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
+                <!-- Se cambió el texto del botón para que sea más claro -->
+                <a href="https://liardi27.github.io/DesingInterfaces/App3/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Abrir Calendario</a>
+                <a href="https://liardi27.github.io/DocumentationWebPages/" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación</a>
             </div>
         </section>
+
     </main>
 
-    <!-- 
-        * === LÓGICA JAVASCRIPT ===
-        * No es estrictamente necesario para este caso, ya que las redirecciones
-        * se pueden manejar con etiquetas `<a>`. Sin embargo, si quisiéramos añadir
-        * lógica más compleja en el futuro, este sería el lugar.
-        * Por ahora, mantendremos el HTML puro y semántico para esta funcionalidad.
-    -->
     <script>
-        // Mensaje en consola para demostrar que el script se carga.
-        // Un buen hábito es siempre verificar que tus scripts se ejecutan correctamente.
-        console.log("Menú de aplicaciones cargado y listo. Creado con buenas prácticas y sin frameworks.");
+        console.log("Menú de aplicaciones cargado y listo. Se ha actualizado el diseño con Tailwind CSS.");
     </script>
 
 </body>
 </html>
-
-

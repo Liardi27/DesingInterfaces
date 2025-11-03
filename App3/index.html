@@ -333,9 +333,19 @@
     };
 
     // --- CONFIGURACIÓN DE CANCIONES Y TEMAS MENSUALES ---
+    // --- INICIO DE LA MODIFICACIÓN: Lista de canciones actualizada ---
+    // --- CORRECCIÓN: Se codifican las URLs para evitar errores con espacios y caracteres especiales ---
     const defaultSongs = [
-        { title: "Mañana soleada", artist: "Melodía Instrumental", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", clue: "Perfecta para empezar el día con energía." }, { title: "Ritmo de la ciudad", artist: "Banda Urbana", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", clue: "El pulso de la gran urbe en una melodía." }, { title: "Eco del bosque", artist: "Sonidos Naturales", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", clue: "Un viaje sonoro a la naturaleza." }, { title: "Noche estrellada", artist: "Piano Solitario", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", clue: "La banda sonora de un cielo despejado." }, { title: "Olas del mar", artist: "Relajación Profunda", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", clue: "Deja que el sonido te lleve a la costa." }, { title: "Aventura épica", artist: "Orquesta Cinematográfica", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", clue: "Para sentirse el héroe de la película." }, { title: "Café de la esquina", artist: "Jazz Trío", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", clue: "Suena como un local acogedor y con humo." }, { title: "Recuerdos de ayer", artist: "Guitarra Acústica", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", clue: "Una melodía para la nostalgia." }, { title: "Futuro brillante", artist: "Synthwave Pro", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", clue: "Neones y coches deportivos de los 80." }, { title: "Viento de otoño", artist: "Melancolía Folk", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", clue: "Hojas cayendo y una fogata." }, { title: "Luz de neón", artist: "Electrónica 80s", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3", clue: "Sintetizadores y cajas de ritmos." }, { title: "Camino de tierra", artist: "Country Moderno", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3", clue: "Botas, sombrero y una camioneta." }, { title: "Fuego en la chimenea", artist: "Clásico Acogedor", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3", clue: "Perfecta para una tarde de lectura." }, { title: "Tormenta de verano", artist: "Rock Alternativo", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3", clue: "Guitarras distorsionadas y energía." }, { title: "Primer amanecer", artist: "Ambient New Age", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3", clue: "Música para meditar y ver salir el sol." }, { title: "Baile bajo la luna", artist: "Ritmos Latinos", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3", clue: "¡Sabor y movimiento para el cuerpo!" }, { title: "Canto del ruiseñor", artist: "Orquesta Natural", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", clue: "La naturaleza compone su propia sinfonía." }, { title: "Aceleración", artist: "Drum & Bass", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", clue: "Ritmos rotos a toda velocidad." }, { title: "Pausa y reflexión", artist: "Música Minimalista", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", clue: "Menos es más en esta pieza." }, { title: "Fiesta en la playa", artist: "Reggae Vibes", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", clue: "Buenas vibraciones y ritmo relajado." }, { title: "Viaje interestelar", artist: "Space Rock", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", clue: "Guitarras con eco y efectos espaciales." }, { title: "Misterio sin resolver", artist: "Banda Sonora de Suspense", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", clue: "Tensión y expectación en cada nota." }, { title: "Risa de niños", artist: "Pop Alegre", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", clue: "Pura felicidad y energía positiva." }, { title: "Corazón valiente", artist: "Power Metal", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", clue: "Baterías épicas y guitarras veloces." }, { title: "Meditación Zen", artist: "Cuencos Tibetanos", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", clue: "Sonidos que curan y relajan la mente." }, { title: "Despertar del volcán", artist: "Rock Progresivo", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", clue: "Cambios de ritmo y solos complejos." }, { title: "Sueños de algodón", artist: "Canción de Cuna", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3", clue: "Para dormir plácidamente." }, { title: "Expreso de medianoche", artist: "Blues Eléctrico", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3", clue: "Un lamento de guitarra en la noche." }, { title: "Vals de las flores", artist: "Orquesta Clásica", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3", clue: "Un famoso ballet de Tchaikovsky." }, { title: "Paseo por París", artist: "Acordeón Francés", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3", clue: "El sonido inconfundible de la capital francesa." }, { title: "Celebración final", artist: "Fanfarria Festiva", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3", clue: "Música para una gran victoria." }
+        { title: "Life Is a Highway", artist: "Rascal Flatts", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Rascal%20Flatts%20-%20Life%20Is%20a%20Highway%20.mp3", clue: "Una canción clásica sobre la carretera." },
+        { title: "Lonely", artist: "Imagine Dragons", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Imagine%20Dragons%20-%20Lonely(Traducida%20al%20Espa%C3%B1ol).mp3", clue: "Una canción de una banda moderna popular." },
+        { title: "Faint", artist: "Linkin Park", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Faint%20Linkin%20Park.mp3", clue: "Un himno de nu-metal." },
+        { title: "Secrets", artist: "OneRepublic", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20OneRepublic%20Secrets%20.mp3", clue: "Perfecta para guardar un secreto." },
+        { title: "Can't Feel My Face", artist: "The Weeknd", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Can%27t%20Feel%20My%20Face.mp3", clue: "No puedo sentir mi cara..." },
+        { title: "Dracula", artist: "Tame Impala", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Tame%20Impala%20-%20Dracula%20.mp3", clue: "Un título... ¿chupasangre?" },
+        { title: "Ride It", artist: "Jay Sean", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Jay%20Sean%20-%20Ride%20It%20.mp3", clue: "Un clásico de R&B." }
     ];
+    // --- FIN DE LA MODIFICACIÓN ---
+    
     const monthlyThemes = {
         9: { // Octubre (0-indexed)
             name: "🤘 Rocktubre 🤘",
@@ -492,35 +502,21 @@
         danceCtx.stroke();
 
         // --- Dibuja los objetos del monigote ---
-        // Encuentra el objeto diario para la fecha actual (si existe)
-        // MODIFICADO: Buscar por día del mes (1-31) en lugar de "YYYY-MM-DD"
-        const dayOfMonth = selectedDate ? new Date(selectedDate).getDate() : null;
-        const dailyItemForDate = dayOfMonth ? dailyItems[dayOfMonth] : null;
-        // Encuentra el objeto seleccionado en el armario
+        
+        // --- INICIO DE LA CORRECCIÓN TOTAL ---
+        // Se elimina toda la lógica de "preview" (dailyItemForDate).
+        // El monigote AHORA SOLO dibuja lo que está en 'selectedItem'.
+
+        // 1. Encontrar el objeto seleccionado en el armario
         const equippedItem = Object.values(dailyItems).find(i => i.id === selectedItem);
 
-        // Decide qué objeto dibujar
+        // 2. Decidir qué dibujar
         let itemToDraw = null;
-
-        // --- INICIO DE LA CORRECCIÓN ---
-        
-        // PRIORIDAD 1: Si el usuario ha seleccionado "Ninguno"...
-        if (selectedItem === "none") {
-            
-            // EXCEPCIÓN: Mostrar "preview" solo si estamos en un día con item
-            // Y ese item AÚN NO está desbloqueado.
-            if (dailyItemForDate && !unlockedItems.includes(dailyItemForDate.id)) {
-                itemToDraw = dailyItemForDate; // Muestra el preview
-            } else {
-                // Si el item ya está desbloqueado, "Ninguno" significa "Ninguno".
-                itemToDraw = null; 
-            }
-        } 
-        // PRIORIDAD 2: Si el usuario tiene un item específico seleccionado, dibujarlo.
-        else if (selectedItem !== "none" && equippedItem) {
-            itemToDraw = equippedItem; // equippedItem se encontró correctamente
+        if (selectedItem !== "none" && equippedItem) {
+            itemToDraw = equippedItem; // Solo dibujar el item equipado
         }
-        // --- FIN DE LA CORRECCIÓN ---
+        // Si selectedItem es "none", itemToDraw permanece 'null' y no se dibuja nada.
+        // --- FIN DE LA CORRECCIÓN TOTAL ---
 
 
         if (itemToDraw) {
@@ -1690,14 +1686,14 @@
              const itemIcon = itemData?.icon || 'fa-solid fa-sparkles';
              showAchievementToast({ id: `item-${itemId}`, name: `¡Objeto: ${itemName}!`, icon: itemIcon }); 
 
-             // Equipar automáticamente si no hay nada equipado (lógica sin cambios)
-              if (selectedItem === "none") {
-                 await selectWardrobeItem(itemId); // Guardar selección y actualizar
-              } else {
-                 // Si ya había algo equipado, solo forzar redibujo
-                 if(animationFrameId) cancelAnimationFrame(animationFrameId); 
-                 danceLoop(performance.now());
-              }
+             // --- INICIO DE LA CORRECCIÓN ---
+             // Se elimina el bloque que equipaba el item automáticamente.
+             // Ahora solo se desbloquea. El usuario debe ir al armario para equiparlo.
+             
+             // Forzar redibujo (por si acaso, aunque no debería cambiar nada)
+             if(animationFrameId) cancelAnimationFrame(animationFrameId); 
+             danceLoop(performance.now());
+             // --- FIN DE LA CORRECCIÓN ---
 
          } catch (error) {
              console.error(`Error al desbloquear el objeto ${itemId} en localStorage:`, error);
@@ -1896,6 +1892,10 @@
 
 </body>
 </html>
+
+
+
+
 
 
 

@@ -9,31 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Press+Start+2P&display.swap" rel="stylesheet">
-    
-    <!--
-      ¡CAMBIO TOTAL DE ICONOS!
-      Quitamos Phosphor Icons y ponemos Font Awesome.
-      Esta es la biblioteca de iconos más usada y debería funcionar 100%.
-    -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- --- INICIO DE LA MODIFICACIÓN: METAS PARA PWA (Multiplataforma) --- -->
-    <!-- Color de la barra de estado (Android/Desktop) -->
     <meta name="theme-color" content="#111827">
-
-    <!-- Meta tags para iOS (Añadir a Pantalla de Inicio) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Diario Musical">
-    <!-- Icono para iOS (usamos un placeholder) -->
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/FBBF24/111827?text=🎵">
-
-    <!-- 
-      Web App Manifest (inline) para 'Añadir a Pantalla de Inicio' en Android/Desktop.
-      Esto permite que la app se "instale".
-      Usamos un 'data URI' para mantener todo en un solo archivo.
-    -->
     <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Diario%20Musical%22%2C%22short_name%22%3A%22Diario%22%2C%22description%22%3A%22Tu%20calendario%20musical%20personal.%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23111827%22%2C%22theme_color%22%3A%22%23111827%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2FFBBF24%2F111827%3Ftext%3D%F0%9F%8E%B5%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2FFBBF24%2F111827%3Ftext%3D%F0%9F%8E%B5%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
     <!-- --- FIN DE LA MODIFICACIÓN --- -->
 
@@ -81,7 +64,6 @@
         }
         .calendar-day:hover {
             background-color: var(--bg-tertiary);
-            /* cursor: pointer; <-- Movido a JS para días habilitados */
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -101,10 +83,10 @@
         /* Ajustes de tamaño de fuente específicos para el tema retro */
         .theme-retro h1, .theme-retro #special-theme-banner { font-size: 1rem; line-height: 1.25rem; }
         .theme-retro #monthDisplay { font-size: 0.875rem; }
-        .theme-retro main .font-semibold > div { font-size: 0.75rem; } /* NUEVO para cabeceras Lun, Mar... */
-        .theme-retro .calendar-day { font-size: 0.875rem; } /* Reducido de 1rem */
-        .theme-retro #day-modal-content h2 { font-size: 0.875rem; } /* Reducido de 1rem */
-        .theme-retro #song-title { font-size: 1rem; line-height: 1.4rem; } /* Reducido de 1.1rem */
+        .theme-retro main .font-semibold > div { font-size: 0.75rem; }
+        .theme-retro .calendar-day { font-size: 0.875rem; }
+        .theme-retro #day-modal-content h2 { font-size: 0.875rem; }
+        .theme-retro #song-title { font-size: 1rem; line-height: 1.4rem; }
         .theme-retro #note-textarea, .theme-retro select { font-size: 0.75rem; }
         .theme-retro button { font-size: 0.75rem; }
         
@@ -116,12 +98,12 @@
             }
             90% {
                 transform: translateY(-5px) scale(1.1);
-                color: var(--accent-primary); /* ¡Que brille un poco! */
+                color: var(--accent-primary);
             }
         }
 
         #monthDisplay .animated-letter {
-            display: inline-block; /* Importante para transform */
+            display: inline-block;
             animation: subtleBob 4s infinite ease-in-out;
             transition: color 0.3s;
         }
@@ -155,13 +137,13 @@
         /* --- ESTILO PARA INDICADOR DE NOTA --- */
         .note-indicator {
             position: absolute;
-            bottom: 4px; /* Ajusta la posición vertical */
-            right: 4px; /* Ajusta la posición horizontal */
+            bottom: 4px;
+            right: 4px;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--accent-primary); /* Usa el color de acento */
-            box-shadow: 0 0 3px rgba(0,0,0,0.5); /* Sombra sutil */
+            background-color: var(--accent-primary);
+            box-shadow: 0 0 3px rgba(0,0,0,0.5);
         }
         /* Ajustar posición relativa para que el indicador se posicione correctamente */
         .calendar-day {
@@ -177,9 +159,8 @@
         <!-- Cabecera --><header class="flex flex-col sm:flex-row justify-between items-center p-4 themed-bg-secondary rounded-lg shadow-lg fade-in gap-4">
             <h1 class="text-xl sm:text-2xl font-bold themed-text-accent text-center sm:text-left">Mi Diario Musical</h1>
             <div class="flex items-center gap-4">
-                <div id="monthDisplay" class="text-lg sm:text-xl font-semibold flex items-center"><!-- Las letras animadas se insertarán aquí --></div>
+                <div id="monthDisplay" class="text-lg sm:text-xl font-semibold flex items-center"></div>
                 <div class="flex gap-2">
-                    <!-- ICONOS CAMBIADOS (Font Awesome) -->
                     <button id="backButton" class="p-2 rounded-full hover:themed-bg-tertiary transition-colors"><i class="fa-solid fa-caret-left fa-lg"></i></button>
                     <button id="nextButton" class="p-2 rounded-full hover:themed-bg-tertiary transition-colors"><i class="fa-solid fa-caret-right fa-lg"></i></button>
                 </div>
@@ -195,24 +176,23 @@
                     <option value="retro">Retro</option>
                 </select>
 
+                <!-- REMOVIDO: El botón de añadir MP3 ahora está dentro de cada día. -->
+                
                 <!-- Playlist -->
                 <button id="playlist-button" title="Reproducir Playlist del Mes"
                     class="p-2.5 rounded-full themed-bg-tertiary hover:scale-110 hover:themed-bg-padding transition-all duration-200">
-                    <!-- ICONO CAMBIADO -->
                     <i class="fa-solid fa-list fa-lg themed-text-accent"></i>
                 </button>
 
                 <!-- Estadísticas -->
                 <button id="stats-button" title="Ver Estadísticas"
                     class="p-2.5 rounded-full themed-bg-tertiary hover:scale-110 hover:themed-bg-padding transition-all duration-200">
-                    <!-- ICONO CAMBIADO -->
                     <i class="fa-solid fa-chart-bar fa-lg themed-text-accent"></i>
                 </button>
 
                 <!-- Logros -->
                 <button id="achievements-button" title="Ver Logros"
                     class="p-2.5 rounded-full themed-bg-tertiary hover:scale-110 hover:themed-bg-padding transition-all duration-200 relative">
-                    <!-- ICONO CAMBIADO -->
                     <i class="fa-solid fa-medal fa-lg themed-text-accent"></i>
                     <span id="achievements-badge"
                         class="hidden absolute -top-1 -right-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">!</span>
@@ -221,7 +201,6 @@
                 <!-- Vestuario -->
                 <button id="wardrobe-button" title="Personalizar Monigote"
                     class="p-2.5 rounded-full themed-bg-tertiary hover:scale-110 hover:themed-bg-padding transition-all duration-200">
-                    <!-- ICONO CAMBIADO -->
                     <i class="fa-solid fa-shirt fa-lg themed-text-accent"></i>
                 </button>
             </div>
@@ -240,7 +219,6 @@
         <div id="day-modal-content" class="themed-bg-secondary p-6 rounded-lg shadow-2xl w-11/12 max-w-md zoom-in flex flex-col gap-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold themed-text-accent">Canción del Día</h2>
-                <!-- ICONO CAMBIADO -->
                 <button id="close-day-modal" class="p-1 rounded-full hover:themed-bg-tertiary"><i class="fa-solid fa-xmark fa-lg"></i></button>
             </div>
              <!-- Info de la canción y Trivia --><div>
@@ -259,7 +237,7 @@
                 <button data-speed="1" class="speed-control-btn active p-2 w-12 h-10 rounded-md themed-bg-tertiary hover:themed-bg-padding">1x</button>
                 <button data-speed="1.5" class="speed-control-btn p-2 w-12 h-10 rounded-md themed-bg-tertiary hover:themed-bg-padding">1.5x</button>
             </div>
-             <!-- Notas Personales --><div class="flex flex-col gap-2">
+            <!-- Notas Personales --><div class="flex flex-col gap-2">
                 <h3 class="font-bold themed-text-accent">Mis Notas</h3>
                 <p id="note-date" class="text-sm themed-text-secondary -mt-2">Escribe algo sobre este día.</p>
                 <textarea id="note-textarea" class="w-full h-32 themed-bg-tertiary rounded-md p-2 themed-text-primary focus:outline-none focus:ring-2 themed-ring-focus" placeholder="Escribe tus pensamientos sobre la canción o el día..."></textarea>
@@ -272,7 +250,6 @@
         <div class="themed-bg-secondary p-6 rounded-lg shadow-2xl w-11/12 max-w-md zoom-in">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold themed-text-accent">Estadísticas del Mes</h2>
-                <!-- ICONO CAMBIADO -->
                 <button id="close-stats-modal" class="p-1 rounded-full hover:themed-bg-tertiary"><i class="fa-solid fa-xmark fa-lg"></i></button>
             </div>
             <div id="stats-content" class="max-h-80 overflow-y-auto"></div>
@@ -283,7 +260,6 @@
         <div class="themed-bg-secondary p-6 rounded-lg shadow-2xl w-11/12 max-w-lg zoom-in">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold themed-text-accent">Mis Logros</h2>
-                <!-- ICONO CAMBIADO -->
                 <button id="close-achievements-modal" class="p-1 rounded-full hover:themed-bg-tertiary"><i class="fa-solid fa-xmark fa-lg"></i></button>
             </div>
             <div id="achievements-content" class="max-h-96 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -294,12 +270,10 @@
         <div class="themed-bg-secondary p-6 rounded-lg shadow-2xl w-11/12 max-w-xl zoom-in">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold themed-text-accent">Armario del Monigote</h2>
-                <!-- ICONO CAMBIADO -->
                 <button id="close-wardrobe-modal" class="p-1 rounded-full hover:themed-bg-tertiary"><i class="fa-solid fa-xmark fa-lg"></i></button>
             </div>
             <div id="wardrobe-items" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
                 <!-- Items del armario se cargarán aquí --><div class="themed-bg-tertiary rounded-lg p-4 text-center item-card selected" data-item-id="none">
-                    <!-- ICONO CAMBIADO -->
                     <i class="fa-solid fa-circle-xmark fa-3x themed-text-primary mb-2"></i>
                     <p class="text-sm font-semibold themed-text-primary">Ninguno</p>
                 </div>
@@ -314,15 +288,16 @@
     
     <!-- Toast para notificar logros --><div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50"></div>
 
-    <!-- Reproductor y Monigote Bailarín Flotante --><div id="global-player-container" class="fixed bottom-5 right-5 z-50 hidden flex flex-col items-center gap-2">
+    <!-- Reproductor y Monigote Bailarín Flotante -->
+    <div id="global-player-container" class="fixed bottom-5 right-5 z-50 hidden flex flex-col items-center gap-2">
         <canvas id="danceCanvas" width="150" height="150"></canvas>
         <audio id="audioPlayer" controls class="w-48"></audio>
     </div>
     
+    <!-- Input de archivo oculto para MP3 (compartido por todos los botones) -->
+    <input type="file" id="mp3-file-input" accept=".mp3,audio/*" class="hidden">
+    
 <script type="module">
-    // --- IMPORTS Y CONFIGURACIÓN DE FIREBASE ---
-    // --- Firebase ha sido eliminado ---
-
     // --- CONFIGURACIÓN DE TEMAS ---
     const themes = {
         basico: { '--font-main': "'Inter', sans-serif", '--bg-primary': '#111827', '--bg-secondary': '#1f2937', '--bg-tertiary': '#374151', '--bg-padding': '#0f172a', '--text-primary': '#F9FAFB', '--text-secondary': '#9ca3af', '--accent-primary': '#FBBF24', '--accent-primary-hover': '#F59E0B', '--day-selected': '#1D4ED8', '--day-current-border': '#FBBF24' },
@@ -333,18 +308,15 @@
     };
 
     // --- CONFIGURACIÓN DE CANCIONES Y TEMAS MENSUALES ---
-    // --- INICIO DE LA MODIFICACIÓN: Lista de canciones actualizada ---
-    // --- CORRECCIÓN: Se codifican las URLs para evitar errores con espacios y caracteres especiales ---
     const defaultSongs = [
-        { title: "Life Is a Highway", artist: "Rascal Flatts", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Rascal%20Flatts%20-%20Life%20Is%20a%20Highway%20.mp3", clue: "Una canción clásica sobre la carretera." },
-        { title: "Lonely", artist: "Imagine Dragons", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Imagine%20Dragons%20-%20Lonely(Traducida%20al%20Espa%C3%B1ol).mp3", clue: "Una canción de una banda moderna popular." },
-        { title: "Faint", artist: "Linkin Park", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Faint%20Linkin%20Park.mp3", clue: "Un himno de nu-metal." },
-        { title: "Secrets", artist: "OneRepublic", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20OneRepublic%20Secrets%20.mp3", clue: "Perfecta para guardar un secreto." },
-        { title: "Can't Feel My Face", artist: "The Weeknd", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Can%27t%20Feel%20My%20Face.mp3", clue: "No puedo sentir mi cara..." },
-        { title: "Dracula", artist: "Tame Impala", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Tame%20Impala%20-%20Dracula%20.mp3", clue: "Un título... ¿chupasangre?" },
-        { title: "Ride It", artist: "Jay Sean", src: "https://liardi27.github.io/DesingInterfaces/App3/Musica/Rascal%20Flatts%20-%20Jay%20Sean%20-%20Ride%20It%20.mp3", clue: "Un clásico de R&B." }
+        { title: "Secrets", artist: "OneRepublic", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", clue: "Perfecta para guardar un secreto." },
+        { title: "Can't Feel My Face", artist: "The Weeknd", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", clue: "No puedo sentir mi cara..." },
+        { title: "Lonely (Traducida)", artist: "Imagine Dragons", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", clue: "Una canción de una banda moderna popular." },
+        { title: "Ride It", artist: "Jay Sean", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", clue: "Un clásico de R&B." },
+        { title: "Faint", artist: "Linkin Park", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", clue: "Un himno de nu-metal." },
+        { title: "Life Is a Highway", artist: "Rascal Flatts", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", clue: "Una canción clásica sobre la carretera." },
+        { title: "Dracula", artist: "Tame Impala", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", clue: "Un título... ¿chupasangre?" }
     ];
-    // --- FIN DE LA MODIFICACIÓN ---
     
     const monthlyThemes = {
         9: { // Octubre (0-indexed)
@@ -355,19 +327,15 @@
     
     // --- CONFIGURACIÓN DE LOGROS ---
     const achievements = {
-        // ICONOS CAMBIADOS (Font Awesome)
         WEEK_STREAK: { id: 'WEEK_STREAK', name: '¡Racha Semanal!', description: 'Escuchaste música 7 días seguidos.', icon: 'fa-solid fa-calendar-check' },
         MONTH_STREAK: { id: 'MONTH_STREAK', name: '¡Melómano Mensual!', description: 'Escuchaste música 30 días seguidos.', icon: 'fa-solid fa-trophy' },
         ROCKTOBER_COMPLETE: { id: 'ROCKTOBER_COMPLETE', name: 'Leyenda del Rock', description: '¡Escuchaste todas las canciones de Rocktubre!', icon: 'fa-solid fa-guitar' },
     };
 
     // --- CONFIGURACIÓN DE OBJETOS PARA EL MONIGOTE ---
-    // MODIFICADO: Cambiado de "YYYY-MM-DD" a solo el número del día (1-31)
-    // para que los desbloqueos funcionen en cualquier mes.
-    // ¡TODOS LOS ICONOS CAMBIADOS A FONT AWESOME!
     const dailyItems = {
         1: { id: "sunglasses", name: "Gafas de Sol", icon: "fa-solid fa-glasses", type: "head" },
-        2: { id: "pumpkin-head", name: "Calabaza Halloween", icon: "fa-solid fa-face-grin-squint", type: "head" }, // No hay calabaza, usamos una cara
+        2: { id: "pumpkin-head", name: "Calabaza Halloween", icon: "fa-solid fa-face-grin-squint", type: "head" },
         3: { id: "ghost-costume", name: "Disfraz de Fantasma", icon: "fa-solid fa-ghost", type: "body" },
         4: { id: "wizard-hat", name: "Sombrero de Mago", icon: "fa-solid fa-hat-wizard", type: "head" },
         5: { id: "tie", name: "Corbata Elegante", icon: "fa-solid fa-user-tie", type: "body" },
@@ -376,17 +344,17 @@
         8: { id: "crown", name: "Corona de Rey", icon: "fa-solid fa-crown", type: "head" },
         9: { id: "scarf", name: "Bufanda Cálida", icon: "fa-solid fa-scarf", type: "neck" },
         10: { id: "backpack", name: "Mochila Aventurera", icon: "fa-solid fa-backpack", type: "back" },
-        11: { id: "mustache", name: "Bigote Falso", icon: "fa-solid fa-user-secret", type: "face" }, // No hay bigote solo
+        11: { id: "mustache", name: "Bigote Falso", icon: "fa-solid fa-user-secret", type: "face" },
         12: { id: "flower-hat", name: "Sombrero de Flor", icon: "fa-solid fa-flower", type: "head" },
         13: { id: "guitar", name: "Guitarra Eléctrica", icon: "fa-solid fa-guitar", type: "hand-right" },
-        14: { id: "bow-tie", name: "Pajarita", icon: "fa-solid fa-user-tie", type: "neck" }, // Re-usamos corbata
+        14: { id: "bow-tie", name: "Pajarita", icon: "fa-solid fa-user-tie", type: "neck" },
         15: { id: "chef-hat", name: "Gorro de Chef", icon: "fa-solid fa-hat-chef", type: "head" },
         16: { id: "pirate-patch", name: "Parche Pirata", icon: "fa-solid fa-eye-slash", type: "face" },
         17: { id: "feather-boa", name: "Boa de Plumas", icon: "fa-solid fa-feather", type: "neck" },
         18: { id: "camera", name: "Cámara de Fotos", icon: "fa-solid fa-camera", type: "hand-left" },
-        19: { id: "party-hat", name: "Sombrero de Fiesta", icon: "fa-solid fa-cake-candles", type: "head" }, // No hay cono de fiesta
-        20: { id: "angel-wings", name: "Alas de Ángel", icon: "fa-solid fa-dove", type: "back" }, // No hay alas
-        21: { id: "devil-horns", name: "Cuernos de Diablo", icon: "fa-solid fa-user-ninja", type: "head" }, // No hay cuernos
+        19: { id: "party-hat", name: "Sombrero de Fiesta", icon: "fa-solid fa-cake-candles", type: "head" },
+        20: { id: "angel-wings", name: "Alas de Ángel", icon: "fa-solid fa-dove", type: "back" },
+        21: { id: "devil-horns", name: "Cuernos de Diablo", icon: "fa-solid fa-user-ninja", type: "head" },
         22: { id: "microphone", name: "Micrófono", icon: "fa-solid fa-microphone", type: "hand-right" },
         23: { id: "lab-coat", name: "Bata de Científico", icon: "fa-solid fa-flask", type: "body" },
         24: { id: "detective-hat", name: "Gorro de Detective", icon: "fa-solid fa-magnifying-glass", type: "head" },
@@ -395,15 +363,17 @@
         27: { id: "superhero-mask", name: "Máscara de Héroe", icon: "fa-solid fa-user-secret", type: "face" },
         28: { id: "fez-hat", name: "Gorro Fez", icon: "fa-solid fa-graduation-cap", type: "head" },
         29: { id: "propeller-hat", name: "Gorro Hélice", icon: "fa-solid fa-paper-plane", type: "head" },
-        30: { id: "viking-helmet", name: "Casco Vikingo", icon: "fa-solid fa-shield-halved", type: "head" }, // No hay casco vikingo
+        30: { id: "viking-helmet", name: "Casco Vikingo", icon: "fa-solid fa-shield-halved", type: "head" },
         31: { id: "witch-hat", name: "Sombrero de Bruja", icon: "fa-solid fa-cat", type: "head" }
     };
 
 
     let nav = 0, selectedDate = null, currentPlaylist = [], currentPlaylistIndex = 0;
-    // let app, auth, db, userId; // <-- Firebase eliminado
-    let unlockedItems = []; // Array para almacenar los IDs de los objetos desbloqueados
-    let selectedItem = "none"; // Objeto actualmente equipado por el monigote
+    let unlockedItems = []; 
+    let selectedItem = "none"; 
+    
+    // NUEVO: Variable para el URL del objeto local
+    let currentObjectURL = null; 
 
     // --- DOM ELEMENTS ---
     const calendar = document.getElementById('calendar');
@@ -422,12 +392,14 @@
     const itemUnlockMessage = document.getElementById('item-unlock-message');
     let animationFrameId;
 
+    // NUEVOS DOM ELEMENTS
+    const mp3FileInput = document.getElementById('mp3-file-input');
+
     // --- THEME & ANIMATION LOGIC ---
     function applyTheme(themeName) {
         const theme = themes[themeName] || themes.basico;
         const root = document.documentElement;
         Object.entries(theme).forEach(([key, value]) => root.style.setProperty(key, value));
-        // Check if theme-switcher exists before setting its value
         const themeSwitcher = document.getElementById('theme-switcher');
         if (themeSwitcher) {
             themeSwitcher.value = themeName;
@@ -503,67 +475,55 @@
 
         // --- Dibuja los objetos del monigote ---
         
-        // --- INICIO DE LA CORRECCIÓN TOTAL ---
-        // Se elimina toda la lógica de "preview" (dailyItemForDate).
-        // El monigote AHORA SOLO dibuja lo que está en 'selectedItem'.
-
-        // 1. Encontrar el objeto seleccionado en el armario
         const equippedItem = Object.values(dailyItems).find(i => i.id === selectedItem);
-
-        // 2. Decidir qué dibujar
         let itemToDraw = null;
         if (selectedItem !== "none" && equippedItem) {
-            itemToDraw = equippedItem; // Solo dibujar el item equipado
+            itemToDraw = equippedItem; 
         }
-        // Si selectedItem es "none", itemToDraw permanece 'null' y no se dibuja nada.
-        // --- FIN DE LA CORRECCIÓN TOTAL ---
-
 
         if (itemToDraw) {
             danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary');
-            danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover'); // Usar un color ligeramente diferente para el borde
-            danceCtx.lineWidth = 2; // Un borde más fino para los objetos
+            danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover'); 
+            danceCtx.lineWidth = 2; 
 
             // Dibuja el objeto según su ID (simplificado)
             switch (itemToDraw.id) {
-                case "sunglasses": // Gafas de sol
-                    danceCtx.fillRect(baseX - 15, headY - 5, 30, 8); // Puente
+                case "sunglasses": 
+                    danceCtx.fillRect(baseX - 15, headY - 5, 30, 8); 
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX - 8, headY -1, 6, 0, Math.PI * 2); // Lente izq
-                    danceCtx.stroke(); // Dibujar borde
-                    danceCtx.fill();   // Rellenar
+                    danceCtx.arc(baseX - 8, headY -1, 6, 0, Math.PI * 2); 
+                    danceCtx.stroke(); 
+                    danceCtx.fill();   
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX + 8, headY - 1, 6, 0, Math.PI * 2); // Lente der
+                    danceCtx.arc(baseX + 8, headY - 1, 6, 0, Math.PI * 2); 
                     danceCtx.stroke();
                     danceCtx.fill();
                     break;
-                case "pumpkin-head": // Calabaza (cubre la cabeza)
+                case "pumpkin-head": 
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX, headY, 20, 0, Math.PI * 2); // Calabaza grande
+                    danceCtx.arc(baseX, headY, 20, 0, Math.PI * 2); 
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Detalles de calabaza (ojos, boca) - más simples
-                    danceCtx.fillStyle = 'black'; // Color negro para detalles
-                    danceCtx.fillRect(baseX - 10, headY - 8, 5, 5); // Ojo izq
-                    danceCtx.fillRect(baseX + 5, headY - 8, 5, 5); // Ojo der
-                    danceCtx.beginPath(); // Boca simple
+                    danceCtx.fillStyle = 'black'; 
+                    danceCtx.fillRect(baseX - 10, headY - 8, 5, 5); 
+                    danceCtx.fillRect(baseX + 5, headY - 8, 5, 5); 
+                    danceCtx.beginPath(); 
                     danceCtx.moveTo(baseX - 10, headY + 5);
                     danceCtx.lineTo(baseX + 10, headY + 5);
                     danceCtx.lineWidth = 2;
                     danceCtx.stroke();
-                    danceCtx.lineWidth = 3; // Restaurar grosor de línea
+                    danceCtx.lineWidth = 3; 
                     break;
-                case "ghost-costume": // Fantasma (cubre el cuerpo)
+                case "ghost-costume": 
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX - 30, shoulderY - 10);
                     danceCtx.lineTo(baseX + 30, shoulderY - 10);
-                    danceCtx.lineTo(baseX + 25, footY + 15); // Más bajo
-                    danceCtx.lineTo(baseX, footY + 10); // Pico central
+                    danceCtx.lineTo(baseX + 25, footY + 15); 
+                    danceCtx.lineTo(baseX, footY + 10); 
                     danceCtx.lineTo(baseX - 25, footY + 15);
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Ojos del fantasma
                     danceCtx.fillStyle = 'black';
                     danceCtx.beginPath();
                     danceCtx.arc(baseX - 7, headY - 3, 4, 0, Math.PI * 2);
@@ -572,25 +532,25 @@
                     danceCtx.arc(baseX + 7, headY - 3, 4, 0, Math.PI * 2);
                     danceCtx.fill();
                    break;
-                case "wizard-hat": // Sombrero de Mago
+                case "wizard-hat": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 25, headY - 10); // Base ancha
+                    danceCtx.moveTo(baseX - 25, headY - 10); 
                     danceCtx.lineTo(baseX + 25, headY - 10);
-                    danceCtx.lineTo(baseX, headY - 45); // Punta alta
+                    danceCtx.lineTo(baseX, headY - 45); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                case "tie": // Corbata
+                case "tie": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 4, shoulderY); // Nudo
+                    danceCtx.moveTo(baseX - 4, shoulderY); 
                     danceCtx.lineTo(baseX + 4, shoulderY);
                     danceCtx.lineTo(baseX + 4, shoulderY + 8);
                     danceCtx.lineTo(baseX - 4, shoulderY + 8);
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    danceCtx.beginPath(); // Parte larga
+                    danceCtx.beginPath(); 
                     danceCtx.moveTo(baseX, shoulderY + 8);
                     danceCtx.lineTo(baseX + 6, hipY - 5);
                     danceCtx.lineTo(baseX, hipY);
@@ -599,46 +559,40 @@
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                case "headphones": // Auriculares
+                case "headphones": 
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX, headY - 15, 20, Math.PI, 0); // Diadema
+                    danceCtx.arc(baseX, headY - 15, 20, Math.PI, 0); 
                     danceCtx.stroke();
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX - 15, headY, 7, 0, Math.PI * 2); // Auricular izq (más grande)
+                    danceCtx.arc(baseX - 15, headY, 7, 0, Math.PI * 2); 
                     danceCtx.fill();
                     danceCtx.stroke();
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX + 15, headY, 7, 0, Math.PI * 2); // Auricular der
+                    danceCtx.arc(baseX + 15, headY, 7, 0, Math.PI * 2); 
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                case "cape": // Capa (detrás del cuerpo)
-                    // Dibujar la capa primero para que quede detrás
+                case "cape": 
                     danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary');
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover');
                     danceCtx.lineWidth = 2;
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 15, shoulderY); // Atado al cuello/hombros
-                    danceCtx.lineTo(baseX - 40, footY + 10); // Cae más ancho
-                    danceCtx.quadraticCurveTo(baseX, footY + 20, baseX + 40, footY + 10); // Curva inferior
+                    danceCtx.moveTo(baseX - 15, shoulderY); 
+                    danceCtx.lineTo(baseX - 40, footY + 10); 
+                    danceCtx.quadraticCurveTo(baseX, footY + 20, baseX + 40, footY + 10); 
                     danceCtx.lineTo(baseX + 15, shoulderY);
-                    // No cerrar aquí para que el cuello quede abierto
-                    danceCtx.lineTo(baseX - 15, shoulderY); // Conectar al inicio
+                    danceCtx.lineTo(baseX - 15, shoulderY); 
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Restaurar colores y grosor para el monigote
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
                     danceCtx.lineWidth = 3;
-                    // Redibujar cuerpo y cabeza encima de la capa
-                    danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke(); // Cuerpo
-                    danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke(); // Cabeza
-                    // Brazos y piernas (ya dibujados antes, podrían necesitar redibujarse si la capa los tapa mucho)
-                    break; // Salir aquí porque ya hemos gestionado el dibujo de la capa y el cuerpo
-                case "crown": // Corona
+                    danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke(); 
+                    danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke(); 
+                    break; 
+                case "crown": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 15, headY - 15); // Base
+                    danceCtx.moveTo(baseX - 15, headY - 15); 
                     danceCtx.lineTo(baseX + 15, headY - 15);
-                    // Picos
                     danceCtx.lineTo(baseX + 15, headY - 25);
                     danceCtx.lineTo(baseX + 10, headY - 20);
                     danceCtx.lineTo(baseX + 5, headY - 25);
@@ -650,116 +604,104 @@
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                case "scarf": // Bufanda
+                case "scarf": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 18, shoulderY + 5); // Empieza más a la izquierda
-                    danceCtx.quadraticCurveTo(baseX, shoulderY + 15, baseX + 18, shoulderY + 5); // Curva sobre el pecho
-                    danceCtx.lineTo(baseX + 10, hipY - 10); // Cae hacia abajo a la derecha
-                    danceCtx.lineTo(baseX + 5, hipY - 5); // Grosor
-                    danceCtx.lineTo(baseX - 10, shoulderY + 12); // Vuelve hacia arriba
+                    danceCtx.moveTo(baseX - 18, shoulderY + 5); 
+                    danceCtx.quadraticCurveTo(baseX, shoulderY + 15, baseX + 18, shoulderY + 5); 
+                    danceCtx.lineTo(baseX + 10, hipY - 10); 
+                    danceCtx.lineTo(baseX + 5, hipY - 5); 
+                    danceCtx.lineTo(baseX - 10, shoulderY + 12); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                case "backpack": // Mochila (detrás del cuerpo)
-                    // Dibujar mochila primero
+                case "backpack": 
                     danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary');
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover');
                     danceCtx.lineWidth = 2;
-                    danceCtx.fillRect(baseX - 15, shoulderY + 5, 30, 35); // Rectángulo principal
+                    danceCtx.fillRect(baseX - 15, shoulderY + 5, 30, 35); 
                     danceCtx.strokeRect(baseX - 15, shoulderY + 5, 30, 35);
-                    // Correas simples
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX - 15, shoulderY + 8);
-                    danceCtx.lineTo(baseX - 5, shoulderY - 5); // Va hacia el hombro izq
+                    danceCtx.lineTo(baseX - 5, shoulderY - 5); 
                     danceCtx.moveTo(baseX + 15, shoulderY + 8);
-                    danceCtx.lineTo(baseX + 5, shoulderY - 5); // Va hacia el hombro der
+                    danceCtx.lineTo(baseX + 5, shoulderY - 5); 
                     danceCtx.stroke();
-                    // Restaurar y redibujar cuerpo/cabeza
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
                     danceCtx.lineWidth = 3;
                     danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke();
                     danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke();
-                    break; // Salir, cuerpo redibujado
-                case "mustache": // Bigote
+                    break; 
+                case "mustache": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 12, headY + 5); // Izquierda
-                    danceCtx.quadraticCurveTo(baseX - 6, headY + 12, baseX, headY + 7); // Curva hacia el centro
-                    danceCtx.quadraticCurveTo(baseX + 6, headY + 12, baseX + 12, headY + 5); // Curva hacia la derecha
+                    danceCtx.moveTo(baseX - 12, headY + 5); 
+                    danceCtx.quadraticCurveTo(baseX - 6, headY + 12, baseX, headY + 7); 
+                    danceCtx.quadraticCurveTo(baseX + 6, headY + 12, baseX + 12, headY + 5); 
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                // --- Añadir casos para los nuevos objetos ---
-                case "flower-hat": // Sombrero de flor
-                    // Base del sombrero (círculo pequeño)
+                case "flower-hat": 
                     danceCtx.beginPath();
                     danceCtx.arc(baseX, headY - 15, 10, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Pétalos alrededor
                     for (let i = 0; i < 6; i++) {
                         const angle = (i / 6) * Math.PI * 2;
                         const petalX = baseX + Math.cos(angle) * 15;
                         const petalY = headY - 15 + Math.sin(angle) * 15;
                         danceCtx.beginPath();
                         danceCtx.arc(petalX, petalY, 6, 0, Math.PI * 2);
-                        danceCtx.fillStyle = 'white'; // Color diferente para pétalos
+                        danceCtx.fillStyle = 'white'; 
                         danceCtx.fill();
                         danceCtx.stroke();
                     }
-                    danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary'); // Restaurar color
+                    danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary'); 
                    break;
-                case "guitar": // Guitarra (mano derecha)
-                    // Mástil
+                case "guitar": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX + 20, shoulderY + 10); // Cerca del hombro
-                    danceCtx.lineTo(baseX + 25, headY - 10); // Hacia arriba
-                    danceCtx.lineWidth = 4; // Mástil más grueso
+                    danceCtx.moveTo(baseX + 20, shoulderY + 10); 
+                    danceCtx.lineTo(baseX + 25, headY - 10); 
+                    danceCtx.lineWidth = 4; 
                     danceCtx.stroke();
-                    danceCtx.lineWidth = 2; // Restaurar grosor borde
-                    // Cuerpo de la guitarra (forma simple de 8)
+                    danceCtx.lineWidth = 2; 
                     danceCtx.beginPath();
-                    danceCtx.ellipse(baseX + 30, shoulderY + 35, 12, 18, Math.PI / 4, 0, Math.PI * 2); // Parte inferior
+                    danceCtx.ellipse(baseX + 30, shoulderY + 35, 12, 18, Math.PI / 4, 0, Math.PI * 2); 
                     danceCtx.fill();
                     danceCtx.stroke();
                     danceCtx.beginPath();
-                    danceCtx.ellipse(baseX + 25, shoulderY + 15, 8, 12, Math.PI / 4, 0, Math.PI * 2); // Parte superior
+                    danceCtx.ellipse(baseX + 25, shoulderY + 15, 8, 12, Math.PI / 4, 0, Math.PI * 2); 
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Mano sobre el mástil (simplificado)
                     danceCtx.beginPath();
                     danceCtx.arc(baseX + 22, shoulderY + 15, 5, 0, Math.PI * 2);
-                    danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary'); // Color del monigote
+                    danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary'); 
                     danceCtx.fill();
                    break;
-                case "bow-tie": // Pajarita
+                case "bow-tie": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 10, shoulderY + 5); // Lazo izquierdo
+                    danceCtx.moveTo(baseX - 10, shoulderY + 5); 
                     danceCtx.lineTo(baseX, shoulderY);
                     danceCtx.lineTo(baseX, shoulderY + 10);
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX + 10, shoulderY + 5); // Lazo derecho
+                    danceCtx.moveTo(baseX + 10, shoulderY + 5); 
                     danceCtx.lineTo(baseX, shoulderY);
                     danceCtx.lineTo(baseX, shoulderY + 10);
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    danceCtx.beginPath(); // Nudo central
+                    danceCtx.beginPath(); 
                     danceCtx.arc(baseX, shoulderY + 5, 3, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
                     break;
-                case "chef-hat": // Gorro de chef
-                   // Base cilíndrica
+                case "chef-hat": 
                    danceCtx.fillRect(baseX - 15, headY - 15, 30, 10);
                    danceCtx.strokeRect(baseX - 15, headY - 15, 30, 10);
-                   // Parte superior abombada
                    danceCtx.beginPath();
-                   danceCtx.arc(baseX, headY - 25, 20, Math.PI, 0); // Arco superior
-                   // Lados curvos
+                   danceCtx.arc(baseX, headY - 25, 20, Math.PI, 0); 
                    danceCtx.quadraticCurveTo(baseX + 25, headY - 15, baseX + 15, headY - 15);
                    danceCtx.lineTo(baseX - 15, headY - 15);
                    danceCtx.quadraticCurveTo(baseX - 25, headY - 15, baseX - 20, headY - 25);
@@ -767,71 +709,65 @@
                    danceCtx.fill();
                    danceCtx.stroke();
                     break;
-                case "pirate-patch": // Parche pirata
+                case "pirate-patch": 
                     danceCtx.beginPath();
-                    danceCtx.ellipse(baseX - 8, headY, 7, 5, 0, 0, Math.PI * 2); // Parche ovalado
-                    danceCtx.fillStyle = 'black'; // Negro
+                    danceCtx.ellipse(baseX - 8, headY, 7, 5, 0, 0, Math.PI * 2); 
+                    danceCtx.fillStyle = 'black'; 
                     danceCtx.fill();
-                    danceCtx.beginPath(); // Tira
+                    danceCtx.beginPath(); 
                     danceCtx.moveTo(baseX - 15, headY - 3);
                     danceCtx.lineTo(baseX + 15, headY - 3);
                     danceCtx.strokeStyle = 'black';
                     danceCtx.lineWidth = 1;
                     danceCtx.stroke();
-                    danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover'); // Restaurar
-                    danceCtx.lineWidth = 2; // Restaurar
+                    danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover'); 
+                    danceCtx.lineWidth = 2; 
                    break;
-                // ... Resto de casos ...
-                case "feather-boa": // Boa de plumas
-                    // Dibujar varios círculos superpuestos alrededor del cuello
+                case "feather-boa": 
                     for (let i = 0; i < 10; i++) {
                         const angle = (i / 10) * Math.PI * 2;
-                        const boaX = baseX + Math.cos(angle) * 15; // Cerca del cuello
-                        const boaY = shoulderY + 5 + Math.sin(angle) * 8; // Un poco más abajo
-                        const radius = 4 + Math.random() * 3; // Tamaños variados
+                        const boaX = baseX + Math.cos(angle) * 15; 
+                        const boaY = shoulderY + 5 + Math.sin(angle) * 8; 
+                        const radius = 4 + Math.random() * 3; 
                         danceCtx.beginPath();
                         danceCtx.arc(boaX, boaY, radius, 0, Math.PI * 2);
                         danceCtx.fill();
-                        // danceCtx.stroke(); // Opcional: borde para cada "pluma"
                     }
                    break;
-                case "camera": // Cámara de fotos (mano izquierda)
-                    const camX = baseX - 25 - lArmAngle - 10; // Posición de la mano izq
+                case "camera": 
+                    const camX = baseX - 25 - lArmAngle - 10; 
                     const camY = shoulderY + 20;
-                    danceCtx.fillRect(camX - 10, camY - 8, 20, 16); // Cuerpo cámara
+                    danceCtx.fillRect(camX - 10, camY - 8, 20, 16); 
                     danceCtx.strokeRect(camX - 10, camY - 8, 20, 16);
-                    danceCtx.beginPath(); // Lente
+                    danceCtx.beginPath(); 
                     danceCtx.arc(camX, camY, 6, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
-                    danceCtx.fillRect(camX - 2, camY - 12, 4, 4); // Flash/Visor
+                    danceCtx.fillRect(camX - 2, camY - 12, 4, 4); 
                    break;
-                case "party-hat": // Sombrero de fiesta (cono)
+                case "party-hat": 
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 12, headY - 5); // Base
+                    danceCtx.moveTo(baseX - 12, headY - 5); 
                     danceCtx.lineTo(baseX + 12, headY - 5);
-                    danceCtx.lineTo(baseX, headY - 35); // Punta
+                    danceCtx.lineTo(baseX, headY - 35); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    danceCtx.beginPath(); // Pompón
+                    danceCtx.beginPath(); 
                     danceCtx.arc(baseX, headY - 37, 3, 0, Math.PI * 2);
                     danceCtx.fill();
                    break;
-                case "angel-wings": // Alas de ángel (detrás)
-                    // Dibujar alas primero
-                    danceCtx.fillStyle = 'white'; // Blancas
-                    danceCtx.strokeStyle = '#ddd'; // Borde gris claro
+                case "angel-wings": 
+                    danceCtx.fillStyle = 'white'; 
+                    danceCtx.strokeStyle = '#ddd'; 
                     danceCtx.lineWidth = 1;
-                    // Ala izquierda
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 5, shoulderY); // Cerca del hombro
-                    danceCtx.quadraticCurveTo(baseX - 40, shoulderY - 20, baseX - 50, shoulderY + 10); // Curva superior
-                    danceCtx.quadraticCurveTo(baseX - 35, shoulderY + 30, baseX - 5, shoulderY + 10); // Curva inferior
+                    danceCtx.moveTo(baseX - 5, shoulderY); 
+                    danceCtx.quadraticCurveTo(baseX - 40, shoulderY - 20, baseX - 50, shoulderY + 10); 
+                    danceCtx.quadraticCurveTo(baseX - 35, shoulderY + 30, baseX - 5, shoulderY + 10); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Ala derecha
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX + 5, shoulderY);
                     danceCtx.quadraticCurveTo(baseX + 40, shoulderY - 20, baseX + 50, shoulderY + 10);
@@ -839,192 +775,170 @@
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Restaurar y redibujar cuerpo/cabeza
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
                     danceCtx.lineWidth = 3;
                     danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke();
                     danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke();
-                   break; // Salir
-                case "devil-horns": // Cuernos de diablo
-                    danceCtx.fillStyle = 'red'; // Rojos
-                    danceCtx.strokeStyle = 'darkred'; // Borde oscuro
-                    // Cuerno izquierdo
+                   break; 
+                case "devil-horns": 
+                    danceCtx.fillStyle = 'red'; 
+                    danceCtx.strokeStyle = 'darkred'; 
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX - 8, headY - 15);
-                    danceCtx.quadraticCurveTo(baseX - 15, headY - 30, baseX - 5, headY - 25); // Curvado
+                    danceCtx.quadraticCurveTo(baseX - 15, headY - 30, baseX - 5, headY - 25); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Cuerno derecho
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX + 8, headY - 15);
-                    danceCtx.quadraticCurveTo(baseX + 15, headY - 30, baseX + 5, headY - 25); // Curvado
+                    danceCtx.quadraticCurveTo(baseX + 15, headY - 30, baseX + 5, headY - 25); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
                    break;
-                case "microphone": // Micrófono (mano derecha)
-                    const micX = baseX + 25 + rArmAngle + 5; // Posición mano der
+                case "microphone": 
+                    const micX = baseX + 25 + rArmAngle + 5; 
                     const micY = shoulderY + 20;
-                    danceCtx.fillStyle = 'gray'; // Mango gris
-                    danceCtx.fillRect(micX - 3, micY, 6, 15); // Mango
+                    danceCtx.fillStyle = 'gray'; 
+                    danceCtx.fillRect(micX - 3, micY, 6, 15); 
                     danceCtx.strokeRect(micX - 3, micY, 6, 15);
-                    danceCtx.fillStyle = 'darkgray'; // Cabeza más oscura
-                    danceCtx.beginPath(); // Cabeza redonda
+                    danceCtx.fillStyle = 'darkgray'; 
+                    danceCtx.beginPath(); 
                     danceCtx.arc(micX, micY, 5, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
                    break;
-                case "lab-coat": // Bata de laboratorio (cubre cuerpo)
-                    danceCtx.fillStyle = 'white'; // Blanca
-                    danceCtx.strokeStyle = '#ccc'; // Borde gris claro
+                case "lab-coat": 
+                    danceCtx.fillStyle = 'white'; 
+                    danceCtx.strokeStyle = '#ccc'; 
                     danceCtx.lineWidth = 1;
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 20, shoulderY); // Hombro izq
-                    danceCtx.lineTo(baseX - 20, footY); // Baja recto
-                    danceCtx.lineTo(baseX + 20, footY); // Base
-                    danceCtx.lineTo(baseX + 20, shoulderY); // Sube recto
-                    // Solapas simples
+                    danceCtx.moveTo(baseX - 20, shoulderY); 
+                    danceCtx.lineTo(baseX - 20, footY); 
+                    danceCtx.lineTo(baseX + 20, footY); 
+                    danceCtx.lineTo(baseX + 20, shoulderY); 
                     danceCtx.lineTo(baseX + 5, shoulderY);
                     danceCtx.lineTo(baseX + 10, shoulderY + 15);
                     danceCtx.lineTo(baseX - 10, shoulderY + 15);
                     danceCtx.lineTo(baseX - 5, shoulderY);
-                    danceCtx.closePath(); // Cierra en hombro izq
+                    danceCtx.closePath(); 
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Restaurar
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
                     danceCtx.lineWidth = 3;
-                    // <!--- INICIO DE LA CORRECCIÓN ---
-                    danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke(); // Redibujar cuerpo
-                    // <!--- FIN DE LA CORRECCIÓN ---
-                    danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke(); // Redibujar cabeza
-                   break; // Salir
-                case "detective-hat": // Gorro de detective
-                    danceCtx.fillStyle = '#a0522d'; // Marrón
-                    danceCtx.strokeStyle = '#8b4513'; // Marrón oscuro
-                    // Base del sombrero (ala)
+                    danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke(); 
+                    danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke(); 
+                   break; 
+                case "detective-hat": 
+                    danceCtx.fillStyle = '#a0522d'; 
+                    danceCtx.strokeStyle = '#8b4513';
                     danceCtx.beginPath();
                     danceCtx.ellipse(baseX, headY - 8, 22, 6, 0, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Parte superior
                     danceCtx.beginPath();
-                    danceCtx.ellipse(baseX, headY - 15, 15, 8, 0, Math.PI, 0); // Media elipse superior
-                    danceCtx.lineTo(baseX - 15, headY - 15); // Conectar a la base
+                    danceCtx.ellipse(baseX, headY - 15, 15, 8, 0, Math.PI, 0); 
+                    danceCtx.lineTo(baseX - 15, headY - 15); 
                     danceCtx.fill();
                     danceCtx.stroke();
                    break;
-                case "ballet-skirt": // Falda de ballet (tutú)
+                case "ballet-skirt": 
                     danceCtx.fillStyle = 'pink';
                     danceCtx.strokeStyle = 'deeppink';
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 20, hipY); // Lado izquierdo cadera
-                    // Ondas del tutú
+                    danceCtx.moveTo(baseX - 20, hipY); 
                     danceCtx.quadraticCurveTo(baseX - 15, hipY + 15, baseX, hipY + 10);
-                    danceCtx.quadraticCurveTo(baseX + 15, hipY + 15, baseX + 20, hipY); // Lado derecho cadera
+                    danceCtx.quadraticCurveTo(baseX + 15, hipY + 15, baseX + 20, hipY); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
                    break;
-                case "football-helmet": // Casco de fútbol
-                    danceCtx.fillStyle = 'blue'; // Color del equipo
+                case "football-helmet": 
+                    danceCtx.fillStyle = 'blue'; 
                     danceCtx.strokeStyle = 'darkblue';
-                    // Casco principal
                     danceCtx.beginPath();
                     danceCtx.arc(baseX, headY, 18, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Barra protectora
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX - 15, headY + 5);
                     danceCtx.lineTo(baseX - 15, headY + 15);
                     danceCtx.lineTo(baseX + 15, headY + 15);
                     danceCtx.lineTo(baseX + 15, headY + 5);
-                    danceCtx.strokeStyle = 'white'; // Blanca
+                    danceCtx.strokeStyle = 'white'; 
                     danceCtx.lineWidth = 3;
                     danceCtx.stroke();
-                    danceCtx.lineWidth = 2; // Restaurar
+                    danceCtx.lineWidth = 2; 
                    break;
-                case "superhero-mask": // Máscara de héroe
-                    danceCtx.fillStyle = 'black'; // Negra
+                case "superhero-mask": 
+                    danceCtx.fillStyle = 'black'; 
                     danceCtx.beginPath();
-                    // Forma alrededor de los ojos
                     danceCtx.moveTo(baseX - 18, headY - 8);
-                    danceCtx.quadraticCurveTo(baseX, headY - 12, baseX + 18, headY - 8); // Curva superior
-                    danceCtx.lineTo(baseX + 15, headY + 2); // Baja
-                    danceCtx.quadraticCurveTo(baseX, headY + 8, baseX - 15, headY + 2); // Curva inferior sobre nariz
+                    danceCtx.quadraticCurveTo(baseX, headY - 12, baseX + 18, headY - 8); 
+                    danceCtx.lineTo(baseX + 15, headY + 2); 
+                    danceCtx.quadraticCurveTo(baseX, headY + 8, baseX - 15, headY + 2); 
                     danceCtx.closePath();
                     danceCtx.fill();
                    break;
-                case "fez-hat": // Gorro Fez
+                case "fez-hat": 
                     danceCtx.fillStyle = 'darkred';
                     danceCtx.strokeStyle = 'black';
-                    // Base del Fez (cilindro truncado)
                     danceCtx.beginPath();
-                    danceCtx.ellipse(baseX, headY - 5, 15, 4, 0, 0, Math.PI * 2); // Elipse inferior (base)
-                    danceCtx.moveTo(baseX - 15, headY - 5); // Lado izq
-                    danceCtx.lineTo(baseX - 10, headY - 20); // Sube inclinado
-                    danceCtx.ellipse(baseX, headY - 20, 10, 3, 0, Math.PI, 0); // Elipse superior (media)
-                    danceCtx.lineTo(baseX + 15, headY - 5); // Lado der
+                    danceCtx.ellipse(baseX, headY - 5, 15, 4, 0, 0, Math.PI * 2); 
+                    danceCtx.moveTo(baseX - 15, headY - 5); 
+                    danceCtx.lineTo(baseX - 10, headY - 20); 
+                    danceCtx.ellipse(baseX, headY - 20, 10, 3, 0, Math.PI, 0); 
+                    danceCtx.lineTo(baseX + 15, headY - 5); 
                     danceCtx.fill();
                     danceCtx.stroke();
-                     // Borla
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX, headY - 20); // Centro superior
-                    danceCtx.lineTo(baseX + 8, headY - 10); // Cae hacia la derecha
+                    danceCtx.moveTo(baseX, headY - 20); 
+                    danceCtx.lineTo(baseX + 8, headY - 10); 
                     danceCtx.stroke();
-                    danceCtx.beginPath(); // Pompón de la borla
+                    danceCtx.beginPath(); 
                     danceCtx.arc(baseX + 8, headY - 10, 3, 0, Math.PI * 2);
                     danceCtx.fillStyle = 'black';
                     danceCtx.fill();
                    break;
-                case "propeller-hat": // Gorro Hélice
-                    danceCtx.fillStyle = 'lightblue'; // Gorro azul claro
+                case "propeller-hat": 
+                    danceCtx.fillStyle = 'lightblue'; 
                     danceCtx.strokeStyle = 'blue';
-                    // Casco base (semicírculo)
                     danceCtx.beginPath();
                     danceCtx.arc(baseX, headY - 5, 16, Math.PI, 0);
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Eje de la hélice
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX, headY - 20);
                     danceCtx.lineTo(baseX, headY - 30);
                     danceCtx.strokeStyle = 'gray';
                     danceCtx.lineWidth = 2;
                     danceCtx.stroke();
-                    // Hélice (dos palas simples)
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX - 10, headY - 30);
                     danceCtx.lineTo(baseX + 10, headY - 30);
-                    danceCtx.strokeStyle = 'red'; // Roja
+                    danceCtx.strokeStyle = 'red'; 
                     danceCtx.lineWidth = 4;
                     danceCtx.stroke();
-                    danceCtx.lineWidth = 2; // Restaurar
+                    danceCtx.lineWidth = 2; 
                    break;
-                case "viking-helmet": // Casco vikingo
+                case "viking-helmet": 
                     danceCtx.fillStyle = 'gray';
                     danceCtx.strokeStyle = 'darkgray';
-                    // Casco base
                     danceCtx.beginPath();
-                    danceCtx.arc(baseX, headY - 2, 17, Math.PI, 0); // Semicírculo
+                    danceCtx.arc(baseX, headY - 2, 17, Math.PI, 0); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Cuernos
                     danceCtx.fillStyle = 'white';
                     danceCtx.strokeStyle = 'black';
-                    // Cuerno izquierdo
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX - 15, headY - 5);
-                    danceCtx.quadraticCurveTo(baseX - 30, headY - 20, baseX - 25, headY - 30); // Curvado hacia arriba
-                    danceCtx.quadraticCurveTo(baseX - 20, headY - 15, baseX - 15, headY - 5); // Vuelve a la base
+                    danceCtx.quadraticCurveTo(baseX - 30, headY - 20, baseX - 25, headY - 30); 
+                    danceCtx.quadraticCurveTo(baseX - 20, headY - 15, baseX - 15, headY - 5); 
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Cuerno derecho
                     danceCtx.beginPath();
                     danceCtx.moveTo(baseX + 15, headY - 5);
                     danceCtx.quadraticCurveTo(baseX + 30, headY - 20, baseX + 25, headY - 30);
@@ -1033,51 +947,52 @@
                     danceCtx.fill();
                     danceCtx.stroke();
                    break;
-                case "witch-hat": // Sombrero de bruja
+                case "witch-hat": 
                     danceCtx.fillStyle = 'black';
                     danceCtx.strokeStyle = '#333';
-                    // Ala del sombrero
                     danceCtx.beginPath();
                     danceCtx.ellipse(baseX, headY + 5, 25, 6, 0, 0, Math.PI * 2);
                     danceCtx.fill();
                     danceCtx.stroke();
-                    // Cono
                     danceCtx.beginPath();
-                    danceCtx.moveTo(baseX - 15, headY + 5); // Base del cono sobre el ala
-                    danceCtx.lineTo(baseX + 5, headY - 35); // Punta inclinada
+                    danceCtx.moveTo(baseX - 15, headY + 5); 
+                    danceCtx.lineTo(baseX + 5, headY - 35); 
                     danceCtx.lineTo(baseX + 15, headY + 5);
                     danceCtx.closePath();
                     danceCtx.fill();
                     danceCtx.stroke();
                    break;
                 default:
-                   // Objeto desconocido o "none"
                     break;
             }
-             // Restaurar colores/grosor por si acaso
-             danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary');
-             danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover');
-             danceCtx.lineWidth = 2;
+            // Restaurar colores/grosor por si acaso
+            danceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary');
+            danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary-hover');
+            danceCtx.lineWidth = 2;
         }
-
-        // --- BLOQUE ELIMINADO ---
-        // El `if` que estaba aquí fue eliminado porque redibujaba
-        // el cuerpo y la cabeza ENCIMA de los accesorios.
     }
 
 
     function danceLoop(timestamp) {
         if (!lastTime) lastTime = timestamp;
-        // const deltaTime = timestamp - lastTime; // Opcional: para movimiento basado en delta time
-        drawRhythmicStickFigure(timestamp); // Usar timestamp directamente para simplicidad
+        drawRhythmicStickFigure(timestamp); 
         lastTime = timestamp;
         animationFrameId = requestAnimationFrame(danceLoop);
     }
     
+    // --- Lógica para revocar URL de objeto (limpieza de memoria) ---
+    function revokePreviousObjectUrl() {
+        if (currentObjectURL) {
+            URL.revokeObjectURL(currentObjectURL);
+            currentObjectURL = null;
+            // console.log("URL de objeto local revocada.");
+        }
+    }
+
     // --- CALENDAR LOGIC ---
     function loadCalendar() {
         const dt = new Date();
-        if (nav !== 0) dt.setMonth(new Date().getMonth() + nav, 1); // Asegura que empiece en el día 1 del mes correcto
+        if (nav !== 0) dt.setMonth(new Date().getMonth() + nav, 1); 
         const month = dt.getMonth(), year = dt.getFullYear();
         
         const banner = document.getElementById('special-theme-banner');
@@ -1090,66 +1005,71 @@
 
         const firstDayOfMonth = new Date(year, month, 1);
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        // Ajuste para que Lunes sea 0, Martes 1, ..., Domingo 6
         const paddingDays = (firstDayOfMonth.getDay() + 6) % 7; 
 
-        // Actualizar el texto del mes con letras animadas
         const monthName = dt.toLocaleDateString('es-ES', { month: 'long' });
         const yearText = ` ${year}`;
-        monthDisplay.innerHTML = ''; // Limpiar contenido previo
+        monthDisplay.innerHTML = ''; 
         monthName.split('').forEach(letter => {
             const span = document.createElement('span');
             span.classList.add('animated-letter');
             span.textContent = letter;
             monthDisplay.appendChild(span);
         });
-         // Añadir el año sin animación
-         const yearSpan = document.createElement('span');
-         yearSpan.textContent = yearText;
-         monthDisplay.appendChild(yearSpan);
+        const yearSpan = document.createElement('span');
+        yearSpan.textContent = yearText;
+        monthDisplay.appendChild(yearSpan);
 
 
-        calendar.innerHTML = ''; // Limpiar calendario
-        // --- Obtener notas antes de generar los días ---
+        calendar.innerHTML = ''; 
         const notes = JSON.parse(localStorage.getItem('musical-calendar-notes') || '{}');
 
-        // --- OBTENER HOY (normalizado a medianoche) ---
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         for (let i = 1; i <= paddingDays + daysInMonth; i++) {
             const daySquare = document.createElement('div');
-            // --- Se quita position:relative de aquí porque se añadió en CSS ---
-            daySquare.classList.add('calendar-day', 'h-16', 'sm:h-20', 'lg:h-24', 'flex', 'items-center', 'justify-center', 'text-lg', 'rounded-lg', 'transition-all', 'duration-200');
+            // Se elimina 'flex items-center justify-center' para dar paso al innerHTML personalizado
+            daySquare.classList.add('calendar-day', 'h-16', 'sm:h-20', 'lg:h-24', 'text-lg', 'rounded-lg', 'transition-all', 'duration-200');
+            daySquare.style.padding = '0'; // Se fuerza a 0 para que el div interno maneje el padding/espaciado
             
             if (i > paddingDays) {
                 const dayOfMonth = i - paddingDays;
-                daySquare.innerText = dayOfMonth;
-
-                // --- FECHA DE ESTA CELDA ---
+                
                 const dayDate = new Date(year, month, dayOfMonth);
-                // dayDate ya está normalizada a medianoche por el constructor
                 
                 const dayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayOfMonth).padStart(2, '0')}`;
                 daySquare.dataset.date = dayString;
 
-                // --- COMPARAR FECHA ---
                 if (dayDate > today) {
                     // --- DÍA FUTURO (BLOQUEADO) ---
-                    daySquare.classList.add('opacity-50', 'cursor-not-allowed');
-                    // No se añade event listener ni hover de cursor
+                    daySquare.classList.add('opacity-50', 'cursor-not-allowed', 'flex', 'items-center', 'justify-center');
+                    daySquare.innerText = dayOfMonth; // Poner el número y centrar
                 
                 } else {
                     // --- DÍA ACTUAL O PASADO (HABILITADO) ---
-                    daySquare.classList.add('cursor-pointer'); // Añadir cursor pointer aquí
+                    daySquare.classList.add('cursor-pointer'); 
                     
                     // Comprobar si es el día actual
                     if (dayDate.getTime() === today.getTime()) {
                         daySquare.classList.add('current-day');
                     }
 
+                    // --- HTML DEL DÍA (Número + Botón MP3) ---
+                    daySquare.innerHTML = `
+                        <div class="relative w-full h-full flex flex-col items-center justify-between p-1.5 sm:p-2">
+                            <span class="text-lg sm:text-xl font-bold themed-text-primary">${dayOfMonth}</span>
+                            <button type="button" 
+                                    class="mp3-day-button p-1 rounded-full text-xs text-gray-900 bg-amber-400 hover:bg-green-600 transition-colors z-10 shadow-md"
+                                    title="Cargar y reproducir MP3 local"
+                                    data-day-target="${dayString}"
+                                    onclick="event.stopPropagation(); document.getElementById('mp3-file-input').dataset.targetDay='${dayString}'; document.getElementById('mp3-file-input').click();">
+                                <i class="fa-solid fa-file-audio"></i>
+                            </button>
+                        </div>
+                    `;
+
                     // --- Añadir indicador si hay nota ---
-                    // Verifica que la nota exista y no esté vacía
                     if (notes[dayString] && notes[dayString].trim() !== '') {
                         const indicator = document.createElement('div');
                         indicator.classList.add('note-indicator');
@@ -1157,12 +1077,17 @@
                     }
                     // --- Fin indicador ---
 
-                    // Añadir click listener
-                    daySquare.addEventListener('click', () => openDayModal(daySquare, dayString));
+                    // Añadir click listener (para abrir modal si no se pulsó el botón)
+                    daySquare.addEventListener('click', (e) => {
+                        // Solo abre el modal si el elemento clickeado NO es el botón mp3
+                        if (!e.target.closest('.mp3-day-button')) {
+                            openDayModal(daySquare, dayString);
+                        }
+                    });
                 }
 
             } else {
-                daySquare.classList.add('themed-bg-padding', 'opacity-50'); // Hacer los días de relleno más sutiles
+                daySquare.classList.add('themed-bg-padding', 'opacity-50', 'flex', 'items-center', 'justify-center'); 
             }
             calendar.appendChild(daySquare);
         }
@@ -1174,6 +1099,10 @@
         document.getElementById('backButton').addEventListener('click', () => { nav--; loadCalendar(); });
         saveNoteButton.addEventListener('click', saveNote);
         document.getElementById('playlist-button').addEventListener('click', playMonthPlaylist);
+
+        // Se elimina la escucha del botón global, ahora se escucha el cambio en el input de archivo.
+        mp3FileInput.addEventListener('change', handleLocalMp3Upload);
+
 
         // Modals
         const statsModal = document.getElementById('stats-modal');
@@ -1191,17 +1120,14 @@
         document.getElementById('close-wardrobe-modal').addEventListener('click', () => wardrobeModal.classList.add('hidden'));
         wardrobeModal.addEventListener('click', (e) => { if (e.target === wardrobeModal) wardrobeModal.classList.add('hidden'); });
         document.getElementById('clear-selected-item').addEventListener('click', () => {
-            selectWardrobeItem('none'); // Llama a la función para guardar y actualizar
-            updateWardrobeUI(); // Actualiza la UI del armario inmediatamente
+            selectWardrobeItem('none'); 
+            updateWardrobeUI(); 
         });
 
 
-        // --- INICIO DE LA CORRECCIÓN ---
-        // Añadimos la lógica para resetear 'selectedDate' al cerrar el modal.
         document.getElementById('close-day-modal').addEventListener('click', () => {
             dayModal.classList.add('hidden');
-            selectedDate = null; // ¡RESETEAR LA FECHA!
-            // Forzar redibujo para quitar el item "preview"
+            selectedDate = null; 
             if(animationFrameId) cancelAnimationFrame(animationFrameId);
             danceLoop(performance.now());
         });
@@ -1209,8 +1135,7 @@
         dayModal.addEventListener('click', (e) => { 
             if (e.target === dayModal) {
                 dayModal.classList.add('hidden');
-                selectedDate = null; // ¡RESETEAR LA FECHA!
-                // Forzar redibujo
+                selectedDate = null; 
                 if(animationFrameId) cancelAnimationFrame(animationFrameId);
                 danceLoop(performance.now());
             }
@@ -1220,8 +1145,8 @@
         // Player & Animation
         audioPlayer.addEventListener('play', () => {
             globalPlayerContainer.classList.remove('hidden');
-            cancelAnimationFrame(animationFrameId); // Detener animación anterior si la hubiera
-            lastTime = 0; // Reiniciar tiempo para la animación
+            cancelAnimationFrame(animationFrameId); 
+            lastTime = 0; 
             animationFrameId = requestAnimationFrame(danceLoop);
         });
         audioPlayer.addEventListener('pause', () => {
@@ -1232,24 +1157,21 @@
         audioPlayer.addEventListener('ended', async () => {
             cancelAnimationFrame(animationFrameId);
             
-            // --- LÓGICA DE DESBLOQUEO AL TERMINAR ---
-            if (selectedDate) {
-                // MODIFICADO: Buscar por día del mes (1-31) en lugar de "YYYY-MM-DD"
-                const dayOfMonth = new Date(selectedDate).getDate(); // Obtiene el día (ej: 3)
-                const itemForThisDay = dailyItems[dayOfMonth]; // Busca el item para el día 3
-                // Solo desbloquear si es la primera vez que se escucha (no está en unlockedItems)
+            // --- LÓGICA DE DESBLOQUEO AL TERMINAR (SOLO SI ES UNA CANCIÓN DE CALENDARIO) ---
+            // Si currentObjectURL es nulo, significa que se estaba reproduciendo una canción del calendario.
+            if (selectedDate && !currentObjectURL) { 
+                const dayOfMonth = new Date(selectedDate).getDate(); 
+                const itemForThisDay = dailyItems[dayOfMonth]; 
                 if (itemForThisDay && !unlockedItems.includes(itemForThisDay.id)) {
                     await unlockItem(itemForThisDay.id);
-                    // Mostrar el mensaje en el modal si está abierto
-                     if (!dayModal.classList.contains('hidden')) {
+                    if (!dayModal.classList.contains('hidden')) {
                         itemUnlockMessage.classList.remove('hidden');
-                         setTimeout(() => itemUnlockMessage.classList.add('hidden'), 5000);
+                        setTimeout(() => itemUnlockMessage.classList.add('hidden'), 5000);
                     }
                 }
             }
             // --- FIN LÓGICA DE DESBLOQUEO ---
             
-            // globalPlayerContainer.classList.add('hidden'); // <-- ELIMINADO: Se maneja en playNextInPlaylist
             playNextInPlaylist(); 
         });
 
@@ -1267,62 +1189,103 @@
         });
     }
 
+    // NUEVA FUNCIÓN: Manejar subida de MP3 local
+    async function handleLocalMp3Upload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 1. Revocar el URL anterior para liberar memoria.
+        revokePreviousObjectUrl();
+
+        // 2. Crear un nuevo URL de objeto para el archivo local
+        currentObjectURL = URL.createObjectURL(file);
+
+        // 3. Actualizar el reproductor
+        audioPlayer.src = currentObjectURL;
+
+        // 4. Actualizar la interfaz de usuario (usando el nombre del archivo como título)
+        songClue.style.display = 'none';
+        songTitle.style.display = 'block';
+        songTitle.textContent = file.name;
+        songArtist.textContent = 'Archivo Local (MP3)';
+        itemUnlockMessage.classList.add('hidden');
+        dayModal.classList.add('hidden'); // Ocultar modal del día
+
+        // Deseleccionar el día en el calendario (Si se pulsa el botón MP3, no es una canción del calendario)
+        document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected-day'));
+        selectedDate = null; 
+        currentPlaylist = []; // Cancelar cualquier playlist en curso
+
+        // Limpiar el input para permitir la subida del mismo archivo de nuevo
+        event.target.value = null;
+
+        // 5. Reproducir
+        try {
+            await audioPlayer.play();
+            globalPlayerContainer.classList.remove('hidden');
+
+            // Mostrar un toast simple de confirmación
+            showAchievementToast({
+                id: 'local_upload',
+                name: 'Música Cargada',
+                description: `Reproduciendo: ${file.name.substring(0, 20)}...`,
+                icon: 'fa-solid fa-file-audio'
+            });
+
+            // Asegurar que la animación continúe
+            if(animationFrameId) cancelAnimationFrame(animationFrameId);
+            danceLoop(performance.now());
+            
+        } catch (error) {
+            console.error("Error al reproducir el archivo local:", error);
+            showAchievementToast({
+                id: 'local_upload_fail',
+                name: 'Error de Reproducción',
+                description: `No se pudo reproducir el archivo.`,
+                icon: 'fa-solid fa-triangle-exclamation'
+            });
+        }
+    }
+
+
     async function openDayModal(dayElement, dateString, autoplay = true) {
-        selectedDate = dateString; // Actualizar fecha seleccionada globalmente
-        // Resaltar día seleccionado en el calendario
+        selectedDate = dateString; 
         document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected-day'));
         if (dayElement) dayElement.classList.add('selected-day');
 
         const [year, monthNum, day] = dateString.split('-').map(Number);
-        const monthIndex = monthNum - 1; // Meses en JS son 0-indexados
+        const monthIndex = monthNum - 1; 
 
-        // Determinar qué lista de canciones usar
         const currentSongs = monthlyThemes[monthIndex]?.songs || defaultSongs;
-        const songIndex = day - 1; // Días son 1-indexados
+        const songIndex = day - 1; 
 
-        // Asegurarse de que el índice de la canción es válido
         if (songIndex < 0 || songIndex >= currentSongs.length) {
-            console.error(`Índice de canción inválido (${songIndex}) para el día ${dateString}`);
+             console.error(`Índice de canción inválido (${songIndex}) para el día ${dateString}`);
              songClue.textContent = 'No hay canción para este día.';
              songTitle.textContent = '-';
              songArtist.textContent = '';
-             audioPlayer.src = ''; // Limpiar reproductor
+             audioPlayer.src = ''; 
              itemUnlockMessage.classList.add('hidden');
         } else {
              const song = currentSongs[songIndex];
             
-             // Mostrar pista primero, luego revelar título
              songClue.textContent = `Pista: ${song.clue || '???'}`;
              songTitle.textContent = 'Adivina la canción...';
              songArtist.textContent = '';
              songClue.style.display = 'block';
              songTitle.style.display = 'none';
-             itemUnlockMessage.classList.add('hidden'); // Ocultar mensaje de objeto al abrir modal
+             itemUnlockMessage.classList.add('hidden'); 
 
              setTimeout(() => {
                  songClue.style.display = 'none';
                  songTitle.style.display = 'block';
                  songTitle.textContent = song.title;
                  songArtist.textContent = song.artist;
-             }, 2000); // Revelar después de 2 segundos
-            
-             // Reproducir la canción (siempre intentar, maneja error si falla)
+             }, 2000); 
+             
              await playSong(song, autoplay);
-            
-             // Cargar nota existente para este día
+             
              await loadNote();
-
-             // --- LÓGICA DE DESBLOQUEO MOVIDA A 'ended' listener ---
-             /*
-             const itemForThisDay = dailyItems[dateString];
-             if (itemForThisDay && !unlockedItems.includes(itemForThisDay.id)) {
-                 await unlockItem(itemForThisDay.id);
-                 itemUnlockMessage.classList.remove('hidden'); // Mostrar mensaje
-                 setTimeout(() => itemUnlockMessage.classList.add('hidden'), 5000); // Ocultar después de 5s
-             } else {
-                 itemUnlockMessage.classList.add('hidden'); // Asegurarse de que esté oculto
-             }
-             */
         }
          // Actualizar fecha en el área de notas
          const friendlyDate = new Date(year, monthIndex, day).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -1333,6 +1296,9 @@
     }
 
     async function playSong(song, autoplay = true) {
+        // NUEVO: Limpiar URL de objeto local si existe antes de cargar la canción de la web
+        revokePreviousObjectUrl(); 
+
         if (song && song.src) {
             audioPlayer.src = song.src;
             // Resetear velocidad a 1x por defecto al cambiar de canción
@@ -1348,499 +1314,454 @@
                 } catch (error) {
                     // Ignorar errores 'AbortError' que ocurren si el usuario cambia de canción rápidamente
                     if (error.name !== 'AbortError') {
-                         console.error("Error al intentar reproducir automáticamente:", error);
-                         // Podrías mostrar un mensaje al usuario indicando que necesita interactuar para reproducir.
+                         console.error(`Error al intentar reproducir automáticamente: ${error.message}. URL: ${song.src}`);
                     }
                 }
             }
         } else {
             console.warn("Intento de reproducir canción inválida:", song);
-            audioPlayer.src = ''; // Limpiar si la canción no es válida
+            audioPlayer.src = ''; 
         }
     }
 
     // --- DATA & ACHIEVEMENTS LOGIC (localStorage) ---
      async function saveNote() {
-         if (!selectedDate) return; // Ya no se necesita userId
-         const noteText = noteTextarea.value;
-         try {
-             // Obtener objeto de notas existente o crear uno nuevo
-             const notes = JSON.parse(localStorage.getItem('musical-calendar-notes') || '{}');
-             
-             // --- Eliminar la nota si está vacía, o guardarla si tiene texto ---
-             if (noteText.trim() === '') {
-                 delete notes[selectedDate]; // Elimina la entrada si el texto está vacío
-             } else {
-                 notes[selectedDate] = noteText; // Guarda el texto si no está vacío
-             }
+          if (!selectedDate) {
+            // No se puede guardar nota sin una fecha de calendario seleccionada (no local file)
+            saveNoteButton.textContent = 'Selecciona un día primero';
+            setTimeout(() => { saveNoteButton.textContent = 'Guardar Nota'; }, 1500);
+            return;
+          }
+          const noteText = noteTextarea.value;
+          try {
+              const notes = JSON.parse(localStorage.getItem('musical-calendar-notes') || '{}');
+              
+              if (noteText.trim() === '') {
+                  delete notes[selectedDate]; 
+              } else {
+                  notes[selectedDate] = noteText; 
+              }
 
-             // Guardar de nuevo en localStorage
-             localStorage.setItem('musical-calendar-notes', JSON.stringify(notes));
-             
-             // --- Añadir o quitar indicador al día en el calendario visible ---
-             const daySquare = calendar.querySelector(`.calendar-day[data-date="${selectedDate}"]`);
-             if (daySquare) {
-                 const existingIndicator = daySquare.querySelector('.note-indicator');
-                 if (noteText.trim() !== '') {
-                     // Añadir indicador si no existe
-                     if (!existingIndicator) {
-                         const indicator = document.createElement('div');
-                         indicator.classList.add('note-indicator');
-                         daySquare.appendChild(indicator);
-                     }
-                 } else {
-                     // Quitar indicador si existe
-                     if (existingIndicator) {
-                         existingIndicator.remove();
-                     }
-                 }
-             }
-             // --- Fin añadir/quitar indicador ---
+              localStorage.setItem('musical-calendar-notes', JSON.stringify(notes));
+              
+              const daySquare = calendar.querySelector(`.calendar-day[data-date="${selectedDate}"]`);
+              if (daySquare) {
+                  const existingIndicator = daySquare.querySelector('.note-indicator');
+                  if (noteText.trim() !== '') {
+                      if (!existingIndicator) {
+                          const indicator = document.createElement('div');
+                          indicator.classList.add('note-indicator');
+                          daySquare.appendChild(indicator);
+                      }
+                  } else {
+                      if (existingIndicator) {
+                          existingIndicator.remove();
+                      }
+                  }
+              }
 
-             // Feedback visual de guardado (sin cambios)
-             saveNoteButton.textContent = '¡Guardado!';
-             saveNoteButton.disabled = true;
-             setTimeout(() => {
-                 saveNoteButton.textContent = 'Guardar Nota';
-                 saveNoteButton.disabled = false;
-             }, 1500);
-         } catch (error) {
-             console.error("Error guardando la nota en localStorage:", error);
-             saveNoteButton.textContent = 'Error al guardar';
-         }
+              saveNoteButton.textContent = '¡Guardado!';
+              saveNoteButton.disabled = true;
+              setTimeout(() => {
+                  saveNoteButton.textContent = 'Guardar Nota';
+                  saveNoteButton.disabled = false;
+              }, 1500);
+          } catch (error) {
+              console.error("Error guardando la nota en localStorage:", error);
+              saveNoteButton.textContent = 'Error al guardar';
+          }
      }
 
      async function loadNote() {
-         if (!selectedDate) { // Ya no se necesita userId
-             noteTextarea.value = ''; // Limpiar si no hay fecha
-             return;
-         }
-         try {
-             // Obtener objeto de notas
-             const notes = JSON.parse(localStorage.getItem('musical-calendar-notes') || '{}');
-             // Obtener la nota específica o un string vacío por defecto
-             noteTextarea.value = notes[selectedDate] || '';
-         } catch (error) {
-             console.error("Error cargando la nota desde localStorage:", error);
-             noteTextarea.value = ''; // Limpiar en caso de error
-         }
+          if (!selectedDate) { 
+              noteTextarea.value = ''; 
+              return;
+          }
+          try {
+              const notes = JSON.parse(localStorage.getItem('musical-calendar-notes') || '{}');
+              noteTextarea.value = notes[selectedDate] || '';
+          } catch (error) {
+              console.error("Error cargando la nota desde localStorage:", error);
+              noteTextarea.value = ''; 
+          }
      }
 
      async function showStats() {
-         // Ya no se necesita comprobación de userId
-         const statsContent = document.getElementById('stats-content');
-         statsContent.innerHTML = '<p>Cargando estadísticas...</p>'; // Feedback mientras carga
+          const statsContent = document.getElementById('stats-content');
+          statsContent.innerHTML = '<p>Cargando estadísticas...</p>'; 
 
-         try {
-             // Obtener historial desde localStorage (guardado como un array de fechas)
-             const listenedDates = JSON.parse(localStorage.getItem('musical-calendar-history') || '[]');
+          try {
+              const listenedDates = JSON.parse(localStorage.getItem('musical-calendar-history') || '[]');
 
-             if (listenedDates.length === 0) {
-                 statsContent.innerHTML = '<p>Aún no has escuchado ninguna canción este mes.</p>';
-                 document.getElementById('stats-modal').classList.remove('hidden');
-                 return;
-             }
+              if (listenedDates.length === 0) {
+                  statsContent.innerHTML = '<p>Aún no has escuchado ninguna canción este mes.</p>';
+                  document.getElementById('stats-modal').classList.remove('hidden');
+                  return;
+              }
 
-             // Filtrar por el mes actual visible en el calendario (lógica sin cambios)
-             const currentVisibleDate = new Date();
-             if (nav !== 0) currentVisibleDate.setMonth(new Date().getMonth() + nav, 1);
-             const currentMonth = currentVisibleDate.getMonth();
-             const currentYear = currentVisibleDate.getFullYear();
+              const currentVisibleDate = new Date();
+              if (nav !== 0) currentVisibleDate.setMonth(new Date().getMonth() + nav, 1);
+              const currentMonth = currentVisibleDate.getMonth();
+              const currentYear = currentVisibleDate.getFullYear();
 
-             const datesThisMonth = listenedDates.filter(d => {
-                 const date = new Date(d);
-                 try {
-                     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-                 } catch (e) { return false; }
-             });
+              const datesThisMonth = listenedDates.filter(d => {
+                  const date = new Date(d);
+                  try {
+                      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+                  } catch (e) { 
+                      console.warn("Fecha inválida en el historial:", d, e);
+                      return false; 
+                  }
+              });
 
-             const daysListened = datesThisMonth.length;
-             const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-             const percentage = totalDaysInMonth > 0 ? ((daysListened / totalDaysInMonth) * 100).toFixed(1) : 0;
+              const daysListened = datesThisMonth.length;
+              const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+              const percentage = totalDaysInMonth > 0 ? ((daysListened / totalDaysInMonth) * 100).toFixed(1) : 0;
 
-             // Calcular racha actual (lógica sin cambios)
-             let currentStreak = 0;
-             if (datesThisMonth.length > 0) {
-                 datesThisMonth.sort((a, b) => new Date(b) - new Date(a));
-                 let lastDate = new Date(datesThisMonth[0]);
-                 currentStreak = 1;
-                 for (let i = 1; i < datesThisMonth.length; i++) {
-                     const currentDate = new Date(datesThisMonth[i]);
-                     const diffTime = lastDate - currentDate;
-                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                     if (diffDays === 1) {
-                         currentStreak++;
-                         lastDate = currentDate;
-                     } else {
-                         break; // Se rompió la racha
-                     }
-                 }
-             }
+              let currentStreak = 0;
+              if (datesThisMonth.length > 0) {
+                  datesThisMonth.sort((a, b) => new Date(b) - new Date(a));
+                  let lastDate = new Date(datesThisMonth[0]);
+                  currentStreak = 1;
+                  for (let i = 1; i < datesThisMonth.length; i++) {
+                      const currentDate = new Date(datesThisMonth[i]);
+                      const diffTime = lastDate - currentDate;
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      if (diffDays === 1) {
+                          currentStreak++;
+                          lastDate = currentDate;
+                      } else {
+                          break; 
+                      }
+                  }
+              }
 
-             // Renderizar estadísticas (sin cambios)
-             statsContent.innerHTML = `
-                 <div class="space-y-3">
-                     <p><strong class="themed-text-accent">Mes:</strong> ${currentVisibleDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
-                     <p><strong class="themed-text-accent">Días escuchados:</strong> ${daysListened} de ${totalDaysInMonth}</p>
-                     <p><strong class="themed-text-accent">Porcentaje del mes:</strong> ${percentage}%</p>
-                     <p><strong class="themed-text-accent">Racha actual (en este mes):</strong> ${currentStreak} días</p>
-                 </div>
-             `;
+              statsContent.innerHTML = `
+                   <div class="space-y-3">
+                       <p><strong class="themed-text-accent">Mes:</strong> ${currentVisibleDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
+                       <p><strong class="themed-text-accent">Días escuchados:</strong> ${daysListened} de ${totalDaysInMonth}</p>
+                       <p><strong class="themed-text-accent">Porcentaje del mes:</strong> ${percentage}%</p>
+                       <p><strong class="themed-text-accent">Racha actual (en este mes):</strong> ${currentStreak} días</p>
+                   </div>
+               `;
 
-         } catch (error) {
-             console.error("Error al cargar estadísticas desde localStorage:", error);
-             statsContent.innerHTML = '<p class="text-red-400">Error al cargar estadísticas.</p>';
-         }
+          } catch (error) {
+              console.error("Error al cargar estadísticas desde localStorage:", error);
+              statsContent.innerHTML = '<p class="text-red-400">Error al cargar estadísticas.</p>';
+          }
 
-         document.getElementById('stats-modal').classList.remove('hidden');
+          document.getElementById('stats-modal').classList.remove('hidden');
      }
 
 
-    async function recordListenHistoryAndCheckAchievements() {
-         if (!selectedDate) return; // Ya no se necesita userId
-         
-         try {
-             // 1. Registrar la escucha en localStorage
-             let listenedDates = JSON.parse(localStorage.getItem('musical-calendar-history') || '[]');
-             if (!listenedDates.includes(selectedDate)) {
-                 listenedDates.push(selectedDate);
-                 localStorage.setItem('musical-calendar-history', JSON.stringify(listenedDates));
-             }
+     async function recordListenHistoryAndCheckAchievements() {
+          if (!selectedDate) return; 
+          
+          try {
+              // 1. Registrar la escucha en localStorage
+              let listenedDates = JSON.parse(localStorage.getItem('musical-calendar-history') || '[]');
+              if (!listenedDates.includes(selectedDate)) {
+                  listenedDates.push(selectedDate);
+                  localStorage.setItem('musical-calendar-history', JSON.stringify(listenedDates));
+              }
             
-             // 2. Obtener logros desbloqueados de localStorage
-             let unlockedAchievements = JSON.parse(localStorage.getItem('musical-calendar-achievements') || '[]');
+              // 2. Obtener logros desbloqueados de localStorage
+              let unlockedAchievements = JSON.parse(localStorage.getItem('musical-calendar-achievements') || '[]');
 
-             // 3. Función auxiliar para desbloquear (ahora guarda en localStorage)
-             const checkAndUnlock = async (achId) => {
-                 if (!unlockedAchievements.includes(achId) && achievements[achId]) { // Verificar que el logro exista
-                     showAchievementToast(achievements[achId]);
-                     // Añadir al array local y guardar en localStorage
-                     unlockedAchievements.push(achId); 
-                     localStorage.setItem('musical-calendar-achievements', JSON.stringify(unlockedAchievements));
+              // 3. Función auxiliar para desbloquear (ahora guarda en localStorage)
+              const checkAndUnlock = async (achId) => {
+                  if (!unlockedAchievements.includes(achId) && achievements[achId]) { 
+                      showAchievementToast(achievements[achId]);
+                      unlockedAchievements.push(achId); 
+                      localStorage.setItem('musical-calendar-achievements', JSON.stringify(unlockedAchievements));
 
-                     // --- NUEVO: Mostrar la insignia ---
-                     const badge = document.getElementById('achievements-badge');
-                     if (badge) {
-                         badge.classList.remove('hidden');
-                     }
-                 }
-             };
+                      const badge = document.getElementById('achievements-badge');
+                      if (badge) {
+                          badge.classList.remove('hidden');
+                      }
+                  }
+              };
 
-             // 4. Comprobar logros específicos (lógica sin cambios)
+              // 4. Comprobar logros específicos 
+              
+              // Racha de 7 días
+              let consecutiveDays7 = 0;
+              const today = new Date(selectedDate); 
+              for (let i = 0; i < 7; i++) {
+                  const d = new Date(today);
+                  d.setDate(today.getDate() - i);
+                  const dateStrToFind = d.toISOString().split('T')[0];
+                  if (listenedDates.includes(dateStrToFind)) {
+                      consecutiveDays7++;
+                  } else {
+                      break; 
+                  }
+              }
+              if (consecutiveDays7 >= 7) await checkAndUnlock('WEEK_STREAK');
 
-             // Racha de 7 días
-             let consecutiveDays7 = 0;
-             const today = new Date(selectedDate); // Usar la fecha seleccionada como referencia
-             for (let i = 0; i < 7; i++) {
-                 const d = new Date(today);
-                 d.setDate(today.getDate() - i);
-                 const dateStrToFind = d.toISOString().split('T')[0];
-                 if (listenedDates.includes(dateStrToFind)) {
-                     consecutiveDays7++;
-                 } else {
-                     break; // Se rompe la racha
-                 }
-             }
-             if (consecutiveDays7 >= 7) await checkAndUnlock('WEEK_STREAK');
-
-             // Racha de 30 días
-             let consecutiveDays30 = 0;
-             for (let i = 0; i < 30; i++) {
-                 const d = new Date(today);
-                 d.setDate(today.getDate() - i);
-                 const dateStrToFind = d.toISOString().split('T')[0];
-                 if (listenedDates.includes(dateStrToFind)) {
-                     consecutiveDays30++;
-                 } else {
-                     break;
-                 }
-             }
-             if (consecutiveDays30 >= 30) await checkAndUnlock('MONTH_STREAK');
+              // Racha de 30 días
+              let consecutiveDays30 = 0;
+              for (let i = 0; i < 30; i++) {
+                  const d = new Date(today);
+                  d.setDate(today.getDate() - i);
+                  const dateStrToFind = d.toISOString().split('T')[0];
+                  if (listenedDates.includes(dateStrToFind)) {
+                      consecutiveDays30++;
+                  } else {
+                      break;
+                  }
+              }
+              if (consecutiveDays30 >= 30) await checkAndUnlock('MONTH_STREAK');
 
 
-             // Completar Rocktubre
-             const currentMonth = today.getMonth(); // 0-indexed
-             if (currentMonth === 9 && monthlyThemes[9]) { // Es Octubre y existe el tema
-                 const rocktoberSongs = monthlyThemes[9].songs;
-                 const requiredRocktoberDates = rocktoberSongs.map((_, index) => {
-                     const day = index + 1;
-                     return `${today.getFullYear()}-10-${String(day).padStart(2, '0')}`;
-                 });
-                 // Comprobar si *todas* las fechas requeridas están en listenedDates
-                 const allRocktoberListened = requiredRocktoberDates.every(reqDate => listenedDates.includes(reqDate));
-                 if (allRocktoberListened) {
-                     await checkAndUnlock('ROCKTOBER_COMPLETE');
-                 }
-             }
+              // Completar Rocktubre
+              const currentMonth = today.getMonth(); 
+              if (currentMonth === 9 && monthlyThemes[9]) { 
+                  const rocktoberSongs = monthlyThemes[9].songs;
+                  const requiredRocktoberDates = rocktoberSongs.map((_, index) => {
+                      const day = index + 1;
+                      return `${today.getFullYear()}-10-${String(day).padStart(2, '0')}`;
+                  });
+                  const allRocktoberListened = requiredRocktoberDates.every(reqDate => listenedDates.includes(reqDate));
+                  if (allRocktoberListened) {
+                      await checkAndUnlock('ROCKTOBER_COMPLETE');
+                  }
+              }
 
-         } catch (error) {
-             console.error("Error al registrar historial o comprobar logros en localStorage:", error);
-         }
-    }
+          } catch (error) {
+              console.error("Error al registrar historial o comprobar logros en localStorage:", error);
+          }
+     }
 
 
-    async function showAchievements() {
-         // Ya no se necesita userId
-         const content = document.getElementById('achievements-content');
-         content.innerHTML = '<p>Cargando logros...</p>'; // Feedback
+     async function showAchievements() {
+          const content = document.getElementById('achievements-content');
+          content.innerHTML = '<p>Cargando logros...</p>'; 
 
-         // --- NUEVO: Ocultar la insignia al abrir ---
-         const badge = document.getElementById('achievements-badge');
-         if (badge) {
-             badge.classList.add('hidden');
-         }
+          const badge = document.getElementById('achievements-badge');
+          if (badge) {
+              badge.classList.add('hidden');
+          }
 
-         try {
-             // Obtener logros desde localStorage
-             const unlockedIds = JSON.parse(localStorage.getItem('musical-calendar-achievements') || '[]');
+          try {
+              const unlockedIds = JSON.parse(localStorage.getItem('musical-calendar-achievements') || '[]');
             
-             content.innerHTML = ''; // Limpiar 'Cargando...'
+              content.innerHTML = ''; 
 
-             if (Object.keys(achievements).length === 0) {
-                 content.innerHTML = '<p>No hay logros definidos.</p>';
-             } else {
-                 // Crear tarjetas (lógica sin cambios)
-                 for (const ach of Object.values(achievements)) {
-                     const isUnlocked = unlockedIds.includes(ach.id);
-                     const card = document.createElement('div');
-                     card.className = `p-4 rounded-lg flex items-center gap-4 transition-all ${isUnlocked ? 'themed-bg-tertiary shadow-lg ring-2 ring-amber-400' : 'themed-bg-padding opacity-60'}`; // Resaltar desbloqueados
-                     card.innerHTML = `
-                         <!-- ICONO CORREGIDO (Font Awesome) -->
-                         <i class="${ach.icon || 'fa-solid fa-question'} fa-2x ${isUnlocked ? 'themed-text-accent' : 'text-gray-500'}"></i>
-                         <div>
-                             <h3 class="font-bold ${isUnlocked ? 'themed-text-primary' : 'text-gray-400'}">${ach.name}</h3>
-                             <p class="text-sm ${isUnlocked ? 'themed-text-secondary' : 'text-gray-500'}">${ach.description}</p>
-                         </div>
-                     `;
-                     content.appendChild(card);
-                 }
-             }
-         } catch (error) {
-             console.error("Error al mostrar logros desde localStorage:", error);
-             content.innerHTML = '<p class="text-red-400">Error al cargar los logros.</p>';
-         }
+              if (Object.keys(achievements).length === 0) {
+                  content.innerHTML = '<p>No hay logros definidos.</p>';
+              } else {
+                  for (const ach of Object.values(achievements)) {
+                      const isUnlocked = unlockedIds.includes(ach.id);
+                      const card = document.createElement('div');
+                      card.className = `p-4 rounded-lg flex items-center gap-4 transition-all ${isUnlocked ? 'themed-bg-tertiary shadow-lg ring-2 ring-amber-400' : 'themed-bg-padding opacity-60'}`; 
+                      card.innerHTML = `
+                          <i class="${ach.icon || 'fa-solid fa-question'} fa-2x ${isUnlocked ? 'themed-text-accent' : 'text-gray-500'}"></i>
+                          <div>
+                              <h3 class="font-bold ${isUnlocked ? 'themed-text-primary' : 'text-gray-400'}">${ach.name}</h3>
+                              <p class="text-sm ${isUnlocked ? 'themed-text-secondary' : 'text-gray-500'}">${ach.description}</p>
+                          </div>
+                      `;
+                      content.appendChild(card);
+                  }
+              }
+          } catch (error) {
+              console.error("Error al mostrar logros desde localStorage:", error);
+              content.innerHTML = '<p class="text-red-400">Error al cargar los logros.</p>';
+          }
 
-         document.getElementById('achievements-modal').classList.remove('hidden');
-    }
+          document.getElementById('achievements-modal').classList.remove('hidden');
+     }
 
     function showAchievementToast(achievement) {
-         const toastContainer = document.getElementById('toast-container');
-         // Evitar toasts duplicados (lógica sin cambios)
-         if (toastContainer.querySelector(`[data-ach-id="${achievement.id}"]`)) return;
+          const toastContainer = document.getElementById('toast-container');
+          if (toastContainer.querySelector(`[data-ach-id="${achievement.id}"]`)) return;
 
-         const toast = document.createElement('div');
-         toast.dataset.achId = achievement.id; 
-         toast.className = 'slide-in-up themed-bg-secondary p-4 rounded-lg shadow-2xl flex items-center gap-3 mb-2';
-         toast.innerHTML = `
-             <!-- ICONO CORREGIDO (Font Awesome) -->
-             <i class="${achievement.icon || 'fa-solid fa-medal'} fa-2x themed-text-accent"></i>
-             <div>
-                 <p class="font-bold">¡Logro Desbloqueado!</p>
-                 <p class="text-sm">${achievement.name}</p>
-             </div>
-         `;
-         toastContainer.appendChild(toast);
-         // Autodestruir (lógica sin cambios)
-         setTimeout(() => {
-             toast.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-             toast.style.opacity = '0';
-             toast.style.transform = 'translateY(20px)';
-             setTimeout(() => toast.remove(), 500); 
-         }, 5000);
+          const toast = document.createElement('div');
+          toast.dataset.achId = achievement.id;  
+          toast.className = 'slide-in-up themed-bg-secondary p-4 rounded-lg shadow-2xl flex items-center gap-3 mb-2';
+          toast.innerHTML = `
+              <i class="${achievement.icon || 'fa-solid fa-medal'} fa-2x themed-text-accent"></i>
+              <div>
+                  <p class="font-bold">¡Notificación!</p>
+                  <p class="text-sm">${achievement.name}</p>
+              </div>
+          `;
+          toastContainer.appendChild(toast);
+          setTimeout(() => {
+              toast.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+              toast.style.opacity = '0';
+              toast.style.transform = 'translateY(20px)';
+              setTimeout(() => toast.remove(), 500);  
+          }, 5000);
     }
 
 
     // --- MONIGOTE CUSTOMIZATION LOGIC (localStorage) ---
     async function loadUnlockedItems() {
-         // Ya no se necesita userId
-         try {
-             // Los items se guardan en un único objeto en localStorage
-             const wardrobe = JSON.parse(localStorage.getItem('musical-calendar-wardrobe') || '{}');
-             unlockedItems = wardrobe.unlockedIds || [];
-             selectedItem = wardrobe.selectedItem || "none";
-         } catch (error) {
-             console.error("Error cargando objetos del armario desde localStorage:", error);
-             unlockedItems = []; // Resetear en caso de error
-             selectedItem = "none";
-         }
+          try {
+              const wardrobe = JSON.parse(localStorage.getItem('musical-calendar-wardrobe') || '{}');
+              unlockedItems = wardrobe.unlockedIds || [];
+              selectedItem = wardrobe.selectedItem || "none";
+          } catch (error) {
+              console.error("Error cargando objetos del armario desde localStorage:", error);
+              unlockedItems = []; 
+              selectedItem = "none";
+          }
     }
 
     async function unlockItem(itemId) {
-         if (!itemId || unlockedItems.includes(itemId)) return; // No hacer nada si no hay ID o ya está desbloqueado
+          if (!itemId || unlockedItems.includes(itemId)) return; 
 
-         unlockedItems.push(itemId); // Actualizar estado local
-         
-         try {
-             // Obtener armario actual, actualizarlo y guardarlo
-             const wardrobe = JSON.parse(localStorage.getItem('musical-calendar-wardrobe') || '{}');
-             if (!wardrobe.unlockedIds) wardrobe.unlockedIds = [];
-             if (!wardrobe.unlockedIds.includes(itemId)) {
-                 wardrobe.unlockedIds.push(itemId);
-             }
-             localStorage.setItem('musical-calendar-wardrobe', JSON.stringify(wardrobe));
+          unlockedItems.push(itemId); 
+          
+          try {
+              const wardrobe = JSON.parse(localStorage.getItem('musical-calendar-wardrobe') || '{}');
+              if (!wardrobe.unlockedIds) wardrobe.unlockedIds = [];
+              if (!wardrobe.unlockedIds.includes(itemId)) {
+                  wardrobe.unlockedIds.push(itemId);
+              }
+              localStorage.setItem('musical-calendar-wardrobe', JSON.stringify(wardrobe));
 
-             // Mostrar toast (lógica sin cambios)
-             const itemData = Object.values(dailyItems).find(item => item.id === itemId);
-             const itemName = itemData?.name || itemId;
-             // ICONO CORREGIDO (Font Awesome)
-             const itemIcon = itemData?.icon || 'fa-solid fa-sparkles';
-             showAchievementToast({ id: `item-${itemId}`, name: `¡Objeto: ${itemName}!`, icon: itemIcon }); 
-
-             // --- INICIO DE LA CORRECCIÓN ---
-             // Se elimina el bloque que equipaba el item automáticamente.
-             // Ahora solo se desbloquea. El usuario debe ir al armario para equiparlo.
-             
-             // Forzar redibujo (por si acaso, aunque no debería cambiar nada)
-             if(animationFrameId) cancelAnimationFrame(animationFrameId); 
-             danceLoop(performance.now());
-             // --- FIN DE LA CORRECCIÓN ---
-
-         } catch (error) {
-             console.error(`Error al desbloquear el objeto ${itemId} en localStorage:`, error);
-         }
+              const itemData = Object.values(dailyItems).find(item => item.id === itemId);
+              const itemName = itemData?.name || itemId;
+              const itemIcon = itemData?.icon || 'fa-solid fa-sparkles';
+              showAchievementToast({ id: `item-${itemId}`, name: `¡Objeto: ${itemName}!`, icon: itemIcon }); 
+              
+              if(animationFrameId) cancelAnimationFrame(animationFrameId); 
+              danceLoop(performance.now());
+          } catch (error) {
+              console.error(`Error al desbloquear el objeto ${itemId} en localStorage:`, error);
+          }
     }
 
 
     async function selectWardrobeItem(itemId) {
-         // Ya no se necesita userId
-          // Permitir seleccionar "none" siempre, o un item si está desbloqueado
-         if (itemId !== "none" && !unlockedItems.includes(itemId)) {
-             console.warn("Intento de seleccionar un objeto no desbloqueado:", itemId);
-             return; // No permitir seleccionar objetos bloqueados
-         }
+          if (itemId !== "none" && !unlockedItems.includes(itemId)) {
+              console.warn("Intento de seleccionar un objeto no desbloqueado:", itemId);
+              return; 
+          }
 
-         selectedItem = itemId; // Actualizar estado local
+          selectedItem = itemId; 
 
-         try {
-             // ¡AQUÍ ESTÁ EL CAMBIO!
-             // No leemos de localStorage. Usamos el estado global que ya tenemos,
-             // que es la fuente de verdad más actualizada.
-             const wardrobeToSave = {
-                unlockedIds: unlockedItems, // Usamos el array global (actualizado por unlockItem o loadUnlockedItems)
-                selectedItem: selectedItem  // Usamos el item global que acabamos de setear
-             };
-             // Guardamos el estado actual correcto en localStorage
-             localStorage.setItem('musical-calendar-wardrobe', JSON.stringify(wardrobeToSave));
-            
-             // Forzar redibujo del monigote (lógica sin cambios)
-             if(animationFrameId) cancelAnimationFrame(animationFrameId);
-             danceLoop(performance.now());
-         } catch (error) {
-             console.error(`Error al seleccionar el objeto ${itemId} en localStorage:`, error);
-         }
+          try {
+              const wardrobeToSave = {
+                  unlockedIds: unlockedItems, 
+                  selectedItem: selectedItem 
+              };
+              localStorage.setItem('musical-calendar-wardrobe', JSON.stringify(wardrobeToSave));
+              
+              if(animationFrameId) cancelAnimationFrame(animationFrameId);
+              danceLoop(performance.now());
+          } catch (error) {
+              console.error(`Error al seleccionar el objeto ${itemId} en localStorage:`, error);
+          }
     }
 
 
     async function showWardrobe() {
-         // Asegurarse de tener los últimos datos antes de mostrar
-         await loadUnlockedItems();
+          await loadUnlockedItems();
 
-         const wardrobeItemsContainer = document.getElementById('wardrobe-items');
-         wardrobeItemsContainer.innerHTML = ''; // Limpiar contenido previo
+          const wardrobeItemsContainer = document.getElementById('wardrobe-items');
+          wardrobeItemsContainer.innerHTML = ''; 
 
-         // Función para crear una tarjeta de item (lógica sin cambios)
-         const createItemCard = (item, isNoneOption = false) => {
-             const card = document.createElement('div');
-             const isUnlocked = isNoneOption || unlockedItems.includes(item.id);
-             const isSelected = selectedItem === item.id;
+          const createItemCard = (item, isNoneOption = false) => {
+              const card = document.createElement('div');
+              const isUnlocked = isNoneOption || unlockedItems.includes(item.id);
+              const isSelected = selectedItem === item.id;
 
-             card.className = `themed-bg-tertiary rounded-lg p-4 text-center item-card 
-                 ${isUnlocked ? '' : 'disabled'} 
-                 ${isSelected ? 'selected' : ''}`;
-             card.dataset.itemId = item.id;
-            
-             card.innerHTML = `
-                 <!-- ICONO CORREGIDO (Font Awesome) -->
-                 <i class="${item.icon || 'fa-solid fa-question'} fa-3x ${isUnlocked ? (isSelected ? 'themed-text-accent' : 'themed-text-primary') : 'text-gray-500'} mb-2"></i>
-                 <p class="text-sm font-semibold ${isUnlocked ? 'themed-text-primary' : 'text-gray-500'}">${item.name}</p>
-             `;
+              card.className = `themed-bg-tertiary rounded-lg p-4 text-center item-card 
+                  ${isUnlocked ? '' : 'disabled'} 
+                  ${isSelected ? 'selected' : ''}`;
+              card.dataset.itemId = item.id;
+              
+              card.innerHTML = `
+                  <i class="${item.icon || 'fa-solid fa-question'} fa-3x ${isUnlocked ? (isSelected ? 'themed-text-accent' : 'themed-text-primary') : 'text-gray-500'} mb-2"></i>
+                  <p class="text-sm font-semibold ${isUnlocked ? 'themed-text-primary' : 'text-gray-500'}">${item.name}</p>
+              `;
 
-             if (isUnlocked) {
-                 card.addEventListener('click', () => {
-                     selectWardrobeItem(item.id); // Guardar selección
-                     updateWardrobeUI(); // Actualizar visualmente el armario
-                 });
-             }
-             return card;
-         };
-
-         // Añadir opción "Ninguno" (lógica sin cambios)
-         // ICONO CORREGIDO (Font Awesome)
-         const noneItem = { id: "none", name: "Ninguno", icon: "fa-solid fa-circle-xmark" };
-         wardrobeItemsContainer.appendChild(createItemCard(noneItem, true));
- 
-         // Añadir todos los objetos posibles (lógica sin cambios)
-          const addedItemIds = new Set(["none"]); 
-          Object.values(dailyItems).forEach(item => {
-              if (!addedItemIds.has(item.id)) {
-                 wardrobeItemsContainer.appendChild(createItemCard(item));
-                 addedItemIds.add(item.id);
+              if (isUnlocked) {
+                  card.addEventListener('click', () => {
+                      selectWardrobeItem(item.id); 
+                      updateWardrobeUI(); 
+                  });
               }
-          });
+              return card;
+          };
 
-         updateWardrobeUI(); 
-         document.getElementById('wardrobe-modal').classList.remove('hidden');
+          const noneItem = { id: "none", name: "Ninguno", icon: "fa-solid fa-circle-xmark" };
+          wardrobeItemsContainer.appendChild(createItemCard(noneItem, true));
+    
+           const addedItemIds = new Set(["none"]); 
+           Object.values(dailyItems).forEach(item => {
+               if (!addedItemIds.has(item.id)) {
+                   wardrobeItemsContainer.appendChild(createItemCard(item));
+                   addedItemIds.add(item.id);
+               }
+           });
+
+          updateWardrobeUI(); 
+          document.getElementById('wardrobe-modal').classList.remove('hidden');
     }
 
-     // Función para actualizar solo la apariencia del armario (lógica sin cambios)
      function updateWardrobeUI() {
-         document.querySelectorAll('#wardrobe-items .item-card').forEach(card => {
-             card.classList.remove('selected');
-             const icon = card.querySelector('i');
-             if (card.dataset.itemId === selectedItem) {
-                 card.classList.add('selected');
-                 if (icon) icon.classList.add('themed-text-accent');
-             } else {
-                 if (icon) icon.classList.remove('themed-text-accent'); 
-             }
-         });
-         document.getElementById('clear-selected-item').classList.toggle('hidden', selectedItem === 'none');
+          document.querySelectorAll('#wardrobe-items .item-card').forEach(card => {
+              card.classList.remove('selected');
+              const icon = card.querySelector('i');
+              if (card.dataset.itemId === selectedItem) {
+                  card.classList.add('selected');
+                  if (icon) icon.classList.add('themed-text-accent');
+              } else {
+                  if (icon) icon.classList.remove('themed-text-accent'); 
+              }
+          });
+          document.getElementById('clear-selected-item').classList.toggle('hidden', selectedItem === 'none');
      }
 
 
     // --- PLAYLIST & OTHER FUNCTIONS ---
      function playMonthPlaylist() {
-         const currentVisibleDate = new Date();
-         if (nav !== 0) currentVisibleDate.setMonth(new Date().getMonth() + nav, 1);
-         const monthIndex = currentVisibleDate.getMonth();
+          const currentVisibleDate = new Date();
+          if (nav !== 0) currentVisibleDate.setMonth(new Date().getMonth() + nav, 1);
+          const monthIndex = currentVisibleDate.getMonth();
 
-         currentPlaylist = monthlyThemes[monthIndex]?.songs || defaultSongs;
-        
-         if (currentPlaylist.length > 0) {
-             currentPlaylistIndex = 0; 
-             playNextInPlaylist(true); 
-         } else {
-             console.warn("No hay canciones para la playlist de este mes.");
-         }
+          currentPlaylist = monthlyThemes[monthIndex]?.songs || defaultSongs;
+          
+          if (currentPlaylist.length > 0) {
+              currentPlaylistIndex = 0; 
+              playNextInPlaylist(true); 
+          } else {
+              console.warn("No hay canciones para la playlist de este mes.");
+          }
      }
 
      function playNextInPlaylist(isFirstSong = false) {
-         if (!isFirstSong) {
-             currentPlaylistIndex++;
-         }
+          if (!isFirstSong) {
+              currentPlaylistIndex++;
+          }
 
-         if (currentPlaylistIndex >= currentPlaylist.length) {
-             console.log("Playlist terminada.");
-             globalPlayerContainer.classList.add('hidden'); 
-             currentPlaylist = []; 
-             return; 
-         }
+          if (currentPlaylistIndex >= currentPlaylist.length) {
+              console.log("Playlist terminada.");
+              globalPlayerContainer.classList.add('hidden'); 
+              currentPlaylist = []; 
+              return; 
+          }
 
-         const nextSong = currentPlaylist[currentPlaylistIndex];
-         const dateForSong = new Date(); 
-         if (nav !== 0) dateForSong.setMonth(new Date().getMonth() + nav, 1);
-         dateForSong.setDate(currentPlaylistIndex + 1); 
-         selectedDate = dateForSong.toISOString().split('T')[0]; 
-        
-         songClue.style.display = 'none';
-        songTitle.style.display = 'block';
-        songTitle.textContent = nextSong.title;
-        songArtist.textContent = nextSong.artist;
-         itemUnlockMessage.classList.add('hidden'); 
-        loadNote(); 
-        
-        playSong(nextSong, true); 
-        globalPlayerContainer.classList.remove('hidden'); 
+          const nextSong = currentPlaylist[currentPlaylistIndex];
+          const dateForSong = new Date(); 
+          if (nav !== 0) dateForSong.setMonth(new Date().getMonth() + nav, 1);
+          dateForSong.setDate(currentPlaylistIndex + 1); 
+          selectedDate = dateForSong.toISOString().split('T')[0]; 
+          
+          songClue.style.display = 'none';
+          songTitle.style.display = 'block';
+          songTitle.textContent = nextSong.title;
+          songArtist.textContent = nextSong.artist;
+          itemUnlockMessage.classList.add('hidden'); 
+          loadNote(); 
+          
+          playSong(nextSong, true); 
+          globalPlayerContainer.classList.remove('hidden'); 
      }
     
     // --- APP INITIALIZATION ---
@@ -1849,25 +1770,19 @@
         applyTheme(savedTheme);
 
         try {
-            // Ya no hay Firebase. Cargar datos desde localStorage.
             console.log("Iniciando la aplicación con localStorage.");
             
-            // Cargar datos (objetos desbloqueados y seleccionados)
             await loadUnlockedItems(); 
             
-            // Inicializar botones (ya no dependen de un usuario asíncrono)
             initButtons(); 
             
-            // Cargar calendario
             loadCalendar(); 
             
-            // Iniciar animación del monigote con el objeto cargado
             if(animationFrameId) cancelAnimationFrame(animationFrameId);
             danceLoop(performance.now());
 
         } catch (error) {
             console.error("Error crítico inicializando la aplicación:", error);
-            // Mostrar mensaje de error si algo falla (ej. localStorage corrupto)
             document.body.innerHTML = `<div class="text-red-400 text-center p-8">
                  <h2>Error al Cargar</h2>
                  <p>No se pudo inicializar la aplicación.</p>
@@ -1875,6 +1790,9 @@
                  </div>`;
         }
     }
+    
+    // Listener para limpiar URL del objeto al cerrar la página
+    window.addEventListener('beforeunload', revokePreviousObjectUrl); 
 
     // --- Iniciar la aplicación después de que el DOM esté completamente cargado ---
     window.addEventListener('DOMContentLoaded', startApp);
@@ -1892,16 +1810,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-

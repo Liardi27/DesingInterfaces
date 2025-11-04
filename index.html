@@ -11,146 +11,88 @@
         /* Configuración de color y fuente global */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9; /* var(--background-color) */
+            background-color: #f4f7f9; /* Fondo muy claro y suave */
+        }
+        /* Estilo para enfocar la tarjeta en dispositivos pequeños */
+        .menu-container {
+            max-width: 90%; /* Ajuste para móviles */
         }
     </style>
 </head>
 <body class="min-h-screen flex justify-center items-center p-4">
 
     <!-- Contenedor principal del menú -->
-    <main class="menu-container bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl text-center">
-        <header class="mb-8">
-            <h1 class="text-blue-700 text-3xl font-semibold">Menú de Aplicaciones</h1>
+    <main class="menu-container bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-xl text-center border border-gray-100">
+        <header class="mb-8 border-b pb-4 border-gray-200">
+            <h1 class="text-blue-700 text-4xl font-extrabold tracking-tight">Menú de Aplicaciones</h1>
+            <p class="text-gray-500 mt-2 text-lg">Accede a las herramientas desarrolladas para el proyecto.</p>
         </header>
 
-        <!-- Tarjeta para el Repositorio de GitHub y Documentación (ACTUALIZADA) -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Código y Documentación del Proyecto</h2>
-            <p class="text-gray-600 mb-6 leading-relaxed">Accede al repositorio con el código fuente de las aplicaciones y a la documentación detallada del proyecto.</p>
+        <!-- Tarjeta para el Repositorio de GitHub y Documentación -->
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-xl transition duration-300 ease-in-out hover:shadow-xl hover:border-blue-300">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Código y Documentación del Proyecto</h2>
+            <p class="text-gray-600 mb-6 leading-relaxed">Accede a los repositorios principales con el código fuente y la documentación detallada.</p>
             <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <!-- Botón Principal: Código de Aplicaciones (El link que ya tenías) -->
-                <a href="https://github.com/Liardi27/DesingInterfaces" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Código de Aplicaciones</a>
-                <!-- Botón Secundario: Documentación Web (Enlace corregido al repositorio de GitHub) -->
-                <a href="https://github.com/Liardi27/DocumentationWebPages" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación Web</a>
+                <!-- Botón: Código de Aplicaciones -->
+                <a href="https://github.com/Liardi27/DesingInterfaces" target="_blank" class="bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-blue-700 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 -mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 3s-1.09-.31-3.69 1.48a12.35 12.35 0 0 0-6.72 0C6.91 2.69 5.81 3 5.81 3A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7a3.37 3.37 0 0 0-.94 2.61V22"/></svg>
+                    Código de Aplicaciones
+                </a>
+                <!-- Botón: Documentación Web -->
+                <a href="https://github.com/Liardi27/DocumentationWebPages" target="_blank" class="bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-gray-600 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 -mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Documentación Web
+                </a>
             </div>
         </section>
 
         <!-- Tarjeta para la Aplicación 1: Contador de Personas -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Contador de Personas</h2>
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-xl transition duration-300 ease-in-out hover:shadow-xl hover:border-green-300">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Contador de Personas</h2>
             <p class="text-gray-600 mb-6 leading-relaxed">Una herramienta sencilla y eficaz para llevar la cuenta de asistentes a cualquier evento.</p>
             <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <a href="https://liardi27.github.io/DesingInterfaces/App1/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Abrir Aplicación</a>
+                <a href="https://liardi27.github.io/DesingInterfaces/App1/index.html" target="_blank" class="bg-green-600 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-green-700 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    Abrir Aplicación
+                </a>
             </div>
         </section>
 
         <!-- Tarjeta para la Aplicación 2: Pomodoro -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Pomodoro</h2>
+        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-xl transition duration-300 ease-in-out hover:shadow-xl hover:border-yellow-300">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Pomodoro</h2>
             <p class="text-gray-600 mb-6 leading-relaxed">Aumenta tu productividad y concentración utilizando la famosa técnica Pomodoro.</p>
             <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <a href="https://liardi27.github.io/DesingInterfaces/App2/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Iniciar Pomodoro</a>
-                <!-- Enlace corregido al repositorio de GitHub -->
-                <a href="https://github.com/Liardi27/DocumentationWebPages" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación</a>
+                <a href="https://liardi27.github.io/DesingInterfaces/App2/index.html" target="_blank" class="bg-red-600 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-red-700 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    Iniciar Pomodoro
+                </a>
+                <!-- Enlace de Documentación específico para Pomodoro -->
+                <a href="https://liardi27.github.io/DocumentationWebPages/pomodoro.html" target="_blank" class="bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-gray-600 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    Documentación
+                </a>
             </div>
         </section>
         
-        <!-- Tarjeta para la Aplicación 3: Calendario Musical -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Calendario Musical </h2>
+        <!-- Tarjeta para la Aplicación 3: Calendario Musical (Corregido) -->
+        <section class="app-card bg-white border border-gray-200 p-6 rounded-xl transition duration-300 ease-in-out hover:shadow-xl hover:border-purple-300">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Calendario Musical </h2>
             <p class="text-gray-600 mb-6 leading-relaxed">Organiza tus eventos y citas importantes mientras disfrutas de una experiencia auditiva relajante.</p>
             <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
                 <!-- Se cambió el texto del botón para que sea más claro -->
-                <a href="https://liardi27.github.io/DesingInterfaces/App3/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Abrir Calendario</a>
-                <!-- Enlace corregido al repositorio de GitHub -->
-                <a href="<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú de Aplicaciones</title>
-    <!-- Carga de Tailwind CSS para un diseño limpio y responsive -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Configuración de color y fuente global */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9; /* var(--background-color) */
-        }
-    </style>
-</head>
-<body class="min-h-screen flex justify-center items-center p-4">
-
-    <!-- Contenedor principal del menú -->
-    <main class="menu-container bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl text-center">
-        <header class="mb-8">
-            <h1 class="text-blue-700 text-3xl font-semibold">Menú de Aplicaciones</h1>
-        </header>
-
-        <!-- Tarjeta para el Repositorio de GitHub y Documentación (ACTUALIZADA) -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Código y Documentación del Proyecto</h2>
-            <p class="text-gray-600 mb-6 leading-relaxed">Accede al repositorio con el código fuente de las aplicaciones y a la documentación detallada del proyecto.</p>
-            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <!-- Botón Principal: Código de Aplicaciones (El link que ya tenías) -->
-                <a href="https://github.com/Liardi27/DesingInterfaces" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Código de Aplicaciones</a>
-                <!-- Botón Secundario: Documentación Web (Enlace corregido al repositorio de GitHub) -->
-                <a href="https://github.com/Liardi27/DocumentationWebPages" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación Web</a>
-            </div>
-        </section>
-
-        <!-- Tarjeta para la Aplicación 1: Contador de Personas -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Contador de Personas</h2>
-            <p class="text-gray-600 mb-6 leading-relaxed">Una herramienta sencilla y eficaz para llevar la cuenta de asistentes a cualquier evento.</p>
-            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <a href="https://liardi27.github.io/DesingInterfaces/App1/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Abrir Aplicación</a>
-            </div>
-        </section>
-
-        <!-- Tarjeta para la Aplicación 2: Pomodoro -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Pomodoro</h2>
-            <p class="text-gray-600 mb-6 leading-relaxed">Aumenta tu productividad y concentración utilizando la famosa técnica Pomodoro.</p>
-            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <a href="https://liardi27.github.io/DesingInterfaces/App2/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Iniciar Pomodoro</a>
-                <!-- Enlace corregido al repositorio de GitHub -->
-                <a href="https://liardi27.github.io/DocumentationWebPages/pomodoro.html" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación</a>
-            </div>
-        </section>
-        
-        <!-- Tarjeta para la Aplicación 3: Calendario Musical -->
-        <section class="app-card bg-white border border-gray-200 p-6 mb-6 rounded-lg transition duration-300 ease-in-out hover:shadow-lg hover:transform hover:-translate-y-1">
-            <h2 class="text-2xl font-semibold mb-2 text-gray-700">Calendario Musical </h2>
-            <p class="text-gray-600 mb-6 leading-relaxed">Organiza tus eventos y citas importantes mientras disfrutas de una experiencia auditiva relajante.</p>
-            <div class="button-group flex flex-col gap-3 sm:flex-row justify-center">
-                <!-- Se cambió el texto del botón para que sea más claro -->
-                <a href="https://liardi27.github.io/DesingInterfaces/App3/index.html" target="_blank" class="btn bg-blue-600 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-blue-700 hover:scale-[1.02]">Abrir Calendario</a>
-                <!-- Enlace corregido al repositorio de GitHub -->
-                <a href="https://liardi27.github.io/DocumentationWebPages/calendario-musical.html" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación</a>
+                <a href="https://liardi27.github.io/DesingInterfaces/App3/index.html" target="_blank" class="bg-purple-600 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-purple-700 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    Abrir Calendario
+                </a>
+                <!-- Enlace de Documentación específico para Calendario Musical (FIXED) -->
+                <a href="https://liardi27.github.io/DocumentationWebPages/calendario-musical.html" target="_blank" class="bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-semibold uppercase tracking-wider transition duration-300 ease-in-out transform hover:bg-gray-600 hover:scale-[1.02] shadow-md hover:shadow-lg">
+                    Documentación
+                </a>
             </div>
         </section>
 
     </main>
 
     <script>
-        console.log("Menú de aplicaciones cargado y listo. Se ha actualizado el diseño con Tailwind CSS.");
+        console.log("Menú de aplicaciones cargado y listo. Se ha corregido la sintaxis y se ha mantenido el diseño responsive.");
     </script>
 
 </body>
 </html>
-
-" target="_blank" class="btn bg-gray-500 text-white py-3 px-6 rounded-lg text-base font-medium uppercase tracking-wider transition duration-300 ease-in-out hover:bg-gray-600 hover:scale-[1.02]">Documentación</a>
-            </div>
-        </section>
-
-    </main>
-
-    <script>
-        console.log("Menú de aplicaciones cargado y listo. Se ha actualizado el diseño con Tailwind CSS.");
-    </script>
-
-</body>
-</html>
-

@@ -175,8 +175,6 @@
                     <option value="playa">Playa</option>
                     <option value="retro">Retro</option>
                 </select>
-
-                <!-- REMOVIDO: El botón de añadir MP3 ahora está dentro de cada día. -->
                 
                 <!-- Playlist -->
                 <button id="playlist-button" title="Reproducir Playlist del Mes"
@@ -372,9 +370,6 @@
     let unlockedItems = []; 
     let selectedItem = "none"; 
     
-    // NUEVO: Variable para el URL del objeto local
-    let currentObjectURL = null; 
-
     // --- DOM ELEMENTS ---
     const calendar = document.getElementById('calendar');
     const monthDisplay = document.getElementById('monthDisplay');
@@ -395,7 +390,17 @@
     // NUEVOS DOM ELEMENTS
     const mp3FileInput = document.getElementById('mp3-file-input');
 
-    // --- THEME & ANIMATION LOGIC ---
+    // --- LÓGICA DE LIMPIEZA DE URL DE OBJETO ---
+    function revokeLocalMp3ForDay(dateString) {
+        const mp3Cache = JSON.parse(localStorage.getItem('local-mp3-cache') || '{}');
+        const oldLocalSong = mp3Cache[dateString];
+        if (oldLocalSong && oldLocalSong.src.startsWith('blob:')) {
+            URL.revokeObjectURL(oldLocalSong.src);
+            // console.log(`[Cache Cleanup] Revoked old blob URL for ${dateString}`);
+        }
+    }
+    
+    // --- THEME & ANIMATION LOGIC (Sin Cambios) ---
     function applyTheme(themeName) {
         const theme = themes[themeName] || themes.basico;
         const root = document.documentElement;
@@ -777,7 +782,7 @@
                     danceCtx.stroke();
                     danceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
                     danceCtx.lineWidth = 3;
-                    danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke();
+                    danceCtx.beginPath(); danceCtx.moveTo(baseX, shoulderY); danceCtx.lineTo(baseX, hipY); danceCtx.stroke(); 
                     danceCtx.beginPath(); danceCtx.arc(baseX, headY, 15, 0, Math.PI * 2); danceCtx.stroke();
                    break; 
                 case "devil-horns": 
@@ -980,15 +985,6 @@
         animationFrameId = requestAnimationFrame(danceLoop);
     }
     
-    // --- Lógica para revocar URL de objeto (limpieza de memoria) ---
-    function revokePreviousObjectUrl() {
-        if (currentObjectURL) {
-            URL.revokeObjectURL(currentObjectURL);
-            currentObjectURL = null;
-            // console.log("URL de objeto local revocada.");
-        }
-    }
-
     // --- CALENDAR LOGIC ---
     function loadCalendar() {
         const dt = new Date();
@@ -1031,7 +1027,7 @@
             const daySquare = document.createElement('div');
             // Se elimina 'flex items-center justify-center' para dar paso al innerHTML personalizado
             daySquare.classList.add('calendar-day', 'h-16', 'sm:h-20', 'lg:h-24', 'text-lg', 'rounded-lg', 'transition-all', 'duration-200');
-            daySquare.style.padding = '0'; // Se fuerza a 0 para que el div interno maneje el padding/espaciado
+            daySquare.style.padding = '0'; 
             
             if (i > paddingDays) {
                 const dayOfMonth = i - paddingDays;
@@ -1044,7 +1040,7 @@
                 if (dayDate > today) {
                     // --- DÍA FUTURO (BLOQUEADO) ---
                     daySquare.classList.add('opacity-50', 'cursor-not-allowed', 'flex', 'items-center', 'justify-center');
-                    daySquare.innerText = dayOfMonth; // Poner el número y centrar
+                    daySquare.innerText = dayOfMonth; 
                 
                 } else {
                     // --- DÍA ACTUAL O PASADO (HABILITADO) ---
@@ -1093,14 +1089,13 @@
         }
     }
     
-    // --- MODAL & EVENT HANDLING ---
+    // --- MODAL & EVENT HANDLING (Sin Cambios significativos en initButtons) ---
     function initButtons() {
         document.getElementById('nextButton').addEventListener('click', () => { nav++; loadCalendar(); });
         document.getElementById('backButton').addEventListener('click', () => { nav--; loadCalendar(); });
         saveNoteButton.addEventListener('click', saveNote);
         document.getElementById('playlist-button').addEventListener('click', playMonthPlaylist);
 
-        // Se elimina la escucha del botón global, ahora se escucha el cambio en el input de archivo.
         mp3FileInput.addEventListener('change', handleLocalMp3Upload);
 
 
@@ -1157,9 +1152,12 @@
         audioPlayer.addEventListener('ended', async () => {
             cancelAnimationFrame(animationFrameId);
             
-            // --- LÓGICA DE DESBLOQUEO AL TERMINAR (SOLO SI ES UNA CANCIÓN DE CALENDARIO) ---
-            // Si currentObjectURL es nulo, significa que se estaba reproduciendo una canción del calendario.
-            if (selectedDate && !currentObjectURL) { 
+            // --- LÓGICA DE DESBLOQUEO AL TERMINAR ---
+            const mp3Cache = JSON.parse(localStorage.getItem('local-mp3-cache') || '{}');
+            const isCurrentlyPlayingLocal = selectedDate && mp3Cache[selectedDate];
+
+            // Solo desbloquear si es una canción DEL CALENDARIO
+            if (selectedDate && !isCurrentlyPlayingLocal) { 
                 const dayOfMonth = new Date(selectedDate).getDate(); 
                 const itemForThisDay = dailyItems[dayOfMonth]; 
                 if (itemForThisDay && !unlockedItems.includes(itemForThisDay.id)) {
@@ -1192,59 +1190,58 @@
     // NUEVA FUNCIÓN: Manejar subida de MP3 local
     async function handleLocalMp3Upload(event) {
         const file = event.target.files[0];
-        if (!file) return;
+        // La fecha objetivo (el día en el que se pulsa el botón) está en el dataset del input oculto
+        const targetDay = event.target.dataset.targetDay; 
+        if (!file || !targetDay) return;
 
-        // 1. Revocar el URL anterior para liberar memoria.
-        revokePreviousObjectUrl();
-
+        // 1. Revocar el URL anterior para este día (si existe).
+        revokeLocalMp3ForDay(targetDay);
+        
         // 2. Crear un nuevo URL de objeto para el archivo local
-        currentObjectURL = URL.createObjectURL(file);
-
-        // 3. Actualizar el reproductor
-        audioPlayer.src = currentObjectURL;
-
-        // 4. Actualizar la interfaz de usuario (usando el nombre del archivo como título)
-        songClue.style.display = 'none';
-        songTitle.style.display = 'block';
-        songTitle.textContent = file.name;
-        songArtist.textContent = 'Archivo Local (MP3)';
-        itemUnlockMessage.classList.add('hidden');
-        dayModal.classList.add('hidden'); // Ocultar modal del día
-
-        // Deseleccionar el día en el calendario (Si se pulsa el botón MP3, no es una canción del calendario)
-        document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected-day'));
-        selectedDate = null; 
+        const newObjectURL = URL.createObjectURL(file);
+        
+        // 3. Crear el objeto de canción local para guardar
+        const localSong = {
+            title: file.name.replace(/\.[^/.]+$/, "") || 'Canción Local', // Quitar extensión
+            artist: 'Archivo Local',
+            clue: 'Tu canción personalizada.',
+            src: newObjectURL
+        };
+        
+        // 4. Guardar en caché y establecer la fecha seleccionada
+        const mp3Cache = JSON.parse(localStorage.getItem('local-mp3-cache') || '{}');
+        mp3Cache[targetDay] = localSong;
+        localStorage.setItem('local-mp3-cache', JSON.stringify(mp3Cache));
+        
+        // --- Set UI context (importante para la reproducción y modal logic) ---
+        selectedDate = targetDay; // Establece el contexto del día
         currentPlaylist = []; // Cancelar cualquier playlist en curso
 
-        // Limpiar el input para permitir la subida del mismo archivo de nuevo
-        event.target.value = null;
-
-        // 5. Reproducir
-        try {
-            await audioPlayer.play();
-            globalPlayerContainer.classList.remove('hidden');
-
-            // Mostrar un toast simple de confirmación
-            showAchievementToast({
+        // 5. Reproducir y actualizar UI del reproductor flotante
+        // Pasamos true para isLocalSong para que no intente registrar historial/logros
+        await playSong(localSong, true, true); 
+        
+        // 6. Si el modal está abierto para este día, actualizar su contenido
+        const dayElement = calendar.querySelector(`.calendar-day[data-date="${targetDay}"]`);
+        if (!dayModal.classList.contains('hidden') && dayElement && dayElement.classList.contains('selected-day')) {
+            // El modal está abierto y es para el día que acabamos de actualizar.
+            songClue.style.display = 'none';
+            songTitle.style.display = 'block';
+            songTitle.textContent = localSong.title;
+            songArtist.textContent = localSong.artist;
+            itemUnlockMessage.classList.add('hidden');
+        } else {
+             // Si el modal no está abierto o es para otro día, solo mostramos el toast.
+             showAchievementToast({
                 id: 'local_upload',
                 name: 'Música Cargada',
-                description: `Reproduciendo: ${file.name.substring(0, 20)}...`,
+                description: `Reproduciendo: ${localSong.title.substring(0, 20)}...`,
                 icon: 'fa-solid fa-file-audio'
             });
-
-            // Asegurar que la animación continúe
-            if(animationFrameId) cancelAnimationFrame(animationFrameId);
-            danceLoop(performance.now());
-            
-        } catch (error) {
-            console.error("Error al reproducir el archivo local:", error);
-            showAchievementToast({
-                id: 'local_upload_fail',
-                name: 'Error de Reproducción',
-                description: `No se pudo reproducir el archivo.`,
-                icon: 'fa-solid fa-triangle-exclamation'
-            });
         }
+        
+        // 7. Limpiar el input
+        event.target.value = null;
     }
 
 
@@ -1256,48 +1253,73 @@
         const [year, monthNum, day] = dateString.split('-').map(Number);
         const monthIndex = monthNum - 1; 
 
-        const currentSongs = monthlyThemes[monthIndex]?.songs || defaultSongs;
-        const songIndex = day - 1; 
+        // --- REVISAR CACHÉ MP3 LOCAL ---
+        const mp3Cache = JSON.parse(localStorage.getItem('local-mp3-cache') || '{}');
+        const localSong = mp3Cache[dateString];
 
-        if (songIndex < 0 || songIndex >= currentSongs.length) {
-             console.error(`Índice de canción inválido (${songIndex}) para el día ${dateString}`);
-             songClue.textContent = 'No hay canción para este día.';
-             songTitle.textContent = '-';
-             songArtist.textContent = '';
-             audioPlayer.src = ''; 
+        let song;
+        let isLocal = false; // Bandera para saber qué tipo de canción es
+
+        if (localSong) {
+             // 1. Usar la canción local guardada
+             song = localSong;
+             isLocal = true;
+             
+             // Mostrar detalles inmediatamente (sin pista/clue)
+             songClue.style.display = 'none';
+             songTitle.style.display = 'block';
+             songTitle.textContent = song.title;
+             songArtist.textContent = song.artist;
              itemUnlockMessage.classList.add('hidden');
         } else {
-             const song = currentSongs[songIndex];
-            
-             songClue.textContent = `Pista: ${song.clue || '???'}`;
-             songTitle.textContent = 'Adivina la canción...';
-             songArtist.textContent = '';
-             songClue.style.display = 'block';
-             songTitle.style.display = 'none';
-             itemUnlockMessage.classList.add('hidden'); 
+            // 2. Usar la canción del calendario (comportamiento estándar)
+            const currentSongs = monthlyThemes[monthIndex]?.songs || defaultSongs;
+            const songIndex = day - 1; 
 
-             setTimeout(() => {
-                 songClue.style.display = 'none';
-                 songTitle.style.display = 'block';
-                 songTitle.textContent = song.title;
-                 songArtist.textContent = song.artist;
-             }, 2000); 
-             
-             await playSong(song, autoplay);
-             
-             await loadNote();
+            if (songIndex < 0 || songIndex >= currentSongs.length) {
+                 // Manejar el caso de no haber canción
+                 songClue.textContent = 'No hay canción para este día.';
+                 songTitle.textContent = '-';
+                 songArtist.textContent = '';
+                 song = null;
+            } else {
+                 song = currentSongs[songIndex];
+                 
+                 // Lógica de pista/revelación
+                 songClue.textContent = `Pista: ${song.clue || '???'}`;
+                 songTitle.textContent = 'Adivina la canción...';
+                 songArtist.textContent = '';
+                 songClue.style.display = 'block';
+                 songTitle.style.display = 'none';
+                 itemUnlockMessage.classList.add('hidden'); 
+
+                 setTimeout(() => {
+                     songClue.style.display = 'none';
+                     songTitle.style.display = 'block';
+                     songTitle.textContent = song.title;
+                     songArtist.textContent = song.artist;
+                 }, 2000); 
+            }
         }
-         // Actualizar fecha en el área de notas
-         const friendlyDate = new Date(year, monthIndex, day).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-         noteDate.innerText = `Notas para el ${friendlyDate}.`;
         
-         // Mostrar el modal
-         dayModal.classList.remove('hidden');
+        if (song) {
+            // Pasamos la bandera 'isLocal' a playSong para que sepa si grabar historial
+            await playSong(song, autoplay, isLocal); 
+        } else {
+             audioPlayer.src = '';
+        }
+             
+        await loadNote();
+        
+        // Actualizar fecha en el área de notas
+        const friendlyDate = new Date(year, monthIndex, day).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        noteDate.innerText = `Notas para el ${friendlyDate}.`;
+        
+        dayModal.classList.remove('hidden');
     }
 
-    async function playSong(song, autoplay = true) {
-        // NUEVO: Limpiar URL de objeto local si existe antes de cargar la canción de la web
-        revokePreviousObjectUrl(); 
+    // MODIFICADO: Añadido isLocalSong para controlar el registro de historial
+    async function playSong(song, autoplay = true, isLocalSong = false) { 
 
         if (song && song.src) {
             audioPlayer.src = song.src;
@@ -1309,8 +1331,11 @@
             if (autoplay) {
                 try {
                     await audioPlayer.play();
-                    // Solo registrar y comprobar logros si la reproducción inicia correctamente
-                    await recordListenHistoryAndCheckAchievements();
+                    
+                    // Solo registrar y comprobar logros si NO es una canción local
+                    if (!isLocalSong) {
+                        await recordListenHistoryAndCheckAchievements();
+                    }
                 } catch (error) {
                     // Ignorar errores 'AbortError' que ocurren si el usuario cambia de canción rápidamente
                     if (error.name !== 'AbortError') {
@@ -1324,10 +1349,9 @@
         }
     }
 
-    // --- DATA & ACHIEVEMENTS LOGIC (localStorage) ---
+    // --- DATA & ACHIEVEMENTS LOGIC (Sin Cambios en la lógica de almacenamiento) ---
      async function saveNote() {
           if (!selectedDate) {
-            // No se puede guardar nota sin una fecha de calendario seleccionada (no local file)
             saveNoteButton.textContent = 'Selecciona un día primero';
             setTimeout(() => { saveNoteButton.textContent = 'Guardar Nota'; }, 1500);
             return;
@@ -1597,7 +1621,7 @@
     }
 
 
-    // --- MONIGOTE CUSTOMIZATION LOGIC (localStorage) ---
+    // --- MONIGOTE CUSTOMIZATION LOGIC (Sin Cambios) ---
     async function loadUnlockedItems() {
           try {
               const wardrobe = JSON.parse(localStorage.getItem('musical-calendar-wardrobe') || '{}');
@@ -1719,7 +1743,7 @@
      }
 
 
-    // --- PLAYLIST & OTHER FUNCTIONS ---
+    // --- PLAYLIST & OTHER FUNCTIONS (Sin Cambios) ---
      function playMonthPlaylist() {
           const currentVisibleDate = new Date();
           if (nav !== 0) currentVisibleDate.setMonth(new Date().getMonth() + nav, 1);
@@ -1753,6 +1777,7 @@
           dateForSong.setDate(currentPlaylistIndex + 1); 
           selectedDate = dateForSong.toISOString().split('T')[0]; 
           
+          // No mostramos pista/clue durante la playlist
           songClue.style.display = 'none';
           songTitle.style.display = 'block';
           songTitle.textContent = nextSong.title;
@@ -1760,11 +1785,12 @@
           itemUnlockMessage.classList.add('hidden'); 
           loadNote(); 
           
-          playSong(nextSong, true); 
+          // La playlist solo usa canciones predeterminadas, por lo que isLocalSong es false
+          playSong(nextSong, true, false); 
           globalPlayerContainer.classList.remove('hidden'); 
      }
     
-    // --- APP INITIALIZATION ---
+    // --- APP INITIALIZATION (Sin Cambios) ---
     async function startApp() {
         const savedTheme = localStorage.getItem('musical-calendar-theme') || 'basico';
         applyTheme(savedTheme);
@@ -1792,7 +1818,15 @@
     }
     
     // Listener para limpiar URL del objeto al cerrar la página
-    window.addEventListener('beforeunload', revokePreviousObjectUrl); 
+    window.addEventListener('beforeunload', () => {
+        const mp3Cache = JSON.parse(localStorage.getItem('local-mp3-cache') || '{}');
+        Object.values(mp3Cache).forEach(song => {
+             if (song.src.startsWith('blob:')) {
+                 URL.revokeObjectURL(song.src);
+             }
+        });
+        // console.log("[Cleanup] All local blob URLs revoked on closing.");
+    }); 
 
     // --- Iniciar la aplicación después de que el DOM esté completamente cargado ---
     window.addEventListener('DOMContentLoaded', startApp);

@@ -1,21 +1,28 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Hallstatt | La Joya de los Alpes</title>
     
+    <!-- Metaetiquetas para PWA y SEO -->
+    <meta name="description" content="Guía turística interactiva de Hallstatt, Austria. Historia, gastronomía y lugares imperdibles.">
     <meta name="application-name" content="Hallstatt">
     <meta name="apple-mobile-web-app-title" content="Hallstatt">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fuentes e Iconos -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
 
+    <!-- Manifiesto Dinámico -->
     <link rel="manifest" id="my-manifest">
 
     <script>
@@ -23,28 +30,57 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['DM Sans', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
-                    colors: { brand: { dark: '#0f172a', light: '#f8fafc', accent: '#0ea5e9', gold: '#d97706' } },
-                    spacing: { 'safe-top': 'env(safe-area-inset-top)', 'safe-bottom': 'env(safe-area-inset-bottom)' },
+                    fontFamily: { 
+                        sans: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'], 
+                        serif: ['Playfair Display', 'Georgia', 'serif'] 
+                    },
+                    colors: { 
+                        brand: { 
+                            dark: '#0f172a', 
+                            light: '#f8fafc', 
+                            accent: '#0ea5e9', 
+                            gold: '#d97706' 
+                        } 
+                    },
+                    spacing: { 
+                        'safe-top': 'env(safe-area-inset-top)', 
+                        'safe-bottom': 'env(safe-area-inset-bottom)' 
+                    },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' },
                         }
+                    },
+                    screens: {
+                        'hover-hover': {'raw': '(hover: hover)'},
                     }
                 }
             }
         }
+
+        // Generación dinámica del Manifiesto para PWA
         const manifest = {
-            "name": "Hallstatt Guía", "short_name": "Hallstatt", "start_url": ".", "display": "standalone",
-            "background_color": "#0f172a", "theme_color": "#0ea5e9",
+            "name": "Hallstatt Guía",
+            "short_name": "Hallstatt",
+            "start_url": ".",
+            "display": "standalone",
+            "orientation": "portrait",
+            "background_color": "#0f172a",
+            "theme_color": "#0f172a",
             "icons": [
                 { "src": "https://placehold.co/192x192/0ea5e9/ffffff?text=H", "sizes": "192x192", "type": "image/png" },
-                { "src": "https://placehold.co/512x512/0ea5e9/ffffff?text=Hallstatt", "sizes": "512x512", "type": "image/png" }
+                { "src": "https://placehold.co/512x512/0ea5e9/ffffff?text=Hallstatt", "sizes": "512x512", "type": "image/png" },
+                { "src": "https://placehold.co/512x512/0ea5e9/ffffff?text=H+Maskable", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
             ]
         };
         window.addEventListener('DOMContentLoaded', () => {
@@ -53,66 +89,116 @@
     </script>
 
     <style>
-        body { background-color: #f8fafc; color: #1e293b; transition: background-color 0.3s, color 0.3s; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+        /* Estilos Base y Reset */
+        body { 
+            background-color: #f8fafc; 
+            color: #1e293b; 
+            transition: background-color 0.3s, color 0.3s; 
+            overscroll-behavior-y: none; /* Evita rebote de scroll en Mac/iOS */
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-font-smoothing: antialiased;
+        }
         .dark body { background-color: #0f172a; color: #f1f5f9; }
-        @media all and (display-mode: standalone) { body { padding-top: env(safe-area-inset-top); } }
-        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .dark .glass-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .fade-enter { opacity: 0; transform: translateY(10px); filter: blur(5px); transition: opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s; }
+        
+        /* Ajuste para PWA Standalone (Notch del iPhone) */
+        @media all and (display-mode: standalone) { 
+            body { padding-top: env(safe-area-inset-top); } 
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.75); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        }
+        .dark .glass-card { 
+            background: rgba(30, 41, 59, 0.75); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+
+        /* Animaciones de Entrada */
+        .fade-enter { opacity: 0; transform: translateY(15px); filter: blur(4px); transition: opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s; will-change: opacity, transform; }
         .fade-enter-active { opacity: 1; transform: translateY(0); filter: blur(0); }
-        .stagger-1 { transition-delay: 100ms; } .stagger-2 { transition-delay: 200ms; } .stagger-3 { transition-delay: 300ms; } .stagger-4 { transition-delay: 400ms; }
-        #app-content { transition: opacity 0.3s ease-in-out; }
-        .page-fade-out { opacity: 0; transform: scale(0.98); }
-        .nav-blur { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background-color: rgba(255, 255, 255, 0.8); }
-        .dark .nav-blur { background-color: rgba(15, 23, 42, 0.8); }
-        #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none; }
+        .stagger-1 { transition-delay: 50ms; } .stagger-2 { transition-delay: 100ms; } .stagger-3 { transition-delay: 150ms; } .stagger-4 { transition-delay: 200ms; }
+
+        /* Transiciones de Página */
+        #app-content { transition: opacity 0.25s ease-in-out; }
+        .page-fade-out { opacity: 0; transform: scale(0.99); }
+
+        /* Navbar */
+        .nav-blur { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background-color: rgba(255, 255, 255, 0.85); }
+        .dark .nav-blur { background-color: rgba(15, 23, 42, 0.85); }
+
+        /* Efectos */
+        #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
         #snow-canvas.active { display: block; }
-        .modal-overlay { transition: opacity 0.3s ease-in-out, visibility 0.3s; }
+
+        /* Modales */
+        .modal-overlay { transition: opacity 0.3s ease, visibility 0.3s; }
         .hidden-modal { opacity: 0; visibility: hidden; pointer-events: none; }
         .visible-modal { opacity: 1; visibility: visible; pointer-events: auto; }
+        
+        /* Scrollbars Ocultos pero funcionales */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .tilt-card { transform-style: preserve-3d; perspective: 1000px; }
-        .tilt-inner { transform: translateZ(20px); }
+
+        /* Tilt 3D (Solo Desktop) */
+        @media (hover: hover) {
+            .tilt-card { transform-style: preserve-3d; perspective: 1000px; }
+            .tilt-inner { transform: translateZ(20px); }
+            .hover-trigger:hover .hover-target { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Optimizaciones Móviles */
+        .mobile-touch-target { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; }
+        img { -webkit-user-drag: none; user-select: none; }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col pb-safe-bottom">
+<body class="antialiased min-h-screen flex flex-col pb-safe-bottom selection:bg-brand-accent selection:text-white">
 
     <canvas id="snow-canvas"></canvas>
-    <div id="toast-container" class="fixed bottom-20 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 pointer-events-none w-max max-w-[90%]"></div>
+
+    <!-- Import Input Hidden -->
+    <input type="file" id="import-input" hidden onchange="handleImportFile(event)" accept=".json">
 
     <!-- MODAL DE DETALLE -->
     <div id="detail-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center hidden-modal bg-black/60 backdrop-blur-sm p-4 pt-safe-top pb-safe-bottom">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-transform scale-100 animate-float">
-            <div class="relative h-64 shrink-0">
-                <img id="modal-img" src="" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                <button onclick="closeDetailModal()" class="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition backdrop-blur-md z-10 hover:rotate-90 duration-300"><i class="ph ph-x text-xl"></i></button>
-                <div class="absolute bottom-0 left-0 p-6 text-white">
-                    <span id="modal-category" class="text-xs font-bold uppercase tracking-wider bg-brand-accent px-2 py-1 rounded mb-2 inline-block shadow-lg">Categoría</span>
-                    <h2 id="modal-title" class="text-3xl font-serif font-bold leading-tight">Título</h2>
+        <div class="bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-slide-up md:animate-float">
+            <div class="relative h-64 shrink-0 group">
+                <img id="modal-img" src="" class="w-full h-full object-cover transition duration-700" onerror="this.src='https://placehold.co/800x600/1e293b/FFF?text=Imagen+No+Disponible'">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+                <button onclick="closeDetailModal()" class="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md z-10 transition active:scale-90"><i class="ph ph-x text-xl"></i></button>
+                <div class="absolute bottom-0 left-0 p-6 text-white w-full">
+                    <span id="modal-category" class="text-xs font-bold uppercase tracking-wider bg-brand-accent/90 px-2.5 py-1 rounded mb-2 inline-block shadow-sm backdrop-blur-sm">Categoría</span>
+                    <h2 id="modal-title" class="text-3xl font-serif font-bold leading-tight mt-1 text-shadow">Título</h2>
                 </div>
             </div>
-            <div class="p-8 overflow-y-auto">
-                <p id="modal-desc" class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6"></p>
-                <div class="bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl border-l-4 border-brand-accent">
-                    <h4 class="font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2"><i class="ph-fill ph-lightbulb text-brand-gold animate-pulse"></i> ¿Sabías qué?</h4>
-                    <p id="modal-fact" class="text-sm text-gray-500 dark:text-gray-400">Dato curioso...</p>
+            <div class="p-6 md:p-8 overflow-y-auto overscroll-contain">
+                <p id="modal-desc" class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-8"></p>
+                <div class="bg-brand-light dark:bg-slate-800/50 p-5 rounded-xl border-l-4 border-brand-gold">
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2"><i class="ph-fill ph-lightbulb text-brand-gold animate-pulse"></i> ¿Sabías qué?</h4>
+                    <p id="modal-fact" class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Dato curioso...</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MODAL VISITA -->
-    <div id="visit-modal" class="modal-overlay fixed inset-0 z-[110] flex items-center justify-center hidden-modal bg-black/70 backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-transform scale-100 border border-gray-200 dark:border-gray-800">
+    <div id="visit-modal" class="modal-overlay fixed inset-0 z-[110] flex items-end md:items-center justify-center hidden-modal bg-black/70 backdrop-blur-sm p-0 md:p-4 pb-safe-bottom">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-2xl md:rounded-2xl shadow-2xl p-6 animate-slide-up border-t md:border border-gray-200 dark:border-gray-800">
+            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-6 md:hidden"></div>
             <h3 class="text-2xl font-bold mb-2 dark:text-white flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Registrar Visita</h3>
             <p class="mb-4 text-gray-600 dark:text-gray-300">¿Qué te pareció <span id="visit-place-name" class="font-bold text-brand-accent"></span>?</p>
             <input type="hidden" id="visit-place-id">
-            <textarea id="visit-note" class="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-slate-800 dark:text-white mb-6 focus:ring-2 focus:ring-brand-accent outline-none transition" rows="3" placeholder="Nota personal..."></textarea>
-            <div class="flex justify-end gap-3">
-                <button onclick="closeVisitModal()" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 transition font-medium">Cancelar</button>
-                <button onclick="confirmVisit()" class="px-6 py-2 bg-brand-accent text-white rounded-lg font-bold hover:bg-blue-600 transition shadow-lg hover:scale-105 active:scale-95">Guardar</button>
+            <textarea id="visit-note" class="w-full p-4 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-slate-800 dark:text-white mb-6 focus:ring-2 focus:ring-brand-accent outline-none transition resize-none text-base" rows="3" placeholder="Escribe tu nota personal aquí..."></textarea>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="closeVisitModal()" class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition">Cancelar</button>
+                <button onclick="confirmVisit()" class="px-4 py-3 bg-brand-accent text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg shadow-blue-500/30">Guardar</button>
             </div>
         </div>
     </div>
@@ -121,40 +207,47 @@
     <nav class="fixed w-full z-40 nav-blur border-b border-gray-200 dark:border-gray-800 transition-all duration-300 pt-safe-top" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0 flex items-center cursor-pointer select-none hover:scale-105 transition duration-300" onclick="router.navigate('home')">
+                <div class="flex-shrink-0 flex items-center cursor-pointer select-none active:opacity-70 transition" onclick="router.navigate('home')">
                     <i class="ph-fill ph-mountains text-3xl text-brand-accent mr-2"></i>
-                    <span class="font-serif text-xl font-bold tracking-tight">Hallstatt<span class="text-brand-accent">Guide</span></span>
+                    <span class="font-serif text-xl font-bold tracking-tight dark:text-white">Hallstatt<span class="text-brand-accent">Guide</span></span>
                 </div>
-                <div class="hidden md:flex space-x-4 lg:space-x-8 items-center">
-                    <a onclick="router.navigate('home')" class="cursor-pointer hover:text-brand-accent transition font-medium relative group">Explorar <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all group-hover:w-full"></span></a>
-                    <a onclick="router.navigate('history')" class="cursor-pointer hover:text-brand-accent transition font-medium relative group">Historia <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all group-hover:w-full"></span></a>
-                    <a onclick="router.navigate('food')" class="cursor-pointer hover:text-brand-accent transition font-medium relative group">Gastronomía <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all group-hover:w-full"></span></a>
-                    <a onclick="router.navigate('profile')" class="cursor-pointer hover:text-brand-accent transition font-medium flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:shadow-md"><i class="ph ph-user"></i> <span id="nav-profile-label">Mi Perfil</span></a>
-                    <div class="flex items-center gap-2 border-l pl-4 ml-2 border-gray-300 dark:border-gray-700">
-                        <button id="snow-toggle" class="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-400 transition hover:rotate-12"><i class="ph ph-snowflake text-xl"></i></button>
-                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition hover:-rotate-12"><i class="ph ph-moon text-xl" id="theme-icon"></i></button>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-6 lg:space-x-8 items-center">
+                    <a onclick="router.navigate('home')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-brand-accent dark:hover:text-brand-accent transition font-medium relative group py-2">Explorar <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-accent transition-all group-hover:w-full"></span></a>
+                    <a onclick="router.navigate('history')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-brand-accent dark:hover:text-brand-accent transition font-medium relative group py-2">Historia <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-accent transition-all group-hover:w-full"></span></a>
+                    <a onclick="router.navigate('food')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-brand-accent dark:hover:text-brand-accent transition font-medium relative group py-2">Gastronomía <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-accent transition-all group-hover:w-full"></span></a>
+                    <a onclick="router.navigate('profile')" class="cursor-pointer hover:text-brand-accent transition font-medium flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 hover:shadow-md dark:text-white"><i class="ph ph-user"></i> <span id="nav-profile-label">Perfil</span></a>
+                    
+                    <div class="flex items-center gap-2 border-l pl-4 border-gray-300 dark:border-gray-700">
+                        <button id="snow-toggle" class="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-400 transition hover:rotate-12" aria-label="Toggle Snow"><i class="ph ph-snowflake text-xl"></i></button>
+                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition hover:-rotate-12 text-gray-600 dark:text-gray-300" aria-label="Toggle Theme"><i class="ph ph-moon text-xl" id="theme-icon"></i></button>
                     </div>
                 </div>
-                <div class="md:hidden flex items-center gap-3">
-                      <button id="snow-toggle-mobile" class="p-2 text-blue-400 rounded-full"><i class="ph ph-snowflake text-xl"></i></button>
-                    <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="p-2 rounded-full"><i class="ph ph-list text-2xl"></i></button>
+
+                <!-- Mobile Menu Actions -->
+                <div class="md:hidden flex items-center gap-4">
+                    <button id="snow-toggle-mobile" class="mobile-touch-target text-blue-400" aria-label="Nieve"><i class="ph ph-snowflake text-xl"></i></button>
+                    <button onclick="toggleMobileMenu()" class="mobile-touch-target text-gray-800 dark:text-white" aria-label="Menú"><i class="ph ph-list text-2xl"></i></button>
                 </div>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-900 border-t dark:border-gray-800 absolute w-full shadow-xl pb-safe-bottom">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a onclick="router.navigate('home')" class="block px-3 py-3 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"><i class="ph ph-compass text-xl"></i> Explorar</a>
-                <a onclick="router.navigate('history')" class="block px-3 py-3 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"><i class="ph ph-scroll text-xl"></i> Historia</a>
-                <a onclick="router.navigate('food')" class="block px-3 py-3 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"><i class="ph ph-fork-knife text-xl"></i> Gastronomía</a>
-                <a onclick="router.navigate('profile')" class="block px-3 py-3 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"><i class="ph ph-user text-xl"></i> Mi Perfil</a>
-                <div class="border-t dark:border-gray-700 mt-2 pt-2 px-3">
-                     <button id="theme-toggle-mobile" class="w-full text-left py-3 font-medium flex items-center gap-3"><i class="ph ph-moon text-xl"></i> Cambiar Tema</button>
+
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b dark:border-gray-800 absolute w-full shadow-xl pb-safe-bottom z-50 transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a onclick="router.navigate('home')" class="block px-4 py-3 rounded-xl font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3 active:scale-98 transition"><i class="ph ph-compass text-xl text-brand-accent"></i> Explorar</a>
+                <a onclick="router.navigate('history')" class="block px-4 py-3 rounded-xl font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3 active:scale-98 transition"><i class="ph ph-scroll text-xl text-brand-accent"></i> Historia</a>
+                <a onclick="router.navigate('food')" class="block px-4 py-3 rounded-xl font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3 active:scale-98 transition"><i class="ph ph-fork-knife text-xl text-brand-accent"></i> Gastronomía</a>
+                <a onclick="router.navigate('profile')" class="block px-4 py-3 rounded-xl font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3 active:scale-98 transition"><i class="ph ph-user text-xl text-brand-accent"></i> Mi Perfil</a>
+                <div class="border-t dark:border-gray-700 mt-4 pt-4 px-2">
+                      <button id="theme-toggle-mobile" class="w-full text-left py-2 font-medium flex items-center gap-3 text-gray-600 dark:text-gray-400"><i class="ph ph-moon text-xl"></i> Cambiar Tema (Día/Noche)</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main id="app-content" class="flex-grow pt-16 pb-20 md:pb-0"></main>
+    <main id="app-content" class="flex-grow pt-16 pb-8 md:pb-0"></main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -169,6 +262,12 @@
         let currentDemoEmail = null; 
         let isOfflineMode = false;
         let currentPage = 'home';
+
+        // Placeholder fallback para imágenes rotas (Vital para Demo)
+        window.handleImgError = (img) => {
+            img.onerror = null;
+            img.src = "https://placehold.co/800x600/1e293b/FFF?text=Imagen+Hallstatt";
+        };
 
         let firebaseConfig = {};
         if (typeof __firebase_config !== 'undefined') {
@@ -205,13 +304,16 @@
 
         function showToast(msg) {
             const d = document.createElement('div');
-            d.className = "bg-gray-900 text-white px-6 py-3 rounded shadow-xl animate-bounce";
+            d.className = "bg-gray-900/90 backdrop-blur text-white px-6 py-3 rounded-xl shadow-2xl animate-bounce text-center text-sm font-medium border border-gray-700";
             d.innerText = msg;
             document.getElementById('toast-container').appendChild(d);
-            setTimeout(() => d.remove(), 3000);
+            setTimeout(() => {
+                d.classList.add('opacity-0', 'translate-y-4', 'transition-all');
+                setTimeout(() => d.remove(), 500);
+            }, 3000);
         }
 
-        // 3. DATOS ESTÁTICOS (ENRIQUECIDOS)
+        // 3. DATOS ESTÁTICOS
         const PLACES = [
             { 
                 id: 'lake', 
@@ -219,7 +321,7 @@
                 name: 'Lago Hallstätter', 
                 img: 'Imagenes/Explorar/Lago-di-Hallstatt.jpg', 
                 desc: 'Espejo de agua glaciar rodeado de montañas gigantes.', 
-                fullDesc: 'El lago Hallstätter See es mucho más que un cuerpo de agua; es la arteria vital que permitió la existencia de Hallstatt durante milenios. Antes de la construcción de la primera carretera en 1890, todas las mercancías, especialmente la valiosa sal, se transportaban a través de estas aguas oscuras y profundas (hasta 125 metros). Hoy en día, puedes recorrerlo en barcos eléctricos o en las tradicionales "Plätten", barcazas de madera de fondo plano similares a las góndolas, que fueron diseñadas específicamente para transportar barriles de sal por los rápidos del río Traun.', 
+                fullDesc: 'El lago Hallstätter See es mucho más que un cuerpo de agua; es la arteria vital que permitió la existencia de Hallstatt durante milenios. Antes de la construcción de la primera carretera en 1890, todas las mercancías, especialmente la valiosa sal, se transportaban a través de estas aguas oscuras y profundas (hasta 125 metros).', 
                 fact: 'Debido a su profundidad y las montañas circundantes, partes del lago no ven el sol durante semanas en invierno, llegando a congelarse completamente.' 
             },
             { 
@@ -228,7 +330,7 @@
                 name: 'Salzwelten', 
                 img: 'Imagenes/Explorar/Salzwelten Hallstatt_1623323.jpg', 
                 desc: 'La mina de sal más antigua del mundo, activa desde el Neolítico.', 
-                fullDesc: 'Sube en funicular y adéntrate en la historia de la humanidad. Estas minas llevan en funcionamiento más de 7,000 años, lo que las convierte en las más antiguas del mundo. La visita no es solo un museo; es una aventura subterránea que incluye deslizarse por toboganes de madera de 64 metros (usados originalmente por los mineros para desplazarse rápido entre niveles), ver un lago salado subterráneo iluminado místicamente y descubrir cómo el "oro blanco" transformó una región remota en una potencia económica de la Edad de Hierro.', 
+                fullDesc: 'Sube en funicular y adéntrate en la historia de la humanidad. Estas minas llevan en funcionamiento más de 7,000 años. La visita no es solo un museo; es una aventura subterránea que incluye deslizarse por toboganes de madera de 64 metros.', 
                 fact: 'Aquí se descubrió la escalera de madera más antigua de Europa, preservada perfectamente por la sal durante más de 3,000 años.' 
             },
             { 
@@ -237,7 +339,7 @@
                 name: 'Skywalk', 
                 img: 'Imagenes/Explorar/der-hallstatt-skywalk.jpg', 
                 desc: 'Plataforma suspendida a 360m sobre los tejados del pueblo.', 
-                fullDesc: 'Si buscas la "Vista del Patrimonio Mundial" definitiva, este es el lugar. El Skywalk flota libremente a 360 metros sobre los tejados de Hallstatt, sobresaliendo 12 metros del borde de la montaña hacia el abismo. Desde aquí, el pueblo parece una maqueta de juguete y se aprecia la inmensidad del lago y el castillo de Grub en la orilla opuesta. La estructura de acero pesa 200 toneladas y fue un desafío de ingeniería transportarla a esta altura.', 
+                fullDesc: 'Si buscas la "Vista del Patrimonio Mundial" definitiva, este es el lugar. El Skywalk flota libremente a 360 metros sobre los tejados de Hallstatt. Desde aquí, el pueblo parece una maqueta de juguete y se aprecia la inmensidad del lago.', 
                 fact: 'Fue inaugurado para celebrar la designación de la UNESCO y ofrece una de las panorámicas más fotografiadas de Austria.' 
             },
             { 
@@ -246,7 +348,7 @@
                 name: 'Marktplatz', 
                 img: 'Imagenes/Explorar/market .jpg', 
                 desc: 'El corazón histórico, vibrante y colorido.', 
-                fullDesc: 'La Plaza del Mercado (Marktplatz) es el salón de estar de Hallstatt. Rodeada de casas burguesas del siglo XVI pintadas en colores pastel y cubiertas de flores en verano, es el centro de la vida social. En el centro se alza la Columna de la Trinidad, erigida en 1744. Es el lugar perfecto para sentarse en un café, escuchar el agua de la fuente y absorber la atmósfera, imaginando a los comerciantes de sal que se reunían aquí hace siglos.', 
+                fullDesc: 'La Plaza del Mercado (Marktplatz) es el salón de estar de Hallstatt. Rodeada de casas burguesas del siglo XVI pintadas en colores pastel y cubiertas de flores en verano. En el centro se alza la Columna de la Trinidad, erigida en 1744.', 
                 fact: 'Cada diciembre, esta plaza acoge un mercado navideño de cuento de hadas, con artesanía local y vino caliente bajo las montañas nevadas.' 
             },
             { 
@@ -255,7 +357,7 @@
                 name: 'Osario (Beinhaus)', 
                 img: 'Imagenes/Explorar/Osario (Beinhaus).jpg', 
                 desc: 'Una capilla única decorada con cráneos pintados.', 
-                fullDesc: 'Ubicado en la Capilla de San Miguel, este es uno de los lugares más inusuales y conmovedores del mundo. Debido a que el cementerio de Hallstatt es minúsculo y está encaramado en la roca, no había espacio para expandirse. Desde el siglo XII, se desarrolló una tradición pragmática y respetuosa: pasados 10-15 años del entierro, los huesos eran exhumados para hacer sitio a los nuevos difuntos. Los cráneos se limpiaban y se blanqueaban al sol, para luego ser pintados amorosamente con guirnaldas de flores (rosas, hiedra, laurel) y el nombre del difunto.', 
+                fullDesc: 'Ubicado en la Capilla de San Miguel, este es uno de los lugares más inusuales y conmovedores del mundo. Debido a que el cementerio de Hallstatt es minúsculo, los huesos eran exhumados para hacer sitio a los nuevos difuntos, blanqueados al sol y pintados.', 
                 fact: 'Contiene más de 1,200 cráneos, de los cuales 600 están pintados.' 
             },
             { 
@@ -264,7 +366,7 @@
                 name: 'Five Fingers', 
                 img: 'Imagenes/Explorar/austria-5-fingers.jpg', 
                 desc: 'Adrenalina pura con vistas a 400 metros de caída libre.', 
-                fullDesc: 'Ubicado en el macizo de Dachstein, accesible por teleférico, esta plataforma de observación recibe su nombre por su forma de mano con 5 "dedos" que se extienden sobre un precipicio de 400 metros de profundidad. Cada dedo ofrece una experiencia diferente: uno tiene un suelo de cristal vertiginoso, otro un marco barroco para fotos, y otro un telescopio. Es posiblemente el mirador más espectacular de los Alpes, ofreciendo una vista completa de la región de Salzkammergut.', 
+                fullDesc: 'Ubicado en el macizo de Dachstein, accesible por teleférico, esta plataforma de observación recibe su nombre por su forma de mano con 5 "dedos" que se extienden sobre un precipicio de 400 metros de profundidad.', 
                 fact: 'Es considerada una de las plataformas más espectaculares de los Alpes.' 
             },
             { 
@@ -273,7 +375,7 @@
                 name: 'Iglesia Evangélica', 
                 img: 'Imagenes/Explorar/iglesia-protestante.jpg', 
                 desc: 'La icónica torre delgada que define el horizonte.', 
-                fullDesc: 'Ninguna foto de Hallstatt está completa sin la esbelta aguja de la Christuskirche. Construida en 1863, esta iglesia neogótica se alza justo a la orilla del lago. Su construcción fue un hito de libertad religiosa tras el Edicto de Tolerancia del Emperador José II, ya que durante mucho tiempo los protestantes (muchos mineros lo eran) tuvieron que practicar su fe en secreto. Hoy, su silueta reflejada en el lago es el símbolo mundial del pueblo.', 
+                fullDesc: 'Ninguna foto de Hallstatt está completa sin la esbelta aguja de la Christuskirche. Construida en 1863, esta iglesia neogótica se alza justo a la orilla del lago. Su construcción fue un hito de libertad religiosa.', 
                 fact: 'Se construyó relativamente tarde, tras el Edicto de Tolerancia.' 
             }
         ];
@@ -285,7 +387,7 @@
                 name: 'Cultura Hallstatt', 
                 img: 'Imagenes/HIstoria/Cultura-Hallstatt-c.-1200-500-aC-.jpg', 
                 shortDesc: 'Una civilización entera lleva el nombre de este pueblo.', 
-                fullDesc: 'Entre el 800 y el 450 a.C., Hallstatt fue tan importante que dio nombre a toda una era de la historia humana temprana: la "Cultura de Hallstatt". Las excavaciones de un inmenso cementerio prehistórico en el valle alto revelaron ajuares funerarios de una riqueza inimaginable: ámbar del Báltico, vidrio de Italia y marfil de África. Esto demostró que la sal ("el oro blanco") había conectado a este remoto valle con redes comerciales de todo el continente mucho antes de Roma.',
+                fullDesc: 'Entre el 800 y el 450 a.C., Hallstatt fue tan importante que dio nombre a toda una era de la historia humana temprana: la "Cultura de Hallstatt". Las excavaciones de un inmenso cementerio prehistórico en el valle alto revelaron ajuares funerarios de una riqueza inimaginable.',
                 fact: 'Se han excavado más de 1,000 tumbas, y se estima que hay miles más aún sin descubrir.'
             },
             { 
@@ -294,7 +396,7 @@
                 name: 'El Gran Incendio de 1750', 
                 img: 'Imagenes/HIstoria/Incendio.jpg', 
                 shortDesc: 'La tragedia que redefinió la arquitectura del pueblo.', 
-                fullDesc: 'El 20 de septiembre de 1750, una chispa inició un incendio devastador que arrasó el centro medieval de Hallstatt, destruyendo 35 casas principales en la plaza del mercado y matando a cuatro personas. La tragedia, sin embargo, dio forma al Hallstatt que vemos hoy: el pueblo fue reconstruido casi en su totalidad en el estilo barroco tardío de la época, utilizando piedra en lugar de madera, creando la armonía arquitectónica que hoy es Patrimonio de la Humanidad.',
+                fullDesc: 'El 20 de septiembre de 1750, una chispa inició un incendio devastador que arrasó el centro medieval de Hallstatt. La tragedia, sin embargo, dio forma al Hallstatt que vemos hoy: el pueblo fue reconstruido casi en su totalidad en el estilo barroco tardío.',
                 fact: 'La mayoría de las casas de madera medievales originales se perdieron para siempre ese día.'
             },
             { 
@@ -303,7 +405,7 @@
                 name: 'El Hombre de Sal', 
                 img: 'Imagenes/HIstoria/Hombre en la sal.jpeg', 
                 shortDesc: 'Un minero de la Edad de Bronce hallado perfectamente conservado.', 
-                fullDesc: 'En 1734, los mineros se toparon con algo aterrador y fascinante: el cuerpo de un hombre incrustado en la roca de sal, totalmente preservado, con su ropa y herramientas intactas. Inicialmente pensaron que era una víctima reciente, pero los estudios revelaron que era un minero celta de alrededor del 1000 a.C., víctima de un derrumbe prehistórico. La sal había momificado su cuerpo a la perfección. Fue enterrado en el cementerio local, un puente directo entre los mineros modernos y sus ancestros de hace 3000 años.',
+                fullDesc: 'En 1734, los mineros se toparon con algo aterrador y fascinante: el cuerpo de un hombre incrustado en la roca de sal, totalmente preservado. Los estudios revelaron que era un minero celta de alrededor del 1000 a.C., víctima de un derrumbe prehistórico.',
                 fact: 'Sus zapatos de cuero y sus herramientas de madera estaban tan bien conservados que parecían nuevos.'
             },
             { 
@@ -312,7 +414,7 @@
                 name: 'Patrimonio UNESCO', 
                 img: 'Imagenes/HIstoria/Unesco.jpg', 
                 shortDesc: 'Reconocimiento global en 1997.', 
-                fullDesc: 'En 1997, la región de Hallstatt-Dachstein/Salzkammergut fue inscrita en la lista del Patrimonio Mundial de la UNESCO. No solo por su belleza natural de "fiordo alpino", sino como un paisaje cultural excepcional. La UNESCO reconoció la continuidad de la actividad humana (minería de sal) durante milenios y cómo esta industria técnica se integró armoniosamente en un entorno natural frágil sin destruirlo, creando un paisaje único de interacción hombre-naturaleza.',
+                fullDesc: 'En 1997, la región de Hallstatt-Dachstein/Salzkammergut fue inscrita en la lista del Patrimonio Mundial de la UNESCO. No solo por su belleza natural de "fiordo alpino", sino como un paisaje cultural excepcional.',
                 fact: 'Es uno de los pocos sitios en el mundo que cumple criterios tanto de patrimonio "cultural" como "natural".'
             },
             { 
@@ -321,7 +423,7 @@
                 name: 'El Oleoducto de 1595', 
                 img: 'Imagenes/HIstoria/0389-paisaje-cultural-de-hallstatt-dachstein-salzkammergut.jpg', 
                 shortDesc: 'El oleoducto industrial más antiguo del mundo.', 
-                fullDesc: 'Hallstatt tiene un récord de ingeniería poco conocido: el oleoducto industrial más antiguo del mundo aún en funcionamiento. Construido en 1595, no transportaba petróleo, sino salmuera (agua salada) desde la mina hasta la planta de procesamiento en Ebensee, a 40 km de distancia, ya que en Hallstatt se estaba acabando la madera para calentar las calderas de evaporación. Se utilizaron 13,000 troncos de árboles ahuecados manualmente para crear esta tubería revolucionaria.',
+                fullDesc: 'Hallstatt tiene un récord de ingeniería poco conocido: el oleoducto industrial más antiguo del mundo aún en funcionamiento. Construido en 1595, no transportaba petróleo, sino salmuera (agua salada) desde la mina hasta la planta de procesamiento en Ebensee.',
                 fact: 'La salmuera todavía fluye hoy, aunque las tuberías de madera han sido reemplazadas por materiales modernos.'
             },
             { 
@@ -330,7 +432,7 @@
                 name: 'Huellas Romanas', 
                 img: 'Imagenes/HIstoria/Huella.jpeg', 
                 shortDesc: 'Excavaciones de un asentamiento de lujo bajo una tienda.', 
-                fullDesc: 'Durante las obras de renovación de una tienda de deportes local (Janu), se descubrieron extensas ruinas romanas. Las excavaciones revelaron que Hallstatt no era un puesto fronterizo primitivo, sino un asentamiento comercial de lujo. Se encontraron sistemas de calefacción por suelo radiante (hipocausto) y cerámicas finas importadas de todo el Imperio, demostrando que los administradores de la sal vivían con un confort extraordinario hace 2,000 años.',
+                fullDesc: 'Durante las obras de renovación de una tienda de deportes local (Janu), se descubrieron extensas ruinas romanas. Las excavaciones revelaron que Hallstatt no era un puesto fronterizo primitivo, sino un asentamiento comercial de lujo.',
                 fact: 'Puedes bajar al sótano de la tienda para ver las ruinas romanas in situ.'
             },
             { 
@@ -339,8 +441,8 @@
                 name: 'Descubrimiento Romántico', 
                 img: 'Imagenes/HIstoria/caspar-david-friedrich-viandante-sul-mare-di-nebbia.jpg', 
                 shortDesc: 'Cómo el arte puso a Hallstatt en el mapa turístico.', 
-                fullDesc: 'Antes del siglo XIX, Hallstatt era un lugar industrial cerrado, accesible solo con permisos especiales. Fueron los escritores y pintores del Romanticismo (Biedermeier) quienes "redescubrieron" el lugar. Fascinados por la belleza salvaje y melancólica del lago y las montañas, sus cuadros y relatos viajaron por Europa, atrayendo a la primera ola de turistas aristocráticos y aventureros que llegaban en carruajes y barcos de vapor mucho antes de que existieran carreteras modernas.',
-                fact: 'La emperatriz Sissi y el emperador Francisco José eran visitantes asiduos, iniciando la moda del "Verano en el campo" (Sommerfrische).'
+                fullDesc: 'Antes del siglo XIX, Hallstatt era un lugar industrial cerrado. Fueron los escritores y pintores del Romanticismo (Biedermeier) quienes "redescubrieron" el lugar. Fascinados por la belleza salvaje y melancólica del lago y las montañas, sus cuadros viajaron por Europa.',
+                fact: 'La emperatriz Sissi y el emperador Francisco José eran visitantes asiduos.'
             }
         ];
 
@@ -351,8 +453,8 @@
                 name: 'Reinanke a la Parrilla', 
                 img: 'Imagenes/Gastronomia/Reinanke a la parrilla.jpg', 
                 shortDesc: 'El rey del lago, pescado fresco y delicado.', 
-                fullDesc: 'El Reinanke (pescado blanco) es el tesoro culinario del lago Hallstatt. Pescado diariamente en sus aguas cristalinas y frías, tiene una carne blanca, firme y de sabor muy suave. La preparación tradicional es "Müllerin Art" (ligeramente enharinado y frito en mantequilla hasta que esté dorado) o simplemente a la parrilla con hierbas alpinas. Es un plato de "kilómetro cero" en su máxima expresión, servido con patatas al perejil y mantequilla derretida.',
-                fact: 'Este pez es nativo de los lagos alpinos posglaciares y es un indicador de la pureza extrema del agua.'
+                fullDesc: 'El Reinanke (pescado blanco) es el tesoro culinario del lago Hallstatt. Pescado diariamente en sus aguas cristalinas y frías, tiene una carne blanca, firme y de sabor muy suave. La preparación tradicional es "Müllerin Art" o a la parrilla.', 
+                fact: 'Este pez es nativo de los lagos alpinos posglaciares y es un indicador de la pureza extrema del agua.' 
             },
             { 
                 id: 'schnitzel', 
@@ -360,8 +462,8 @@
                 name: 'Wiener Schnitzel', 
                 img: 'Imagenes/Gastronomia/wiener-schnitzel.jpg', 
                 shortDesc: 'El clásico austriaco: ternera empanada perfecta.', 
-                fullDesc: 'Aunque es famoso en todo el mundo, comer un Schnitzel en Austria es otra liga. La clave es la carne: auténtica ternera lechal, golpeada hasta quedar fina como el papel. El empanado no debe pegarse a la carne, sino "souflar" (hincharse) creando ondas crujientes y doradas. En Hallstatt se sirve tradicionalmente con ensalada de patatas tibia (con caldo, vinagre y aceite de semillas de calabaza) y una cucharada de mermelada de arándanos rojos para contrastar.',
-                fact: 'Por ley en Austria, si el menú dice "Wiener Schnitzel" debe ser ternera. Si es de cerdo, se llama "Schnitzel Wiener Art".'
+                fullDesc: 'La clave es la carne: auténtica ternera lechal, golpeada hasta quedar fina como el papel. El empanado no debe pegarse a la carne, sino "souflar" (hincharse) creando ondas crujientes y doradas. Se sirve tradicionalmente con ensalada de patatas tibia.', 
+                fact: 'Por ley en Austria, si el menú dice "Wiener Schnitzel" debe ser ternera. Si es de cerdo, se llama "Schnitzel Wiener Art".' 
             },
             { 
                 id: 'kaiserschmarrn', 
@@ -369,8 +471,8 @@
                 name: 'Kaiserschmarrn', 
                 img: 'Imagenes/Gastronomia/kaiserschmarrn-fluffy.jpg', 
                 shortDesc: 'El "desastre" dulce favorito del Emperador.', 
-                fullDesc: 'Más que un postre, es una institución. Es una tortilla dulce, gruesa y esponjosa (gracias a las claras montadas a nieve) que se rompe en trozos irregulares mientras se fríe en la sartén. Se carameliza ligeramente con azúcar y pasas empapadas en ron. Se sirve caliente, espolvoreado con azúcar glas y acompañado obligatoriamente de "Zwetschkenröster" (compota de ciruelas asadas). Cuenta la leyenda que fue un "accidente" culinario que encantó al Emperador Francisco José I.',
-                fact: 'En los refugios de montaña, los excursionistas a menudo lo piden como plato principal energético para compartir.'
+                fullDesc: 'Más que un postre, es una institución. Es una tortilla dulce, gruesa y esponjosa que se rompe en trozos irregulares mientras se fríe en la sartén. Se carameliza ligeramente con azúcar y pasas empapadas en ron.', 
+                fact: 'En los refugios de montaña, los excursionistas a menudo lo piden como plato principal energético para compartir.' 
             },
             { 
                 id: 'schaumrollen', 
@@ -378,8 +480,8 @@
                 name: 'Schaumrollen', 
                 img: 'Imagenes/Gastronomia/Hallstatt-schaumrollen.jpg', 
                 shortDesc: 'Rollos de merengue, dulces y pegajosos.', 
-                fullDesc: 'Un dulce icónico de los mercados y ferias austriacas. Son tubos de hojaldre crujiente horneados y luego rellenados generosamente con una crema de merengue italiano (claras de huevo y almíbar caliente) suave y brillante. Son extremadamente dulces, pegajosos y adictivos. Ver a las abuelas locales prepararlos y rellenarlos en el momento es parte de la experiencia.',
-                fact: 'Se dice que la mejor manera de comerlos es sin usar las manos para no mancharse, ¡un reto divertido!'
+                fullDesc: 'Un dulce icónico de los mercados y ferias austriacas. Son tubos de hojaldre crujiente horneados y luego rellenados generosamente con una crema de merengue italiano suave y brillante.', 
+                fact: 'Se dice que la mejor manera de comerlos es sin usar las manos para no mancharse, ¡un reto divertido!' 
             },
             { 
                 id: 'bauernkrapfen', 
@@ -387,8 +489,8 @@
                 name: 'Bauernkrapfen', 
                 img: 'Imagenes/Gastronomia/bauernkrapfen.jpg', 
                 shortDesc: 'La rosquilla campesina: dulce o salada.', 
-                fullDesc: 'Una especialidad rústica de las granjas alpinas. Es una masa de levadura frita en manteca caliente hasta que se infla, dejando un centro delgado y crujiente ("la ventana") y un borde grueso y esponjoso. Lo genial es su versatilidad: se puede comer dulce (relleno de mermelada de albaricoque y azúcar glas) o salado (relleno de chucrut ácido). Es el sabor de las fiestas populares y las cosechas.',
-                fact: 'Antiguamente se preparaban en grandes cantidades para alimentar a los trabajadores del campo durante la siega.'
+                fullDesc: 'Una especialidad rústica de las granjas alpinas. Es una masa de levadura frita en manteca caliente hasta que se infla, dejando un centro delgado y crujiente ("la ventana") y un borde grueso y esponjoso.', 
+                fact: 'Antiguamente se preparaban en grandes cantidades para alimentar a los trabajadores del campo durante la siega.' 
             },
             { 
                 id: 'zirbenschnaps', 
@@ -396,8 +498,8 @@
                 name: 'Zirbenschnaps', 
                 img: 'Imagenes/Gastronomia/hallstatt-austria-june-2017-souvenir-260nw-701511403.jpg', 
                 shortDesc: 'El licor rojo sagrado de las montañas.', 
-                fullDesc: 'El "Schnaps" (aguardiente) es medicinal en los Alpes, y el Zirbenschnaps es el rey. Se elabora macerando las piñas jóvenes y rojas del pino cembro (Zirbe), un árbol resistente que solo crece a gran altitud (sobre los 1500m). El resultado es un licor de color rojizo intenso con un sabor único: amaderado, resinoso y ligeramente dulce. Se dice que calma el estómago y el corazón.',
-                fact: 'La cosecha de las piñas de Zirbe está estrictamente regulada y solo se permite durante unas pocas semanas en verano.'
+                fullDesc: 'El "Schnaps" (aguardiente) es medicinal en los Alpes, y el Zirbenschnaps es el rey. Se elabora macerando las piñas jóvenes y rojas del pino cembro (Zirbe), un árbol resistente que solo crece a gran altitud.', 
+                fact: 'La cosecha de las piñas de Zirbe está estrictamente regulada y solo se permite durante unas pocas semanas en verano.' 
             },
             { 
                 id: 'kaspress', 
@@ -405,8 +507,8 @@
                 name: 'Kaspressknödel', 
                 img: 'Imagenes/Gastronomia/Tiroler-Knoedel_Oesterreich-Werbung_Wolfgang-Schardt.jpg', 
                 shortDesc: 'Bolas de queso prensado y frito en sopa.', 
-                fullDesc: 'Olvídate de las bolas de masa hervidas; los Kaspressknödel son de otro nivel. Son bolas aplanadas hechas de pan viejo, leche, huevos y, lo más importante, abundante queso "Bierkäse" o "Bergkäse" (queso de montaña fuerte y oloroso). Se fríen en manteca hasta que están crujientes y dorados por fuera, y luego se sirven flotando en un tazón de caldo de carne humeante, adornado con cebollino fresco.',
-                fact: 'Es el almuerzo de esquí por excelencia: calienta el cuerpo, llena el estómago y repone la sal perdida.'
+                fullDesc: 'Olvídate de las bolas de masa hervidas; los Kaspressknödel son de otro nivel. Son bolas aplanadas hechas de pan viejo, leche, huevos y abundante queso de montaña fuerte. Se fríen en manteca hasta que están crujientes.', 
+                fact: 'Es el almuerzo de esquí por excelencia: calienta el cuerpo, llena el estómago y repone la sal perdida.' 
             }
         ];
 
@@ -421,11 +523,11 @@
 
             if (isOfflineMode && currentUser) {
                 displayName = currentUser.displayName || "Usuario Local";
-                status = "Local (Simulado)";
+                status = "Local (Dispositivo)";
                 showLogin = false;
             } else if (auth?.currentUser && !auth.currentUser.isAnonymous) {
                 displayName = currentUser.displayName || currentUser.email?.split('@')[0] || "Usuario";
-                status = "Sincronizado";
+                status = "Sincronizado (Nube)";
                 showLogin = false;
             } else if (currentDemoEmail) {
                 displayName = currentDemoEmail.split('@')[0];
@@ -439,9 +541,9 @@
             if(statusEl) statusEl.innerText = status;
             
             if(showLogin) {
-                area.innerHTML = `<button onclick="toggleLoginView()" class="px-5 py-2 bg-gray-900 dark:bg-white text-white dark:text-slate-900 rounded hover:scale-105 transition">Conectar</button>`;
+                area.innerHTML = `<button onclick="toggleLoginView()" class="w-full md:w-auto px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-slate-900 rounded-lg font-bold shadow hover:scale-105 transition">Conectar Cuenta</button>`;
             } else {
-                 area.innerHTML = `<button onclick="doLogout()" class="px-4 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50 hover:scale-105 transition">Salir</button>`;
+                 area.innerHTML = `<button onclick="doLogout()" class="w-full md:w-auto px-4 py-2.5 border border-red-500 text-red-500 rounded-lg font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition">Cerrar Sesión</button>`;
                  const loginContainer = document.getElementById('login-container');
                  if(loginContainer) loginContainer.classList.add('hidden');
             }
@@ -454,10 +556,12 @@
                     entry.target.classList.add('fade-enter-active');
                 }
             });
-        });
+        }, { threshold: 0.1 });
 
-        // --- Tilt Effect ---
+        // --- Tilt Effect (Optimizado para NO dispararse en Móvil) ---
         function applyTilt(element) {
+            if (window.matchMedia("(hover: none)").matches) return; // Desactivar en táctil
+
             element.addEventListener('mousemove', (e) => {
                 const rect = element.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -476,19 +580,19 @@
         function loadComments() {
             const container = document.getElementById('comments-feed');
             
-            // 1. CARGAR LOCALMENTE SIEMPRE PRIMERO (Para offline o "instantáneo")
+            // 1. CARGAR LOCALMENTE SIEMPRE PRIMERO (Instantáneo)
             const localComments = JSON.parse(localStorage.getItem('hallstatt_local_comments') || '[]');
             if (localComments.length > 0) {
                 renderCommentsList(localComments);
             } else if (isOfflineMode || !db) {
-                container.innerHTML = '<p class="text-center text-gray-400 italic">Modo Offline: Sé el primero en comentar localmente.</p>';
+                container.innerHTML = '<div class="p-4 text-center border border-dashed border-gray-300 rounded-xl"><p class="text-gray-400 italic">Modo Offline: Sé el primero en comentar localmente.</p></div>';
             }
 
             // 2. SI HAY NUBE, INTENTAR CARGAR Y MEZCLAR
             if (db && !isOfflineMode && (auth?.currentUser || currentUser)) {
                 if(commentsUnsubscribe) commentsUnsubscribe();
                 
-                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'hallstatt_comments'), orderBy('timestamp', 'desc'), limit(5));
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'hallstatt_comments'), orderBy('timestamp', 'desc'), limit(10));
                 
                 commentsUnsubscribe = onSnapshot(q, (snap) => {
                     const cloudDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -504,44 +608,22 @@
         function renderCommentsList(docs) {
              const container = document.getElementById('comments-feed');
              container.innerHTML = docs.map((d, i) => `
-                <div class="bg-white dark:bg-slate-700/50 p-4 rounded border border-gray-100 dark:border-gray-600 fade-enter stagger-${(i%4)+1} relative group">
-                    <div class="flex justify-between items-start">
-                        <div class="font-bold text-brand-accent text-sm">${d.name}</div>
-                        <button onclick="deleteComment('${d.id}')" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1">
-                            <i class="ph ph-trash"></i>
+                <div class="bg-white dark:bg-slate-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600 fade-enter stagger-${(i%4)+1} relative group transition hover:shadow-md">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent"><i class="ph-fill ph-user"></i></div>
+                            <div class="font-bold text-brand-dark dark:text-white text-sm">${d.name}</div>
+                        </div>
+                        <button onclick="deleteComment('${d.id}')" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2">
+                            <i class="ph ph-trash text-lg"></i>
                         </button>
                     </div>
-                    <p class="text-gray-700 dark:text-gray-300 text-sm mt-1">${d.text}</p>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed pl-10">${d.text}</p>
                 </div>
             `).join('') || '<p class="text-center text-gray-400">Sé el primero</p>';
             
             document.querySelectorAll('#comments-feed .fade-enter').forEach(el => observer.observe(el));
         }
-        
-        window.deleteComment = async (id) => {
-    // 1. Intentar borrar localmente
-    const localComments = JSON.parse(localStorage.getItem('hallstatt_local_comments') || '[]');
-    const newLocalComments = localComments.filter(c => c.id !== id);
-    if (localComments.length !== newLocalComments.length) {
-        localStorage.setItem('hallstatt_local_comments', JSON.stringify(newLocalComments));
-        loadComments(); // <-- AGREGADO (faltaba)
-        showToast("Comentario borrado (Local)");
-        return;
-    }
-
-    // 2. Intentar borrar de la nube
-    if (db && !isOfflineMode && id && !id.startsWith('local-')) {
-        try {
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'hallstatt_comments', id));
-            loadComments(); // <-- AGREGADO (faltaba)
-            showToast("Comentario borrado");
-        } catch (e) {
-            console.error(e);
-            showToast("No tienes permiso para borrar este comentario");
-        }
-    }
-};
-
 
         async function renderHome(container) {
             container.classList.add('page-fade-out');
@@ -554,63 +636,68 @@
 
                 container.innerHTML = `
                     <div class="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center px-4 overflow-hidden group">
-                        <div id="hero-bg" class="absolute inset-0 bg-[url('Imagenes/Explorar/vistas-panorámicas.png')] bg-cover bg-center transition-transform duration-100 ease-out" style="transform: scale(1.1);"></div>
+                        <img src="https://placehold.co/1920x1080/2563eb/FFF?text=Hallstatt+Panor%C3%A1mica" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 md:group-hover:scale-105" onerror="this.src='https://placehold.co/1920x1080/2563eb/FFF?text=Hallstatt+Panor%C3%A1mica'">
+                         <!-- Intentar cargar la imagen local, si falla, se queda el placeholder de arriba o usa el onerror inline -->
+                        <img src="Imagenes/Explorar/vistas-panorámicas.png" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 md:group-hover:scale-105 hidden md:block" onerror="this.style.display='none'">
+                        
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
                         <div class="relative z-10 max-w-3xl">
-                            <h1 class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 drop-shadow-lg fade-enter stagger-1">El pueblo de cuento</h1>
-                            <p class="text-xl text-gray-200 mb-8 font-light fade-enter stagger-2">Explora la magia de Hallstatt. Activa el copo de nieve para ver la magia invernal.</p>
-                            <button onclick="document.getElementById('places-grid').scrollIntoView({behavior:'smooth'})" class="px-8 py-3 bg-brand-accent hover:bg-blue-600 text-white rounded-full font-medium transition shadow-lg animate-pulse-slow fade-enter stagger-3 hover:scale-105 active:scale-95">Comenzar Viaje</button>
+                            <span class="text-brand-accent uppercase tracking-widest text-sm font-bold mb-4 block fade-enter">Bienvenido a Austria</span>
+                            <h1 class="text-5xl md:text-8xl font-serif font-bold text-white mb-6 drop-shadow-2xl fade-enter stagger-1">El pueblo de cuento</h1>
+                            <p class="text-lg md:text-xl text-gray-200 mb-8 font-light fade-enter stagger-2 max-w-xl mx-auto">Explora la magia de Hallstatt. Patrimonio de la Humanidad y joya de los Alpes.</p>
+                            <button onclick="document.getElementById('places-grid').scrollIntoView({behavior:'smooth'})" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 hover:bg-brand-accent hover:border-brand-accent text-white rounded-full font-medium transition shadow-lg animate-pulse-slow fade-enter stagger-3 active:scale-95">Comenzar Viaje</button>
                         </div>
                     </div>
-                    <div id="places-grid" class="max-w-7xl mx-auto px-4 py-24">
-                        <div class="text-center mb-16 fade-enter">
-                            <h2 class="text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4">Imprescindibles</h2>
-                            <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">Haz clic en las tarjetas para conocer los secretos de cada lugar.</p>
+                    
+                    <div id="places-grid" class="max-w-7xl mx-auto px-4 py-16 md:py-24">
+                        <div class="text-center mb-12 md:mb-16 fade-enter">
+                            <h2 class="text-3xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white mb-4">Imprescindibles</h2>
+                            <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm md:text-base">Toca las tarjetas para descubrir los secretos de cada lugar.</p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                             ${PLACES.map((p, i) => {
                                 const isFav = favIds.has(p.id);
                                 const isVisited = visitIds.has(p.id);
                                 return `
-                                <div class="glass-card group relative h-80 rounded-2xl overflow-hidden cursor-pointer shadow-lg fade-enter stagger-${(i%4)+1} tilt-card" onclick="openDetailModal('Lugar', '${p.id}')">
-                                    <img src="${p.img}" class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                <div class="glass-card group relative h-72 md:h-96 rounded-2xl overflow-hidden cursor-pointer shadow-lg fade-enter stagger-${(i%4)+1} tilt-card active:scale-98 transition-transform" onclick="openDetailModal('Lugar', '${p.id}')">
+                                    <img src="${p.img}" class="absolute inset-0 w-full h-full object-cover transition duration-700 md:group-hover:scale-110" onerror="handleImgError(this)">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                                     <div class="absolute bottom-0 left-0 right-0 p-6 text-white tilt-inner">
-                                        <h3 class="text-2xl font-serif font-bold mb-1">${p.name}</h3>
-                                        <p class="text-sm text-gray-300 line-clamp-2">${p.desc}</p>
-                                        <div class="flex gap-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0" onclick="event.stopPropagation()">
-                                            <button onclick="${isFav ? `removeFav('${p.id}')` : `savePlace('${p.id}')`}" class="p-2 bg-white/20 backdrop-blur hover:bg-brand-accent rounded-full transition ${isFav ? 'text-red-500 bg-white' : ''} hover:scale-110"><i class="ph-fill ph-heart text-xl"></i></button>
-                                            <button onclick="openVisitModal('${p.id}', '${p.name}')" class="p-2 bg-white/20 backdrop-blur hover:bg-green-600 rounded-full transition ${isVisited ? 'text-green-500 bg-white' : ''} hover:scale-110"><i class="ph-fill ph-check-circle text-xl"></i></button>
-                                            <button onclick="openDetailModal('Lugar', '${p.id}')" class="px-3 py-1 bg-white/20 backdrop-blur hover:bg-white/40 rounded-full text-xs font-bold uppercase tracking-wide ml-auto transition hover:scale-105">Leer Más</button>
+                                        <h3 class="text-2xl font-serif font-bold mb-1 leading-tight">${p.name}</h3>
+                                        <p class="text-sm text-gray-300 line-clamp-2 mb-4">${p.desc}</p>
+                                        <div class="flex gap-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 md:transform md:translate-y-4 md:group-hover:translate-y-0" onclick="event.stopPropagation()">
+                                            <button onclick="${isFav ? `removeFav('${p.id}')` : `savePlace('${p.id}')`}" class="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur hover:bg-brand-accent rounded-full transition ${isFav ? 'text-red-500 bg-white shadow-red-500/50 shadow-lg' : ''} active:scale-90"><i class="ph-fill ph-heart text-xl"></i></button>
+                                            <button onclick="openVisitModal('${p.id}', '${p.name}')" class="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur hover:bg-green-600 rounded-full transition ${isVisited ? 'text-green-500 bg-white shadow-green-500/50 shadow-lg' : ''} active:scale-90"><i class="ph-fill ph-check-circle text-xl"></i></button>
                                         </div>
                                     </div>
                                 </div>
                             `}).join('')}
                         </div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-slate-800 py-24">
+                    
+                    <div class="bg-gray-100 dark:bg-slate-800/50 py-16 md:py-24 border-t dark:border-gray-800">
                         <div class="max-w-3xl mx-auto px-4">
                             <h2 class="text-3xl font-serif font-bold text-center mb-8 dark:text-white fade-enter">El Muro del Viajero</h2>
-                            <div class="glass-card rounded-xl p-6 mb-8 shadow-lg fade-enter stagger-1">
+                            <div class="glass-card rounded-2xl p-6 mb-8 shadow-xl fade-enter stagger-1 border-none ring-1 ring-gray-900/5">
                                 <form onsubmit="postComment(event)" class="flex flex-col gap-4">
-                                    <input type="text" id="comment-name" placeholder="Tu nombre (opcional)" class="w-full p-3 rounded-lg bg-white/50 dark:bg-slate-700/50 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-brand-accent outline-none transition">
-                                    <textarea id="comment-text" required rows="2" placeholder="Comparte un consejo..." class="w-full p-3 rounded-lg bg-white/50 dark:bg-slate-700/50 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-brand-accent outline-none transition"></textarea>
-                                    <button type="submit" class="self-end px-6 py-2 bg-brand-accent text-white rounded-lg font-medium hover:bg-blue-600 transition hover:scale-105">Publicar</button>
+                                    <div class="flex flex-col md:flex-row gap-4">
+                                        <input type="text" id="comment-name" placeholder="Tu nombre" class="w-full md:w-1/3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-brand-accent outline-none transition">
+                                        <div class="flex-1"></div>
+                                    </div>
+                                    <textarea id="comment-text" required rows="2" placeholder="Comparte un consejo o experiencia..." class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-brand-accent outline-none transition resize-none"></textarea>
+                                    <button type="submit" class="self-end px-6 py-2.5 bg-brand-accent text-white rounded-xl font-bold hover:bg-blue-600 transition active:scale-95 shadow-lg">Publicar</button>
                                 </form>
                             </div>
-                            <div id="comments-feed" class="space-y-4 max-h-[500px] overflow-y-auto pr-2"><div class="text-center text-gray-500 italic">Cargando comentarios...</div></div>
+                            <div id="comments-feed" class="space-y-4"><div class="flex justify-center py-8"><div class="w-8 h-8 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"></div></div></div>
                         </div>
                     </div>
                 `;
                 
                 document.querySelectorAll('.fade-enter').forEach(el => observer.observe(el));
                 document.querySelectorAll('.tilt-card').forEach(el => applyTilt(el));
-                
-                // Siempre intentamos cargar comentarios, offline u online
                 loadComments();
-                
                 container.classList.remove('page-fade-out');
-            }, 300);
+            }, 250);
         }
 
         function renderHistory(container) {
@@ -618,35 +705,56 @@
             setTimeout(() => {
                 container.innerHTML = `
                     <div class="max-w-4xl mx-auto px-4 py-12">
-                        <div class="text-center mb-12 fade-enter"><h2 class="text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4">7,000 Años de Historia</h2></div>
-                        <div class="space-y-8">
+                        <div class="text-center mb-12 fade-enter">
+                            <span class="text-brand-gold font-bold uppercase tracking-widest text-xs">Línea de Tiempo</span>
+                            <h2 class="text-4xl font-serif font-bold text-gray-900 dark:text-white mt-2">7,000 Años de Historia</h2>
+                        </div>
+                        <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 md:before:ml-[50%] before:-translate-x-px md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-300 before:to-transparent dark:before:via-gray-700">
                             ${HISTORY_DATA.map((h, index) => `
-                                <div class="glass-card p-8 rounded-2xl flex flex-col ${index % 2 !== 0 ? 'md:flex-row-reverse' : 'md:flex-row'} gap-6 items-center cursor-pointer hover:shadow-xl transition duration-300 group fade-enter stagger-${(index%3)+1} tilt-card" onclick="openDetailModal('Historia', '${h.id}')">
-                                    <div class="rounded-xl w-full md:w-1/3 h-48 overflow-hidden"><img src="${h.img}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110"></div>
-                                    <div class="flex-1"><h3 class="text-2xl font-bold mb-2 dark:text-white group-hover:text-brand-accent transition">${h.name}</h3><p class="text-gray-600 dark:text-gray-300 mb-4">${h.shortDesc}</p></div>
+                                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group fade-enter stagger-${(index%3)+1}">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 bg-brand-accent shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 absolute left-0 md:left-1/2 md:relative z-10">
+                                        <i class="ph-fill ph-clock text-white text-xs"></i>
+                                    </div>
+                                    <div class="glass-card p-0 rounded-2xl shadow-md w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] ml-auto md:ml-0 hover:shadow-xl transition duration-300 cursor-pointer overflow-hidden" onclick="openDetailModal('Historia', '${h.id}')">
+                                        <div class="h-40 overflow-hidden relative">
+                                             <img src="${h.img}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" onerror="handleImgError(this)">
+                                             <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
+                                        </div>
+                                        <div class="p-6">
+                                            <h3 class="text-xl font-bold mb-2 dark:text-white group-hover:text-brand-accent transition">${h.name}</h3>
+                                            <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">${h.shortDesc}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
                 document.querySelectorAll('.fade-enter').forEach(el => observer.observe(el));
-                document.querySelectorAll('.tilt-card').forEach(el => applyTilt(el));
                 container.classList.remove('page-fade-out');
-            }, 300);
+            }, 250);
         }
 
         function renderFood(container) {
             container.classList.add('page-fade-out');
             setTimeout(() => {
                 container.innerHTML = `
-                    <div class="max-w-4xl mx-auto px-4 py-12">
-                          <div class="text-center mb-12 fade-enter"><h2 class="text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4">Sabores de Hallstatt</h2></div>
-                        <div class="grid md:grid-cols-2 gap-6">
+                    <div class="max-w-5xl mx-auto px-4 py-12">
+                          <div class="text-center mb-12 fade-enter">
+                            <span class="text-green-600 font-bold uppercase tracking-widest text-xs">Delicias Alpinas</span>
+                            <h2 class="text-4xl font-serif font-bold text-gray-900 dark:text-white mt-2">Sabores de Hallstatt</h2>
+                          </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             ${FOOD_DATA.map((f, i) => `
-                                <div class="glass-card p-6 rounded-2xl cursor-pointer hover:shadow-xl transition duration-300 group fade-enter stagger-${(i%3)+1} tilt-card" onclick="openDetailModal('Gastronomía', '${f.id}')">
-                                    <div class="rounded-xl w-full h-48 mb-4 overflow-hidden"><img src="${f.img}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110"></div>
-                                    <h3 class="text-xl font-bold mb-2 dark:text-white group-hover:text-brand-gold transition">${f.name}</h3>
-                                    <p class="text-gray-600 dark:text-gray-300 text-sm">${f.shortDesc}</p>
+                                <div class="glass-card p-4 pb-6 rounded-3xl cursor-pointer hover:shadow-2xl transition duration-300 group fade-enter stagger-${(i%3)+1} tilt-card active:scale-98" onclick="openDetailModal('Gastronomía', '${f.id}')">
+                                    <div class="rounded-2xl w-full h-52 mb-5 overflow-hidden shadow-md relative">
+                                        <img src="${f.img}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" onerror="handleImgError(this)">
+                                        <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">Típico</div>
+                                    </div>
+                                    <div class="px-2">
+                                        <h3 class="text-xl font-bold mb-2 dark:text-white group-hover:text-brand-gold transition">${f.name}</h3>
+                                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${f.shortDesc}</p>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -655,7 +763,7 @@
                 document.querySelectorAll('.fade-enter').forEach(el => observer.observe(el));
                 document.querySelectorAll('.tilt-card').forEach(el => applyTilt(el));
                 container.classList.remove('page-fade-out');
-            }, 300);
+            }, 250);
         }
 
         async function renderProfile(container) {
@@ -665,32 +773,88 @@
                 const visits = await dataService.getVisits();
                 container.innerHTML = `
                     <div class="max-w-4xl mx-auto px-4 py-12">
-                        <div class="glass-card rounded-2xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl fade-enter">
-                            <div class="flex items-center gap-6">
-                                <div class="w-20 h-20 rounded-full bg-brand-accent/10 flex items-center justify-center text-4xl text-brand-accent"><i class="ph-fill ph-user-circle"></i></div>
-                                <div><h1 class="text-3xl font-serif font-bold dark:text-white" id="profile-name">Viajero Invitado</h1><p class="text-gray-500 dark:text-gray-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span> <span id="profile-status">Local</span></p></div>
+                        <div class="glass-card rounded-3xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl fade-enter">
+                            <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-5xl text-white shadow-lg"><i class="ph-fill ph-user-circle"></i></div>
+                                <div>
+                                    <h1 class="text-3xl font-serif font-bold dark:text-white" id="profile-name">Cargando...</h1>
+                                    <p class="text-gray-500 dark:text-gray-400 flex items-center justify-center md:justify-start gap-2 mt-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span> <span id="profile-status">Estado</span></p>
+                                </div>
                             </div>
-                            <div id="auth-action-area"></div>
+                            <div id="auth-action-area" class="w-full md:w-auto"></div>
                         </div>
-                        <div id="login-container" class="hidden glass-card rounded-2xl p-8 mb-8 border-l-4 border-brand-accent fade-enter">
-                            <div class="flex justify-between mb-4"><h3 class="text-xl font-bold dark:text-white">Cuenta</h3><button onclick="toggleLoginView()"><i class="ph ph-x text-xl text-gray-400"></i></button></div>
-                            <form onsubmit="handleAuth(event)" class="flex flex-col md:flex-row gap-4 items-end">
-                                <div class="flex-1 w-full"><input type="email" id="auth-email" required placeholder="Email" class="w-full p-2 rounded border dark:bg-slate-800 dark:border-gray-700"></div>
-                                <div class="flex-1 w-full"><input type="password" id="auth-pass" required placeholder="Contraseña" class="w-full p-2 rounded border dark:bg-slate-800 dark:border-gray-700"></div>
-                                <div class="flex gap-2">
-                                    <button type="button" onclick="fillDemoAuth()" class="px-4 py-2 text-sm text-brand-accent hover:text-blue-700 underline">Demo</button>
-                                    <button type="submit" class="px-6 py-2 bg-brand-accent text-white rounded font-bold hover:scale-105 transition">Conectar</button>
+
+                        <div id="login-container" class="hidden glass-card rounded-3xl p-8 mb-8 border-l-4 border-brand-accent fade-enter shadow-2xl">
+                            <div class="flex justify-between mb-6 items-center">
+                                <h3 class="text-2xl font-bold dark:text-white">Acceder / Registrarse</h3>
+                                <button onclick="toggleLoginView()" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition"><i class="ph ph-x text-xl text-gray-400"></i></button>
+                            </div>
+                            <form onsubmit="handleAuth(event)" class="flex flex-col gap-4">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="text-sm font-medium text-gray-500 ml-1">Email</label>
+                                        <input type="email" id="auth-email" required class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-brand-accent outline-none transition">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-sm font-medium text-gray-500 ml-1">Contraseña</label>
+                                        <input type="password" id="auth-pass" required class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-brand-accent outline-none transition">
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <button type="button" onclick="fillDemoAuth()" class="text-sm text-brand-accent hover:text-blue-700 font-medium py-2">Autocompletar Demo</button>
+                                    <button type="submit" class="px-8 py-3 bg-brand-accent text-white rounded-xl font-bold hover:bg-blue-600 shadow-lg hover:shadow-blue-500/30 transition transform active:scale-95">Entrar</button>
                                 </div>
                             </form>
                         </div>
-                        <div class="grid md:grid-cols-2 gap-8">
+
+                        <div class="grid md:grid-cols-2 gap-6 md:gap-8">
                             <div class="fade-enter stagger-1">
-                                <h3 class="text-xl font-bold mb-4 dark:text-white">Favoritos (${favs.length})</h3>
-                                <div class="space-y-3">${favs.map(f => `<div class="flex justify-between p-3 bg-white dark:bg-slate-800 rounded shadow-sm hover:shadow-md transition"><span class="dark:text-gray-200 font-medium cursor-pointer hover:text-brand-accent" onclick="openDetailModal('${f.category}', '${f.id}')">${f.name}</span><button onclick="removeFav('${f.id}')" class="text-red-500 hover:scale-110"><i class="ph ph-trash"></i></button></div>`).join('') || '<p class="text-gray-400">Vacío</p>'}</div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xl font-bold dark:text-white flex items-center gap-2"><i class="ph-fill ph-heart text-red-500"></i> Favoritos</h3>
+                                    <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full dark:text-gray-300">${favs.length}</span>
+                                </div>
+                                <div class="space-y-3 min-h-[100px]">
+                                    ${favs.map(f => `
+                                        <div class="flex justify-between items-center p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700 group cursor-pointer" onclick="openDetailModal('${f.category}', '${f.id}')">
+                                            <div class="flex items-center gap-3 overflow-hidden">
+                                                <img src="${f.img}" class="w-10 h-10 rounded-lg object-cover shrink-0" onerror="handleImgError(this)">
+                                                <span class="dark:text-gray-200 font-medium truncate">${f.name}</span>
+                                            </div>
+                                            <button onclick="event.stopPropagation(); removeFav('${f.id}')" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition"><i class="ph ph-trash"></i></button>
+                                        </div>
+                                    `).join('') || '<div class="p-6 text-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700"><p class="text-gray-400 text-sm">Aún no has guardado favoritos</p></div>'}
+                                </div>
                             </div>
                             <div class="fade-enter stagger-2">
-                                <h3 class="text-xl font-bold mb-4 dark:text-white">Visitas (${visits.length})</h3>
-                                <div class="space-y-3">${visits.map(v => `<div class="p-3 bg-white dark:bg-slate-800 rounded shadow-sm hover:shadow-md transition"><div class="font-bold text-brand-accent">${v.placeName}</div><p class="text-sm dark:text-gray-400 italic">"${v.note}"</p></div>`).join('') || '<p class="text-gray-400">Ninguna</p>'}</div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xl font-bold dark:text-white flex items-center gap-2"><i class="ph-fill ph-map-pin text-green-500"></i> Visitas</h3>
+                                    <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full dark:text-gray-300">${visits.length}</span>
+                                </div>
+                                <div class="space-y-3 min-h-[100px]">
+                                    ${visits.map(v => `
+                                        <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700">
+                                            <div class="flex justify-between mb-1">
+                                                <div class="font-bold text-brand-accent">${v.placeName}</div>
+                                                <div class="text-xs text-gray-400">${new Date(v.date).toLocaleDateString()}</div>
+                                            </div>
+                                            <p class="text-sm dark:text-gray-400 italic bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg">"${v.note}"</p>
+                                        </div>
+                                    `).join('') || '<div class="p-6 text-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700"><p class="text-gray-400 text-sm">No has registrado visitas</p></div>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Gestión de Datos -->
+                        <div class="glass-card rounded-3xl p-6 mt-8 shadow-lg fade-enter stagger-3 border-t-4 border-gray-500 dark:border-gray-600">
+                            <h3 class="text-lg font-bold dark:text-white mb-4 flex items-center gap-2"><i class="ph-fill ph-database"></i> Gestión de Datos</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Exporta tus favoritos y visitas a un archivo JSON para tener una copia de seguridad o importarlos en otro dispositivo.</p>
+                            <div class="flex flex-wrap gap-4">
+                                <button onclick="exportData()" class="flex items-center gap-2 px-5 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition active:scale-95">
+                                    <i class="ph ph-download-simple"></i> Exportar Datos
+                                </button>
+                                <button onclick="triggerImport()" class="flex items-center gap-2 px-5 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition active:scale-95">
+                                    <i class="ph ph-upload-simple"></i> Importar Datos
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -698,7 +862,7 @@
                 updateProfileUI();
                 document.querySelectorAll('.fade-enter').forEach(el => observer.observe(el));
                 container.classList.remove('page-fade-out');
-            }, 300);
+            }, 250);
         }
 
         // 5. LÓGICA DE DATOS (DataService)
@@ -724,21 +888,27 @@
                             const uniqueVisitId = `${v.placeId}_${new Date(v.date).getTime()}`;
                             await setDoc(doc(db, 'artifacts', appId, 'users', targetUser.uid, 'visits', uniqueVisitId), { ...v, userId: targetUser.uid }, { merge: true }); 
                         }
-                        // 🚀 LIMPIEZA CRÍTICA: Borrar local tras sync para no duplicar en otras cuentas
                         await localDB.clear('favorites');
                         await localDB.clear('visits');
-                        showToast(`✅ Sincronizado y Limpio`);
+                        showToast(`✅ Datos locales sincronizados`);
                     } catch (err) { console.error("Sync error:", err); }
                 } 
             },
-            addFavorite: async (item) => {
+            addFavorite: async (item, silent = false) => {
                 const mode = dataService.getMode();
                 if (mode === 'CLOUD_REAL' && auth?.currentUser) {
-                    try { await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'favorites', item.id), item); showToast(`☁️ Guardado`); } catch(e) { localDB.put('favorites', item); showToast(`Guardado (Local)`); }
+                    try { 
+                        await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'favorites', item.id), item); 
+                        if(!silent) showToast(`☁️ Guardado en nube`); 
+                    } catch(e) { 
+                        localDB.put('favorites', item); 
+                        if(!silent) showToast(`Guardado (Local)`); 
+                    }
                 } else {
-                    localDB.put('favorites', item); showToast(`❤️ Guardado`);
+                    localDB.put('favorites', item); 
+                    if(!silent) showToast(`❤️ Guardado en dispositivo`);
                 }
-                if (currentPage === 'home') renderHome(document.getElementById('app-content'));
+                if (currentPage === 'home' && !silent) renderHome(document.getElementById('app-content'));
             },
             removeFavorite: async (id) => {
                 if (dataService.getMode() === 'CLOUD_REAL' && auth?.currentUser) {
@@ -758,7 +928,7 @@
                 }
                 return await localDB.getAll('favorites');
             },
-            addVisit: async (visit) => {
+            addVisit: async (visit, silent = false) => {
                 if (dataService.getMode() === 'CLOUD_REAL' && auth?.currentUser) {
                     try { 
                         const uniqueVisitId = `${visit.placeId}_${new Date().getTime()}`;
@@ -767,8 +937,8 @@
                 } else {
                     localDB.put('visits', visit); 
                 }
-                showToast(`✅ Visita Registrada`);
-                if(currentPage === 'home') renderHome(document.getElementById('app-content'));
+                if(!silent) showToast(`✅ Visita Registrada`);
+                if(currentPage === 'home' && !silent) renderHome(document.getElementById('app-content'));
             },
             getVisits: async () => {
                 if (dataService.getMode() === 'CLOUD_REAL' && auth?.currentUser) {
@@ -788,7 +958,7 @@
                 document.getElementById('mobile-menu').classList.add('hidden'); 
                 currentPage = page;
                 const app = document.getElementById('app-content');
-                window.scrollTo(0, 0);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 
                 if(page === 'home') renderHome(app);
                 else if(page === 'profile') renderProfile(app);
@@ -803,7 +973,7 @@
                 currentUser = { uid: 'local-' + Date.now(), email: email, displayName: email.split('@')[0], isAnonymous: false };
                 localStorage.setItem('hallstatt_local_user', JSON.stringify(currentUser));
                 updateProfileUI();
-                showToast("Sesión Local (Sin Nube)");
+                showToast("Sesión Local Activa");
                 renderProfile(document.getElementById('app-content'));
                 return;
             }
@@ -818,27 +988,25 @@
                         await dataService.mergeLocalToCloud(userCred.user);
                     } catch (linkError) { 
                         if(linkError.code === 'auth/operation-not-allowed') throw linkError; 
-                        // Si falla link (ej: email ya en uso), intentamos sign in normal
                     }
                 }
                 
                 if (!userCred) {
                     try {
                         userCred = await signInWithEmailAndPassword(auth, email, pass);
-                        showToast("¡Bienvenido!");
+                        showToast("¡Bienvenido de nuevo!");
                         cookieService.set('hallstatt_user_email', email);
-                        // Fusión automática al entrar
                         await dataService.mergeLocalToCloud(userCred.user);
                     } catch (loginError) {
                          if (loginError.code === 'auth/user-not-found' || loginError.code === 'auth/invalid-credential') {
-                             // Fallthrough to create
+                             // Intentar crear cuenta
                          } else { throw loginError; }
                     }
                 }
 
                 if (!userCred) {
                     userCred = await createUserWithEmailAndPassword(auth, email, pass);
-                    showToast("Cuenta creada");
+                    showToast("Cuenta creada exitosamente");
                     cookieService.set('hallstatt_user_email', email);
                     await dataService.mergeLocalToCloud(userCred.user);
                 }
@@ -849,7 +1017,7 @@
                     isOfflineMode = true;
                     localStorage.setItem('hallstatt_local_user', JSON.stringify(currentUser));
                     updateProfileUI();
-                    showToast("Sesión Local (Auth desactivado)");
+                    showToast("Sesión Local (Sin conexión)");
                 } else {
                     showToast("Error: " + finalError.code);
                 }
@@ -865,12 +1033,61 @@
         window.router = router;
         window.savePlace = (id) => dataService.addFavorite(PLACES.find(p => p.id === id));
         window.removeFav = (id) => dataService.removeFavorite(id);
-        window.toggleLoginView = () => document.getElementById('login-container').classList.toggle('hidden');
+        window.toggleLoginView = () => {
+            const c = document.getElementById('login-container');
+            c.classList.toggle('hidden');
+            if(!c.classList.contains('hidden')) c.scrollIntoView({behavior:'smooth', block:'center'});
+        };
+        window.toggleMobileMenu = () => document.getElementById('mobile-menu').classList.toggle('hidden');
+
+        // Nuevas funciones de Exportar/Importar
+        window.exportData = async () => {
+            const favs = await dataService.getFavorites();
+            const visits = await dataService.getVisits();
+            const data = { favorites: favs, visits: visits, timestamp: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hallstatt_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("📁 Datos exportados");
+        };
+
+        window.triggerImport = () => document.getElementById('import-input').click();
+
+        window.handleImportFile = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let count = 0;
+                    if (data.favorites && Array.isArray(data.favorites)) {
+                        for (const f of data.favorites) { await dataService.addFavorite(f, true); count++; }
+                    }
+                    if (data.visits && Array.isArray(data.visits)) {
+                        for (const v of data.visits) { await dataService.addVisit(v, true); count++; }
+                    }
+                    showToast(`📂 ${count} elementos importados`);
+                    renderProfile(document.getElementById('app-content'));
+                } catch (err) {
+                    console.error(err);
+                    showToast("Error al importar archivo");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input
+        };
+
         window.fillDemoAuth = async () => {
-            document.getElementById('auth-email').value = "ejemplo@miejemplo.com";
-            document.getElementById('auth-pass').value = "1234567890";
+            document.getElementById('auth-email').value = "viajero@hallstatt.com";
+            document.getElementById('auth-pass').value = "austria2024";
             showToast("Conectando Demo...");
-            await handleAuthLogic("ejemplo@miejemplo.com", "1234567890");
+            await handleAuthLogic("viajero@hallstatt.com", "austria2024");
         };
         window.handleAuth = (e) => { e.preventDefault(); handleAuthLogic(document.getElementById('auth-email').value, document.getElementById('auth-pass').value); };
         window.doLogout = async () => { 
@@ -884,7 +1101,7 @@
         
         window.postComment = async (e) => {
             e.preventDefault();
-            const name = document.getElementById('comment-name').value || 'Anónimo';
+            const name = document.getElementById('comment-name').value || 'Viajero Anónimo';
             const text = document.getElementById('comment-text').value;
             if(!text) return;
 
@@ -896,30 +1113,29 @@
                 localStorage.setItem('hallstatt_local_comments', JSON.stringify(localComments));
                 loadComments();
                 document.getElementById('comment-text').value = '';
-                showToast("Comentario guardado (Local)");
+                showToast("Comentario guardado (Solo Local)");
                 return;
             }
 
-            // 2. MODO ONLINE - INTENTO DE AUTO-LOGIN SI ES NECESARIO
+            // 2. MODO ONLINE
             try {
-                // Si no hay usuario (ni siquiera anónimo), intentamos crearlo al vuelo
                 if (!auth.currentUser) await signInAnonymously(auth);
                 
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'hallstatt_comments'), {
                     name, text, timestamp: serverTimestamp()
                 });
                 document.getElementById('comment-text').value = '';
-                showToast("Enviado al Muro");
+                showToast("¡Enviado al Muro!");
             } catch(e) { 
                 console.error(e);
-                // Fallback a local si falla la nube
+                // Fallback
                 const newComment = { id: 'local-' + Date.now(), name, text, timestamp: { seconds: Date.now()/1000 } };
                 const localComments = JSON.parse(localStorage.getItem('hallstatt_local_comments') || '[]');
                 localComments.unshift(newComment);
                 localStorage.setItem('hallstatt_local_comments', JSON.stringify(localComments));
                 loadComments();
                 document.getElementById('comment-text').value = '';
-                showToast("Error red -> Guardado Local");
+                showToast("Sin red: Guardado localmente");
             }
         };
         
@@ -947,9 +1163,6 @@
                         if (!user.isAnonymous) cookieService.set('hallstatt_user_email', user.email);
                         updateProfileUI();
                         if(currentPage === 'home') loadComments(); 
-                        
-                        // Refresco automático al detectar cambio de auth para limpiar datos antiguos
-                        router.navigate(currentPage);
                     } else {
                         isFirebaseReady = false; signInAnonymously(auth).catch(()=>{});
                     }
@@ -960,6 +1173,7 @@
             isOfflineMode = true;
             const savedLocalUser = localStorage.getItem('hallstatt_local_user');
             if (savedLocalUser) currentUser = JSON.parse(savedLocalUser);
+            updateProfileUI();
         }
 
         // 9. HELPER VISUAL EFFECTS
@@ -972,7 +1186,7 @@
             resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; }
             toggle() {
                 this.active = !this.active; this.canvas.classList.toggle('active', this.active);
-                if(this.active) { this.initParticles(); this.animate(); showToast('❄️ Modo Invierno'); } 
+                if(this.active) { this.initParticles(); this.animate(); showToast('❄️ Modo Invierno Activado'); } 
             }
             initParticles() {
                 this.particles = []; const count = Math.floor(window.innerWidth / 4); 
@@ -998,7 +1212,11 @@
         window.openDetailModal = (cat, id) => {
             let item = (cat === 'Lugar' ? PLACES : cat === 'Historia' ? HISTORY_DATA : FOOD_DATA).find(x => x.id === id);
             if(!item) return;
-            document.getElementById('modal-img').src = item.img;
+            const imgEl = document.getElementById('modal-img');
+            imgEl.src = item.img;
+            // Reiniciar onerror por si la nueva imagen sí carga (o no)
+            imgEl.onerror = function() { this.src='https://placehold.co/800x600/1e293b/FFF?text=Imagen+No+Disponible'; };
+            
             document.getElementById('modal-category').innerText = cat;
             document.getElementById('modal-title').innerText = item.name;
             document.getElementById('modal-desc').innerText = item.fullDesc || item.shortDesc;
@@ -1033,19 +1251,18 @@
             const newLocalComments = localComments.filter(c => c.id !== id);
             if (localComments.length !== newLocalComments.length) {
                 localStorage.setItem('hallstatt_local_comments', JSON.stringify(newLocalComments));
-                loadComments(); // Recargar para mostrar cambios
+                loadComments(); 
                 showToast("Comentario borrado (Local)");
                 return;
             }
-
             // 2. Intentar borrar de la nube
             if (db && !isOfflineMode && id && !id.startsWith('local-')) {
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'hallstatt_comments', id));
-                    showToast("Comentario borrado");
+                    showToast("Comentario eliminado");
                 } catch (e) {
                     console.error(e);
-                    showToast("No tienes permiso para borrar este comentario");
+                    showToast("No puedes borrar esto");
                 }
             }
         };
@@ -1055,6 +1272,3 @@
     </script>
 </body>
 </html>
-
-
-

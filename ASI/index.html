@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jetson AI Lab: Reporte Técnico</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-dark: #121212;
+            --surface: #1e1e1e;
+            --surface-light: #2d2d2d;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #333;
+            --accent-error: #ff5f56;
+            --accent-warn: #ffbd2e;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #0a0a0a;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: rgba(18, 18, 18, 0.95);
+            border-bottom: 1px solid var(--nvidia-green);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
+        .logo span { color: var(--nvidia-green); }
+        .meta-tag { font-family: monospace; font-size: 0.8rem; background: #333; padding: 4px 8px; border-radius: 4px; margin-left: 10px; }
+
+        /* --- TABS --- */
+        .tabs-container {
+            background: var(--surface);
+            padding: 10px 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+        }
+        .tab {
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; padding: 10px 0; font-size: 1rem; font-weight: 600;
+            position: relative; transition: 0.3s; white-space: nowrap;
+        }
+        .tab:hover { color: #fff; }
+        .tab.active { color: var(--nvidia-green); }
+        .tab.active::after {
+            content:''; position: absolute; bottom: -11px; left:0; width:100%; height: 2px; background: var(--nvidia-green);
+        }
+
+        /* --- CONTENT --- */
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+        .tab-pane { display: none; animation: fadeUp 0.4s ease; }
+        .tab-pane.active { display: block; }
+        
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        /* --- DOCS STYLES --- */
+        .doc-section { margin-bottom: 40px; }
+        .section-title { 
+            border-left: 4px solid var(--nvidia-green); 
+            padding-left: 15px; 
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .arch-diagram {
+            display: flex; gap: 5px; margin-bottom: 30px;
+            font-family: monospace; font-size: 0.8rem; text-align: center;
+        }
+        .layer { background: var(--surface-light); padding: 10px; flex: 1; border: 1px solid var(--border); border-radius: 6px; }
+        .layer.hw { border-bottom: 3px solid var(--nvidia-green); }
+
+        .timeline { position: relative; border-left: 2px solid #333; margin-left: 10px; padding-left: 30px; }
+        
+        .event-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .event-card::before {
+            content: ''; position: absolute; left: -36px; top: 20px;
+            width: 10px; height: 10px; background: var(--nvidia-green);
+            border-radius: 50%; border: 3px solid #0a0a0a;
+        }
+        .event-card.error::before { background: var(--accent-error); }
+        .event-card.warn::before { background: var(--accent-warn); }
+
+        .log-box {
+            background: #000; padding: 15px; border-radius: 6px;
+            font-family: 'Consolas', monospace; font-size: 0.85rem; color: #ccc;
+            margin-top: 15px; border-left: 3px solid #444; overflow-x: auto;
+        }
+        .log-line { display: block; margin-bottom: 4px; }
+        .c-cmd { color: var(--nvidia-green); font-weight: bold; }
+        .c-err { color: var(--accent-error); }
+        .c-wrn { color: var(--accent-warn); }
+        .c-suc { color: #44ff44; }
+
+        .spec-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;
+        }
+        .spec-item {
+            background: rgba(118, 185, 0, 0.05); border: 1px solid rgba(118, 185, 0, 0.2);
+            padding: 10px 15px; border-radius: 6px;
+        }
+        .spec-label { font-size: 0.75rem; color: var(--nvidia-green); text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .spec-val { font-weight: 700; font-size: 1.1rem; }
+
+        /* --- BENCHMARK DASHBOARD STYLES --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: var(--surface); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .kpi-num { font-size: 2.5rem; font-weight: 800; color: #fff; margin: 5px 0; }
+        .kpi-txt { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Controles Interactivos */
+        .controls-panel {
+            background: var(--surface-light); padding: 20px; border-radius: 12px;
+            margin-bottom: 30px; border-left: 4px solid var(--nvidia-green);
+        }
+        .controls-title { font-weight: 600; margin-bottom: 15px; display: block; color: #fff; }
+        
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; }
+        .checkbox-wrapper {
+            display: flex; align-items: center; background: rgba(0,0,0,0.3);
+            padding: 8px 16px; border-radius: 50px; cursor: pointer; user-select: none;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .checkbox-wrapper:hover { background: rgba(255,255,255,0.05); border-color: #555; }
+        .checkbox-wrapper input { margin-right: 10px; accent-color: var(--nvidia-green); transform: scale(1.2); }
+
+        .chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .chart-box { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 320px; }
+        
+        @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+        
+        /* Upload Zone */
+        .upload-area {
+            border: 2px dashed #444; border-radius: 12px; padding: 40px; text-align: center;
+            background: rgba(255,255,255,0.02); transition: 0.3s; cursor: pointer;
+        }
+        .upload-area:hover { border-color: var(--nvidia-green); background: rgba(118,185,0,0.05); }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .gallery img { width: 100%; border-radius: 6px; border: 1px solid #333; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Jetson<span>AI</span> Lab <span style="font-size:1rem; color:#666; font-weight:400;">| Ingeniería de Sistemas</span></div>
+    <div>
+        <span class="meta-tag">Orin Nano 8GB</span>
+        <span class="meta-tag">JetPack 6.0</span>
+        <span class="meta-tag">L4T 36.4.7</span>
+    </div>
+</header>
+
+<div class="tabs-container">
+    <button class="tab active" onclick="switchTab('docs', this)">Bitácora de Ingeniería</button>
+    <button class="tab" onclick="switchTab('ollama', this)">Experimento Ollama</button>
+    <button class="tab" onclick="switchTab('gallery', this)">Galería</button>
+    <button class="tab" onclick="switchTab('bench', this)">Benchmarks Interactivos</button>
+</div>
+
+<div class="main-content">
+
+    <!-- PESTAÑA 1: BITÁCORA TÉCNICA -->
+    <div id="docs" class="tab-pane active">
+        
+        <div class="spec-grid">
+            <div class="spec-item"><span class="spec-label">Host OS</span><span class="spec-val">Ubuntu 22.04 LTS</span></div>
+            <div class="spec-item"><span class="spec-label">Kernel</span><span class="spec-val">5.15.136-tegra</span></div>
+            <div class="spec-item"><span class="spec-label">CUDA Driver</span><span class="spec-val">12.6</span></div>
+            <div class="spec-item"><span class="spec-label">Docker</span><span class="spec-val">24.0.5</span></div>
+        </div>
+
+        <div class="doc-section">
+            <h2 class="section-title">Arquitectura del Stack Desplegado</h2>
+            <div class="arch-diagram">
+                <div class="layer hw">Hardware<br>NVIDIA Orin Nano</div>
+                <div class="layer">Kernel L4T<br>Drivers Tegra</div>
+                <div class="layer">Runtime<br>NVIDIA Container Toolkit</div>
+                <div class="layer" style="background: rgba(118, 185, 0, 0.1); border-color: var(--nvidia-green);">
+                    <strong>Contenedor App</strong><br>PyTorch + BitsAndBytes + TGWUI
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <!-- Evento 1 -->
+            <div class="event-card">
+                <h3>1. Inicialización de Infrastructure-as-Code</h3>
+                <p>Clonación del repositorio <code>jetson-containers</code> como capa de abstracción.</p>
+                <div class="log-box">
+                    <span class="log-line c-cmd">$ git clone https://github.com/dusty-nv/jetson-containers</span>
+                    <span class="log-line">>> Enumerating objects: 42246, done.</span>
+                    <span class="log-line c-cmd">$ bash jetson-containers/install.sh</span>
+                </div>
+            </div>
+
+            <!-- Evento 2 -->
+            <div class="event-card error">
+                <h3 style="color: var(--accent-error);">2. Incidencia: Dependencias Host</h3>
+                <p><strong>RCA:</strong> Imagen base Ubuntu Tegra minimizada sin <code>pip</code>.</p>
+                <div class="log-box">
+                    <span class="log-line c-err">line 25: pip3: orden no encontrada</span>
+                    <span class="log-line c-wrn">WARNING: The scripts black and blackd are installed in '/home/.local/bin'</span>
+                </div>
+                <p style="margin-top:10px; font-size:0.9rem; border-top:1px solid #333; padding-top:10px;">
+                    <strong>Resolución:</strong> Instalación manual de <code>python3-pip</code>.
+                </p>
+            </div>
+
+            <!-- Evento 3 -->
+            <div class="event-card warn">
+                <h3 style="color: var(--accent-warn);">3. Compilación Local (Docker Build)</h3>
+                <p><strong>Estado:</strong> CACHE MISS. Compilación automatizada de kernels CUDA para Ampere.</p>
+                <div class="log-box">
+                    <span class="log-line c-wrn">Could not find compatible container. Building...</span>
+                    <span class="log-line">>> Building layers: pytorch, transformers, autogptq...</span>
+                    <span class="log-line c-suc">Successfully tagged text-generation-webui:r36.4.tegra</span>
+                </div>
+            </div>
+
+            <!-- Evento 4 -->
+            <div class="event-card">
+                <h3>4. Validación de Inferencia</h3>
+                <p>Despliegue exitoso de <strong>IBM Granite-4-Tiny</strong>.</p>
+                <div class="spec-grid" style="margin: 10px 0;">
+                    <div class="spec-item"><span class="spec-label">Speed</span><span class="spec-val">43.13 t/s</span></div>
+                    <div class="spec-item"><span class="spec-label">VRAM</span><span class="spec-val">4.2 GB</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: OLLAMA -->
+    <div id="ollama" class="tab-pane">
+        <h2 class="section-title">Experimento: Stack Ollama</h2>
+        <div class="timeline">
+             <div class="event-card">
+                <h3>1. Instalación One-Shot</h3>
+                <p>Detección automática de arquitectura ARM64 y GPU NVIDIA.</p>
+                <div class="log-box">
+                    <span class="log-line c-cmd">$ curl -fsSL https://ollama.com/install.sh | sh</span>
+                    <span class="log-line c-suc">>>> NVIDIA JetPack ready.</span>
+                </div>
+            </div>
+            <div class="event-card error">
+                <h3 style="color: var(--accent-error);">2. Fallo de Memoria (OOM)</h3>
+                <p>El modelo <strong>Ministral 3B</strong> requería 9.3 GB de RAM unificada.</p>
+                <div class="log-box">
+                    <span class="log-line c-cmd">$ ollama run ministral-3:3b</span>
+                    <span class="log-line c-err">Error: model requires 9.3 GiB, available 8.8 GiB</span>
+                </div>
+            </div>
+            <div class="event-card">
+                <h3 style="color: var(--nvidia-green);">3. Éxito: Gemma 2 (2B)</h3>
+                <p>Modelo de Google optimizado. Inferencia fluida en español.</p>
+                <div class="log-box">
+                    <span class="log-line c-cmd">$ ollama run gemma2:2b</span>
+                    <span class="log-line">Eval Rate: 18.26 tokens/s</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3: GALERÍA -->
+    <div id="gallery" class="tab-pane">
+        <div class="upload-area" id="dropArea">
+            <h3 style="color: var(--nvidia-green);">Zona de Evidencias</h3>
+            <p>Arrastra tus capturas de pantalla aquí para visualizarlas</p>
+            <input type="file" id="fileElem" multiple accept="image/*" style="display:none">
+        </div>
+        <div class="gallery" id="galleryGrid"></div>
+    </div>
+
+    <!-- PESTAÑA 4: BENCHMARKS INTERACTIVOS (RESTORED) -->
+    <div id="bench" class="tab-pane">
+        
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-num">43.1</div>
+                <div class="kpi-txt">T/s Granite</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-num">17.5</div>
+                <div class="kpi-txt">T/s Gemma2</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-num" style="color:var(--nvidia-green)">99%</div>
+                <div class="kpi-txt">Uso GPU</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-num">25W</div>
+                <div class="kpi-txt">Potencia</div>
+            </div>
+        </div>
+
+        <!-- ZONA DE CONTROLES RECUPERADA -->
+        <div class="controls-panel">
+            <span class="controls-title">Seleccionar Modelos para Comparativa:</span>
+            <div class="checkbox-group" id="modelCheckboxes">
+                <!-- Se rellena con JS -->
+            </div>
+        </div>
+
+        <!-- GRID DE 4 GRÁFICAS RECUPERADO -->
+        <div class="chart-grid">
+            <div class="chart-box">
+                <h4>Velocidad de Inferencia (Tokens/s)</h4>
+                <div style="height: 250px;"><canvas id="speedChart"></canvas></div>
+            </div>
+            <div class="chart-box">
+                <h4>Estabilidad (Degradación por Contexto)</h4>
+                <div style="height: 250px;"><canvas id="contextChart"></canvas></div>
+            </div>
+            <div class="chart-box">
+                <h4>Calidad de Respuesta (Lógica/Español)</h4>
+                <div style="height: 250px;"><canvas id="qualityChart"></canvas></div>
+            </div>
+            <div class="chart-box">
+                <h4>Eficiencia (Tokens por Vatio)</h4>
+                <div style="height: 250px;"><canvas id="efficiencyChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- TABS LOGIC ---
+    function switchTab(id, btn) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // --- UPLOAD LOGIC ---
+    const dropArea = document.getElementById('dropArea');
+    const fileElem = document.getElementById('fileElem');
+    
+    dropArea.addEventListener('click', () => fileElem.click());
+    
+    ['dragenter', 'dragover'].forEach(e => {
+        dropArea.addEventListener(e, (ev) => { ev.preventDefault(); dropArea.style.borderColor = '#76b900'; });
+    });
+    ['dragleave', 'drop'].forEach(e => {
+        dropArea.addEventListener(e, (ev) => { ev.preventDefault(); dropArea.style.borderColor = '#444'; });
+    });
+    
+    dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+    fileElem.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    function handleFiles(files) {
+        [...files].forEach(file => {
+            if(file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    document.getElementById('galleryGrid').appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // --- CHARTS & DATA LOGIC (RESTORED) ---
+    
+    const modelsData = [
+        { 
+            id: 'granite', 
+            name: 'Granite Tiny (TGW)', 
+            color: '#76b900', // NVIDIA Green
+            speed: 43.13, 
+            quality: 6.5,
+            efficiency: 4.2, 
+            contextDrop: [43, 42, 40, 36, 28] 
+        },
+        { 
+            id: 'gemma_ollama', 
+            name: 'Gemma 2 2B (Ollama)', 
+            color: '#ff9f40', // Orange
+            speed: 17.51, 
+            quality: 8.5,
+            efficiency: 3.2,
+            contextDrop: [18.38, 18.26, 17.90, 16.90, 14.0] 
+        },
+        { 
+            id: 'ministral', 
+            name: 'Ministral 3B (Fallido)', 
+            color: '#ff5f56', // Red
+            speed: 0, 
+            quality: 0,
+            efficiency: 0,
+            contextDrop: [0,0,0,0,0]
+        },
+        { 
+            id: 'phi3', 
+            name: 'Phi-3 Mini (Ref)', 
+            color: '#36a2eb', // Blue
+            speed: 28.2, 
+            quality: 8.0,
+            efficiency: 2.9,
+            contextDrop: [28, 27.8, 26.5, 24.0, 20.0]
+        }
+    ];
+
+    let charts = {};
+
+    function initDashboard() {
+        // 1. Generar Checkboxes
+        const container = document.getElementById('modelCheckboxes');
+        modelsData.forEach(m => {
+            const label = document.createElement('label');
+            label.className = 'checkbox-wrapper';
+            // Ministral desactivado por defecto porque falló
+            const checked = m.id === 'ministral' ? '' : 'checked';
+            label.innerHTML = `<input type="checkbox" value="${m.id}" ${checked} onchange="updateCharts()"> ${m.name}`;
+            container.appendChild(label);
+        });
+
+        // 2. Configurar Defaults
+        Chart.defaults.color = '#888';
+        Chart.defaults.borderColor = '#333';
+        Chart.defaults.font.family = '-apple-system, sans-serif';
+
+        // 3. Crear Instancias de Gráficas
+        charts.speed = new Chart(document.getElementById('speedChart'), {
+            type: 'bar',
+            data: { labels: [], datasets: [{ label: 'tk/s', data: [], borderRadius: 4 }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        charts.context = new Chart(document.getElementById('contextChart'), {
+            type: 'line',
+            data: { labels: ['Start', 'Chat 1', 'Chat 2', 'Chat 3', 'Long'], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        charts.quality = new Chart(document.getElementById('qualityChart'), {
+            type: 'radar',
+            data: { labels: ['Lógica', 'Creatividad', 'Matemáticas', 'Instrucciones', 'Español'], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: '#333' }, angleLines: { color: '#333' }, suggestedMin: 0, suggestedMax: 10 } } }
+        });
+
+        charts.efficiency = new Chart(document.getElementById('efficiencyChart'), {
+            type: 'polarArea',
+            data: { labels: [], datasets: [{ data: [] }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: '#333' }, ticks: { display: false, backdropColor: 'transparent' } } }, plugins: { legend: { position: 'right' } } }
+        });
+
+        updateCharts();
+    }
+
+    function updateCharts() {
+        // Filtrar datos según checkboxes
+        const selected = Array.from(document.querySelectorAll('#modelCheckboxes input:checked')).map(cb => cb.value);
+        const active = modelsData.filter(m => selected.includes(m.id));
+
+        const names = active.map(m => m.name);
+        const colors = active.map(m => m.color);
+
+        // Update Speed
+        charts.speed.data.labels = names;
+        charts.speed.data.datasets[0].data = active.map(m => m.speed);
+        charts.speed.data.datasets[0].backgroundColor = colors;
+        charts.speed.update();
+
+        // Update Context
+        charts.context.data.datasets = active.map(m => ({
+            label: m.name,
+            data: m.contextDrop,
+            borderColor: m.color,
+            backgroundColor: m.color,
+            tension: 0.3,
+            pointRadius: 3
+        }));
+        charts.context.update();
+
+        // Update Quality
+        charts.quality.data.datasets = active.map(m => ({
+            label: m.name,
+            data: [m.quality, m.quality+0.5, m.quality-1, m.quality+1, m.quality],
+            borderColor: m.color,
+            backgroundColor: m.color + '33', // transparencia
+            borderWidth: 2
+        }));
+        charts.quality.update();
+
+        // Update Efficiency
+        charts.efficiency.data.labels = names;
+        charts.efficiency.data.datasets[0].data = active.map(m => m.efficiency);
+        charts.efficiency.data.datasets[0].backgroundColor = colors;
+        charts.efficiency.update();
+    }
+
+    // Arrancar
+    document.addEventListener('DOMContentLoaded', initDashboard);
+
+</script>
+
+</body>
+</html>

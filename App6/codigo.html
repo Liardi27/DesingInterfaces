@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniFile Processor - Documentación Técnica</title>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel para JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        doc: {
+                            bg: '#0f172a',
+                            sidebar: '#1e293b',
+                            card: '#334155',
+                            accent: '#38bdf8', // Sky blue
+                            text: '#f1f5f9',
+                            muted: '#94a3b8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- PrismJS para resaltar código -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f1f5f9; }
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Componentes UI ---
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const ref = useRef(null);
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons({
+                        root: ref.current,
+                        nameAttrs: { 'data-lucide': name },
+                        attrs: { width: size, height: size, class: className }
+                    });
+                }
+            }, [name]);
+            return <span ref={ref}><i data-lucide={name}></i></span>;
+        };
+
+        const CodeBlock = ({ code, title, lang = "javascript" }) => {
+            useEffect(() => {
+                if (window.Prism) {
+                    window.Prism.highlightAll();
+                }
+            }, [code]);
+
+            return (
+                <div className="my-6 rounded-lg overflow-hidden border border-slate-700 bg-[#1e1e1e] shadow-xl">
+                    <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-black/20">
+                        <span className="text-xs font-mono text-doc-accent font-bold">{title}</span>
+                        <div className="flex gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+                        </div>
+                    </div>
+                    <pre className="!m-0 !p-4 !bg-transparent text-sm overflow-x-auto">
+                        <code className={`language-${lang}`}>{code.trim()}</code>
+                    </pre>
+                </div>
+            );
+        };
+
+        const Section = ({ id, title, children }) => (
+            <section id={id} className="mb-16 scroll-mt-24 animate-fade-in">
+                <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3 border-b border-slate-700 pb-4">
+                    <span className="text-doc-accent">#</span> {title}
+                </h2>
+                {children}
+            </section>
+        );
+
+        const Card = ({ title, icon, children }) => (
+            <div className="p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-doc-accent/50 transition-all hover:shadow-lg hover:shadow-doc-accent/10">
+                <div className="flex items-center gap-3 mb-3 text-doc-accent">
+                    <Icon name={icon} size={24} />
+                    <h3 className="font-bold text-lg text-white">{title}</h3>
+                </div>
+                <div className="text-doc-muted leading-relaxed text-sm">
+                    {children}
+                </div>
+            </div>
+        );
+
+        // --- Contenido ---
+
+        const App = () => {
+            const [activeSection, setActiveSection] = useState('intro');
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            const scrollTo = (id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                    setActiveSection(id);
+                    setIsMenuOpen(false); // Cerrar menú en móvil al hacer clic
+                }
+            };
+
+            const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+            return (
+                <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-doc-bg text-doc-text">
+                    
+                    {/* Header Móvil */}
+                    <header className="md:hidden flex items-center justify-between p-4 bg-doc-sidebar border-b border-slate-700 z-30 sticky top-0">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                                OmniFile Docs
+                            </h1>
+                        </div>
+                        <button onClick={toggleMenu} className="p-2 text-white hover:bg-slate-700 rounded-lg transition-colors">
+                            <Icon name={isMenuOpen ? "x" : "menu"} size={24} />
+                        </button>
+                    </header>
+
+                    {/* Sidebar de Navegación (Responsive) */}
+                    <aside className={`
+                        fixed inset-y-0 left-0 z-40 w-72 bg-doc-sidebar border-r border-slate-800 transform transition-transform duration-300 ease-in-out
+                        md:static md:translate-x-0 md:flex md:flex-col
+                        ${isMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+                    `}>
+                        <div className="p-6 border-b border-slate-700 hidden md:block">
+                            <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                                Docs: OmniFile v3
+                            </h1>
+                            <p className="text-xs text-doc-muted mt-2">Análisis técnico del código fuente.</p>
+                        </div>
+                        
+                        {/* Menú de móvil extra header dentro del sidebar */}
+                        <div className="md:hidden p-6 border-b border-slate-700 flex justify-between items-center">
+                            <span className="font-bold text-white">Menú de Navegación</span>
+                            <button onClick={toggleMenu} className="text-slate-400"><Icon name="x" size={20} /></button>
+                        </div>
+
+                        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+                            {[
+                                { id: 'intro', label: 'Introducción', icon: 'layout' },
+                                { id: 'dependencies', label: 'Dependencias', icon: 'box' },
+                                { id: 'db', label: 'Persistencia', icon: 'database' },
+                                { id: 'processing', label: 'Procesamiento', icon: 'file-cog' },
+                                { id: 'state', label: 'Gestión de Estado', icon: 'cpu' }, // NUEVO ITEM
+                                { id: 'viewers', label: 'Visores', icon: 'eye' },
+                                { id: 'images', label: 'Galería de Imágenes', icon: 'image' }, 
+                                { id: 'ui', label: 'Estilos', icon: 'palette' },
+                            ].map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => scrollTo(item.id)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-left
+                                        ${activeSection === item.id 
+                                            ? 'bg-doc-accent/10 text-doc-accent border border-doc-accent/20' 
+                                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+                                >
+                                    <Icon name={item.icon} size={18} />
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="p-4 border-t border-slate-700 text-center">
+                            <span className="text-xs text-slate-500">Generado por Gemini</span>
+                        </div>
+                    </aside>
+
+                    {/* Overlay para cerrar el menú en móvil */}
+                    {isMenuOpen && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
+                            onClick={toggleMenu}
+                        ></div>
+                    )}
+
+                    {/* Contenido Principal */}
+                    <main className="flex-1 overflow-y-auto relative scroll-smooth w-full">
+                        <div className="max-w-4xl mx-auto p-6 md:p-12">
+                            
+                            {/* Header */}
+                            <div className="mb-12 mt-4 md:mt-0">
+                                <div className="inline-block px-3 py-1 rounded-full bg-doc-accent/10 text-doc-accent text-xs font-bold mb-4 border border-doc-accent/20">
+                                    ANÁLISIS DE CÓDIGO
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                                    Arquitectura <span className="text-doc-accent">Serverless</span> Local
+                                </h1>
+                                <p className="text-lg text-slate-400 leading-relaxed">
+                                    OmniFile es una Single Page Application (SPA) que demuestra cómo construir aplicaciones complejas 
+                                    sin herramientas de compilación (como Webpack o Vite) y sin servidor backend, utilizando 
+                                    únicamente las capacidades modernas del navegador.
+                                </p>
+                            </div>
+
+                            {/* Secciones */}
+
+                            <Section id="intro" title="La Filosofía 'No-Build'">
+                                <p className="mb-4 text-lg leading-relaxed text-slate-300">
+                                    El enfoque <strong>"No-Build"</strong> elimina radicalmente la barrera de entrada del desarrollo web moderno. 
+                                    Tradicionalmente, aplicaciones React complejas requieren cadenas de herramientas pesadas (Webpack, Vite, Node.js) para "transpilar" y empaquetar el código antes de que el navegador pueda verlo.
+                                </p>
+                                <p className="mb-4 leading-relaxed">
+                                    OmniFile se salta todo ese proceso intermediario. Entregamos el código fuente JSX directamente al cliente. 
+                                    Esto es posible gracias a <strong>Babel Standalone</strong>, un compilador JavaScript que se ejecuta dentro del navegador del usuario. 
+                                    Intercepta el código React, lo procesa en milisegundos y lo convierte en JavaScript estándar ejecutable. 
+                                    El resultado es una aplicación indistinguible de una profesional, pero que vive en un <strong>único archivo portátil</strong> que puedes enviar por email o guardar en un USB.
+                                </p>
+
+                                {/* NUEVO BLOQUE DE CÓDIGO: Estructura Base */}
+                                <CodeBlock 
+                                    title="index.html - La Arquitectura de Archivo Único"
+                                    lang="html"
+                                    code={`
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 1. Cargamos el motor (React) desde CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>
+    
+    <!-- 2. Cargamos el compilador (Babel) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- 3. Escribimos JSX directamente con type="text/babel" -->
+    <script type="text/babel">
+        const App = () => {
+            return <h1>Hola Mundo sin Build Step!</h1>;
+        };
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    <\/script>
+</body>
+</html>
+                                    `}
+                                />
+
+                                <div className="grid md:grid-cols-2 gap-4 mt-6">
+                                    <Card title="Sin Node.js" icon="server-off">
+                                        Adiós al "node_modules hell". No requiere instalación, ni `npm install`, ni configuración de entorno. Plug & Play.
+                                    </Card>
+                                    <Card title="React en CDN" icon="globe">
+                                        Utiliza versiones UMD de React cargadas desde un CDN (unpkg), en lugar de empaquetarlas localmente.
+                                    </Card>
+                                </div>
+                            </Section>
+
+                            <Section id="dependencies" title="El Stack Tecnológico">
+                                <p className="mb-6">
+                                    La aplicación orquesta varias librerías poderosas cargadas vía CDN en el <code>&lt;head&gt;</code>.
+                                </p>
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <div className="text-yellow-400 font-bold mb-1">Mammoth.js</div>
+                                        <div className="text-xs text-slate-400">Convierte .docx a HTML puro para visualización.</div>
+                                    </div>
+                                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <div className="text-green-400 font-bold mb-1">SheetJS</div>
+                                        <div className="text-xs text-slate-400">Lee Excel/CSV y permite exportar o renderizar tablas.</div>
+                                    </div>
+                                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <div className="text-pink-400 font-bold mb-1">Tailwind CSS</div>
+                                        <div className="text-xs text-slate-400">Cargado vía script CDN para estilos utilitarios instantáneos.</div>
+                                    </div>
+                                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <div className="text-blue-400 font-bold mb-1">PrismJS</div>
+                                        <div className="text-xs text-slate-400">Resaltado de sintaxis para archivos de código.</div>
+                                    </div>
+                                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <div className="text-purple-400 font-bold mb-1">Marked</div>
+                                        <div className="text-xs text-slate-400">Parser de Markdown a HTML seguro y rápido.</div>
+                                    </div>
+                                </div>
+                            </Section>
+
+                            <Section id="db" title="El Wrapper de IndexedDB">
+                                <p className="mb-4">
+                                    Aquí reside la lógica más compleja. <code>localStorage</code> solo permite ~5MB de texto. 
+                                    Para guardar archivos (imágenes, PDFs), necesitamos <strong>IndexedDB</strong>. 
+                                    El código implementa un "wrapper" manual para simplificar su uso con Promesas.
+                                </p>
+
+                                <CodeBlock 
+                                    title="window.LocalDB (Simplified Logic)"
+                                    code={`
+window.LocalDB = (function() {
+    const DB_NAME = 'OmniFile-DB-v1';
+    
+    // Abre la base de datos y crea el 'ObjectStore' si no existe
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                // Se ejecuta solo la primera vez para crear la tabla
+                e.target.result.createObjectStore('files');
+            };
+            request.onsuccess = (e) => resolve(e.target.result);
+        });
+    }
+
+    return {
+        // Método para guardar datos masivos (Blobs)
+        set: async (key, val) => {
+            const db = await openDB();
+            const tx = db.transaction('files', 'readwrite');
+            tx.objectStore('files').put(val, key);
+        }
+        // ... método get similar
+    };
+})();
+                                    `}
+                                />
+                                <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg text-sm text-blue-200 mt-4">
+                                    <strong>Nota Clave:</strong> El código guarda el <code>rawBlob</code> (el archivo binario original) en la base de datos. 
+                                    Al recargar la página, regenera las URLs volátiles (<code>URL.createObjectURL</code>) a partir de esos blobs guardados.
+                                </div>
+                            </Section>
+
+                            <Section id="processing" title="Lógica de Procesamiento">
+                                <p className="mb-4">
+                                    La función <code>processFiles</code> actúa como un controlador de tráfico. Recibe una lista de archivos (del input o drag-and-drop), 
+                                    analiza la extensión y decide qué estrategia de lectura usar.
+                                </p>
+                                <CodeBlock 
+                                    title="Estrategia de Lectura (Snippet)" 
+                                    code={`
+const processFiles = async (fileList) => {
+    // ... loop sobre archivos ...
+    
+    if (ext === 'pdf') {
+        // PDF: No leemos el contenido, solo creamos referencia
+        fileData.content = URL.createObjectURL(file);
+        fileData.viewer = 'pdf';
+    } 
+    else if (['xlsx', 'csv'].includes(ext)) {
+        // EXCEL: Lectura binaria -> Conversión a HTML
+        const buffer = await file.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: 'array' });
+        const html = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
+        fileData.content = html;
+    }
+    else if (ext === 'docx') {
+        // WORD: Mammoth extrae el texto crudo y formato básico
+        const buffer = await file.arrayBuffer();
+        const result = await window.mammoth.convertToHtml({ arrayBuffer: buffer });
+        fileData.content = result.value;
+    }
+    // ... otros formatos
+}
+                                    `}
+                                />
+
+                                {/* NUEVO BLOQUE DE CÓDIGO: Drag and Drop */}
+                                <p className="mt-6 mb-4 text-slate-300">
+                                    Además de la lectura, la aplicación gestiona eventos nativos del DOM para soportar <strong>Drag & Drop</strong>.
+                                    Prevenimos el comportamiento por defecto del navegador (que abriría el archivo) y capturamos los datos.
+                                </p>
+                                <CodeBlock
+                                    title="Eventos del DOM - Drag & Drop"
+                                    lang="javascript"
+                                    code={`
+const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Detectamos si el usuario está arrastrando algo sobre la ventana
+    if (e.type === "dragenter" || e.type === "dragover") {
+        setDragActive(true);
+    } else if (e.type === "dragleave") {
+        setDragActive(false);
+    }
+};
+
+const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    // Accedemos a los archivos a través de dataTransfer
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processFiles(e.dataTransfer.files);
+    }
+};
+                                    `}
+                                />
+                            </Section>
+
+                            {/* NUEVA SECCIÓN: GESTIÓN DE ESTADO */}
+                            <Section id="state" title="Gestión de Estado y Reactividad">
+                                <p className="mb-4 text-slate-300">
+                                    OmniFile utiliza Hooks de React para mantener la interfaz rápida y reactiva, incluso cuando se manipulan listas de archivos grandes.
+                                </p>
+
+                                {/* 1. Filtrado Optimizado */}
+                                <h3 className="text-xl font-bold text-white mb-2 mt-6">Búsqueda en Tiempo Real</h3>
+                                <p className="mb-4 text-sm text-slate-400">
+                                    Utilizamos <code>useMemo</code> para filtrar la lista de archivos. Esto asegura que el filtro solo se recalcule cuando cambia la lista de archivos o el término de búsqueda, evitando renders innecesarios.
+                                </p>
+                                <CodeBlock
+                                    title="Filtrado Optimizado con useMemo"
+                                    lang="javascript"
+                                    code={`
+const filteredFiles = useMemo(() => {
+    // Si no hay búsqueda, devolvemos todo
+    if (!searchQuery) return files;
+
+    // Filtramos ignorando mayúsculas/minúsculas
+    return files.filter(f => 
+        f.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+}, [files, searchQuery]); // Dependencias
+                                    `}
+                                />
+
+                                {/* 2. Lógica de Borrado */}
+                                <h3 className="text-xl font-bold text-white mb-2 mt-6">Sincronización de Estado (Borrado)</h3>
+                                <p className="mb-4 text-sm text-slate-400">
+                                    Al borrar un archivo, debemos actualizar tres estados simultáneos: la lista de archivos (`files`), las pestañas abiertas (`openTabIds`) y la pestaña activa (`activeTabId`) para no dejar al usuario viendo un archivo inexistente.
+                                </p>
+                                <CodeBlock
+                                    title="handleDeleteFile Logic"
+                                    lang="javascript"
+                                    code={`
+const handleDeleteFile = (e, id) => {
+    e.stopPropagation(); // Evitar abrir el archivo al hacer clic en borrar
+
+    // 1. Quitar de la lista principal
+    const updatedFiles = files.filter(f => f.id !== id);
+    setFiles(updatedFiles);
+    
+    // 2. Cerrar la pestaña si estaba abierta
+    const newTabs = openTabIds.filter(tid => tid !== id);
+    setOpenTabIds(newTabs);
+
+    // 3. Si era el archivo activo, cambiar el foco al último disponible
+    if (activeTabId === id) { 
+        setActiveTabId(newTabs.length > 0 ? newTabs[newTabs.length - 1] : null); 
+    }
+    
+    // 4. Sincronizar persistencia
+    saveFilesToDb(updatedFiles);
+};
+                                    `}
+                                />
+                            </Section>
+
+                            <Section id="viewers" title="Sistema de Visores (Viewers)">
+                                <p className="mb-6">
+                                    OmniFile utiliza un patrón de diseño de "Renderizado Condicional". Dependiendo de la propiedad <code>viewer</code> 
+                                    del archivo activo, React monta un componente diferente.
+                                </p>
+
+                                {/* NUEVO BLOQUE DE CÓDIGO: Lógica de Viewers */}
+                                <CodeBlock 
+                                    title="App.js - Patrón de Renderizado Condicional"
+                                    lang="jsx"
+                                    code={`
+{/* Dentro del render principal de la App */}
+<div className="flex-1 overflow-hidden relative">
+    {(() => {
+        // Switch statement para decidir qué componente montar
+        switch (activeFile.viewer) {
+            case 'code': 
+                return <CodeViewer content={activeFile.content} language={activeFile.language} />;
+            case 'markdown': 
+                return <MarkdownViewer content={activeFile.content} theme={theme} />;
+            case 'image': 
+                return <ImageViewer fileUrl={activeFile.content} alt={activeFile.name} />;
+            case 'spreadsheet': 
+                // Renderiza la tabla HTML generada por SheetJS
+                return <SpreadsheetViewer content={activeFile.content} theme={theme} />;
+            case 'pdf': 
+                return <iframe src={activeFile.content} className="w-full h-full" />;
+            default: 
+                return <TextViewer content={activeFile.content} />;
+        }
+    })()}
+</div>
+                                    `}
+                                />
+                                
+                                {/* NUEVO BLOQUE DE CÓDIGO: Rich Text Editor */}
+                                <div className="mt-8 p-4 border border-slate-700 rounded-lg bg-slate-800/30">
+                                    <h3 className="text-lg font-bold text-doc-accent mb-2">Caso Especial: Editor HTML</h3>
+                                    <p className="text-sm text-slate-400 mb-4">
+                                        Para editar archivos Word convertidos a HTML, utilizamos la API nativa <code>contentEditable</code> y comandos del navegador. Es simple pero efectivo.
+                                    </p>
+                                    <CodeBlock
+                                        title="RichTextEditor Component (Fragmento)"
+                                        lang="jsx"
+                                        code={`
+const RichTextEditor = ({ content, onChange }) => {
+    // ... referencias y efectos ...
+
+    return (
+        <div className="flex flex-col h-full">
+            {/* Barra de Herramientas Simple */}
+            <div className="toolbar">
+                <button onClick={() => document.execCommand('bold')}>Bold</button>
+                <button onClick={() => document.execCommand('italic')}>Italic</button>
+            </div>
+            
+            {/* Área Editable */}
+            <div 
+                contentEditable
+                className="prose max-w-none focus:outline-none"
+                onInput={(e) => onChange(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{ __html: content }}
+            />
+        </div>
+    );
+};
+                                        `}
+                                    />
+                                </div>
+
+                                <div className="space-y-4 mt-6">
+                                    <div className="flex gap-4 items-start">
+                                        <div className="bg-slate-700 p-2 rounded text-doc-accent font-mono text-sm whitespace-nowrap">SpreadsheetViewer</div>
+                                        <p className="text-sm text-slate-400">Recibe HTML generado por SheetJS. Utiliza estilos de Tailwind para forzar que la tabla se vea bonita (bordes, scroll) ya que las tablas HTML crudas son feas.</p>
+                                    </div>
+                                    <div className="flex gap-4 items-start">
+                                        <div className="bg-slate-700 p-2 rounded text-doc-accent font-mono text-sm whitespace-nowrap">CodeViewer</div>
+                                        <p className="text-sm text-slate-400">Un componente que envuelve un <code>&lt;pre&gt;&lt;code&gt;</code>. Utiliza un <code>useEffect</code> para llamar a <code>Prism.highlightElement</code> cada vez que el contenido cambia.</p>
+                                    </div>
+                                    <div className="flex gap-4 items-start">
+                                        <div className="bg-slate-700 p-2 rounded text-doc-accent font-mono text-sm whitespace-nowrap">ImageViewer</div>
+                                        <p className="text-sm text-slate-400">El más interactivo. Implementa lógica de matemáticas de mouse (<code>onWheel</code>, <code>onMouseMove</code>) para permitir Pan (arrastrar) y Zoom en la imagen.</p>
+                                    </div>
+                                </div>
+                            </Section>
+
+                            {/* NUEVA SECCIÓN: Galería de Imágenes */}
+                            <Section id="images" title="Galería de Imágenes">
+                                <p className="mb-6 text-slate-300">
+                                    Aquí se mostrarán las capturas de pantalla de la aplicación en funcionamiento. 
+                                    Actualmente en desarrollo.
+                                </p>
+                                
+                                {/* Placeholder Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+                                        <div key={item} className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700">
+                                            {/* Imagen Placeholder con Animación Pulse */}
+                                            <div className="h-40 bg-slate-700 animate-pulse flex items-center justify-center relative group">
+                                                <Icon name="image" size={32} className="text-slate-600 group-hover:scale-110 transition-transform duration-300" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                                    <span className="text-xs font-bold text-white">Captura {item}</span>
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <div className="h-4 bg-slate-700 rounded w-3/4 mb-2 animate-pulse"></div>
+                                                <div className="h-3 bg-slate-700 rounded w-1/2 animate-pulse"></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Section>
+
+                            <Section id="ui" title="Estilos & Glassmorphism">
+                                <p className="mb-4">
+                                    La interfaz visual no usa CSS tradicional, sino una configuración de Tailwind inyectada en JS.
+                                    Destaca el uso de efectos de vidrio.
+                                </p>
+                                <CodeBlock 
+                                    title="CSS Variables & Tailwind"
+                                    lang="css"
+                                    code={`
+/* Definido en el <style> del head */
+.glass-base {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px); /* El efecto borroso detrás */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Animaciones personalizadas en Tailwind config */
+animation: {
+    'blob': 'blob 7s infinite', /* Las esferas de colores flotantes */
+    'fade-in': 'fadeIn 0.3s ease-out'
+}
+                                    `}
+                                />
+
+                                {/* NUEVO BLOQUE DE CÓDIGO: Tema Oscuro */}
+                                <p className="mt-6 mb-4 text-slate-300">
+                                    El cambio de tema no requiere recargar la página. React actualiza el estado y un <code>useEffect</code> sincroniza
+                                    la clase en el <code>body</code> y el <code>localStorage</code>.
+                                </p>
+                                <CodeBlock
+                                    title="Lógica de Tema Oscuro/Claro"
+                                    lang="javascript"
+                                    code={`
+// Estado inicial leyendo de localStorage
+const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+// Efecto secundario: Sincroniza el DOM cuando cambia el estado 'theme'
+useEffect(() => {
+    document.body.className = theme === 'dark' 
+        ? 'dark bg-slate-950 text-slate-50' 
+        : 'light bg-slate-50 text-slate-900';
+    
+    localStorage.setItem('theme', theme);
+}, [theme]);
+
+const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+};
+                                    `}
+                                />
+
+                                <p className="mt-4 text-sm text-slate-400">
+                                    El tema oscuro/claro se maneja cambiando una clase en el <code>&lt;body&gt;</code> y utilizando las variables de color de Tailwind 
+                                    (e.g., <code>dark:bg-slate-900</code>).
+                                </p>
+                            </Section>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

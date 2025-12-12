@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniFile Processor v3 - Local Storage Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#AF02E8">
+    <title>OmniFile Processor v3 - Responsive Edition</title>
 
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -13,7 +15,7 @@
     <!-- Babel para JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Custom Inline IndexedDB Wrapper (Replaces external idb-keyval to prevent load errors) -->
+    <!-- Custom Inline IndexedDB Wrapper -->
     <script>
         window.LocalDB = (function() {
             const DB_NAME = 'OmniFile-DB-v1';
@@ -23,7 +25,6 @@
             function openDB() {
                 if (dbPromise) return dbPromise;
                 dbPromise = new Promise((resolve, reject) => {
-                    // Check if IndexedDB is supported
                     if (!('indexedDB' in window)) {
                         reject(new Error('IndexedDB not supported'));
                         return;
@@ -141,19 +142,21 @@
     <!-- Marked para renderizar Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- Mammoth.js para leer .docx (Updated CDN) -->
+    <!-- Mammoth.js para leer .docx -->
     <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
 
     <!-- SheetJS (XLSX) para Excel/ODS -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
-    <!-- PrismJS para Estilo Terminal de Código -->
+    <!-- PrismJS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-    <!-- El componente markup incluye html y xml -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 
     <!-- Google Font -->
     <link
@@ -163,7 +166,6 @@
     <style>
         :root {
             --bg-gradient-light: linear-gradient(135deg, #eef2ff 0%, #f5d0fe 50%, #e0e7ff 100%);
-            /* CAMBIO REALIZADO: Fondo oscuro sólido #8103A0 */
             --bg-gradient-dark: #8103A0;
         }
 
@@ -171,6 +173,8 @@
             font-family: 'Inter', sans-serif;
             transition: background 0.5s ease;
             background-attachment: fixed;
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior: none;
         }
 
         body.light {
@@ -215,13 +219,11 @@
             background: rgba(156, 163, 175, 0.8);
         }
 
-        /* Estilo Terminal para Prism */
         pre[class*="language-"] {
             margin: 0 !important;
             height: 100%;
             border-radius: 0.75rem;
             background: #1e1e1e !important;
-            /* Fondo terminal oscuro */
             text-shadow: none !important;
             font-family: 'Fira Code', monospace !important;
             font-size: 0.9rem;
@@ -229,13 +231,13 @@
     </style>
 </head>
 
-<body class="light h-screen overflow-hidden selection:bg-brand-500 selection:text-white">
+<body class="light h-[100dvh] overflow-hidden selection:bg-brand-500 selection:text-white">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
-        const MAX_FILE_SIZE_MB = 100; // Increased for DB storage capability
+        const MAX_FILE_SIZE_MB = 100;
         const DB_KEY = 'omnifile-v3-storage';
 
         // --- COMPONENTES UI ---
@@ -264,25 +266,15 @@
             backgroundColor: 'transparent',
             '--tw-prose-body': theme === 'light' ? '#000000' : '#e2e8f0',
             '--tw-prose-headings': theme === 'light' ? '#000000' : '#ffffff',
-            '--tw-prose-lead': theme === 'light' ? '#000000' : '#e2e8f0',
             '--tw-prose-links': theme === 'light' ? '#000000' : '#ffffff',
             '--tw-prose-bold': theme === 'light' ? '#000000' : '#ffffff',
-            '--tw-prose-counters': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-bullets': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-hr': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-quotes': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-quote-borders': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-captions': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-code': theme === 'light' ? '#000000' : '#ffffff',
             '--tw-prose-pre-code': theme === 'light' ? '#000000' : '#e2e8f0',
             '--tw-prose-pre-bg': 'transparent',
-            '--tw-prose-th-borders': theme === 'light' ? '#000000' : '#e2e8f0',
-            '--tw-prose-td-borders': theme === 'light' ? '#000000' : '#e2e8f0',
         });
 
         const SpreadsheetViewer = ({ content, theme }) => {
             return (
-                <div className="w-full h-full overflow-auto custom-scroll p-8">
+                <div className="w-full h-full overflow-auto custom-scroll p-4 md:p-8">
                     <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm p-2 overflow-hidden border border-gray-200 dark:border-gray-700">
                         <div
                             className="prose prose-sm max-w-none dark:prose-invert 
@@ -306,15 +298,15 @@
             }, [content, language]);
             return (
                 <div className="w-full h-full bg-[#1e1e1e] rounded-xl overflow-hidden shadow-inner flex flex-col border border-gray-700">
-                    <div className="h-8 bg-[#252526] flex items-center px-4 border-b border-black/20">
+                    <div className="h-8 bg-[#252526] flex items-center px-4 border-b border-black/20 shrink-0">
                         <div className="flex gap-2">
                             <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
                             <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
                             <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
                         </div>
-                        <span className="ml-4 text-[10px] text-gray-400 font-mono uppercase tracking-widest">Terminal View • {language}</span>
+                        <span className="ml-4 text-[10px] text-gray-400 font-mono uppercase tracking-widest">Terminal • {language}</span>
                     </div>
-                    <pre className={`!m-0 !h-full !rounded-none overflow-auto custom-scroll !bg-[#1e1e1e]`}>
+                    <pre className={`!m-0 !h-full !rounded-none overflow-auto custom-scroll !bg-[#1e1e1e] !p-4`}>
                         <code ref={codeRef} className={`language-${language} !font-mono !text-sm`}>
                             {content}
                         </code>
@@ -326,7 +318,7 @@
         const MarkdownViewer = ({ content, theme }) => {
             return (
                 <div
-                    className="prose prose-slate dark:prose-invert max-w-none p-8 overflow-auto custom-scroll h-full font-medium"
+                    className="prose prose-slate dark:prose-invert max-w-none p-4 md:p-8 overflow-auto custom-scroll h-full font-medium"
                     style={getProseStyles(theme)}
                     dangerouslySetInnerHTML={{ __html: marked.parse(content || '') }}
                 />
@@ -336,7 +328,7 @@
         const HtmlViewer = ({ content, theme }) => {
             return (
                 <div className="w-full h-full overflow-auto custom-scroll bg-white">
-                    <div className="min-h-full p-8 bg-white" style={{ backgroundColor: '#ffffff', color: '#000000' }}>
+                    <div className="min-h-full p-4 md:p-8 bg-white" style={{ backgroundColor: '#ffffff', color: '#000000' }}>
                         <div
                             className="prose prose-slate max-w-none font-medium mx-auto bg-white text-black"
                             style={{ color: '#000000', backgroundColor: '#ffffff' }}
@@ -356,7 +348,7 @@
 
             return (
                 <pre
-                    className="font-mono text-sm p-6 overflow-auto custom-scroll h-full whitespace-pre-wrap break-words font-bold leading-relaxed"
+                    className="font-mono text-sm p-4 md:p-6 overflow-auto custom-scroll h-full whitespace-pre-wrap break-words font-bold leading-relaxed"
                     style={{
                         color: theme === 'light' ? '#000000' : '#e2e8f0',
                         backgroundColor: 'transparent'
@@ -379,21 +371,41 @@
                     setScale(s => Math.min(Math.max(0.5, s - e.deltaY * 0.01), 5));
                 }
             };
+            
+            // Mouse Events
             const handleMouseDown = (e) => { setIsDragging(true); setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y }); };
             const handleMouseMove = (e) => { if (!isDragging) return; setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); };
             const handleMouseUp = () => setIsDragging(false);
 
+            // Touch Events for Mobile
+            const handleTouchStart = (e) => { 
+                if(e.touches.length === 1) {
+                    setIsDragging(true); 
+                    setDragStart({ x: e.touches[0].clientX - position.x, y: e.touches[0].clientY - position.y }); 
+                }
+            };
+            const handleTouchMove = (e) => { 
+                if (!isDragging || e.touches.length !== 1) return; 
+                e.preventDefault(); // Prevent scrolling while dragging image
+                setPosition({ x: e.touches[0].clientX - dragStart.x, y: e.touches[0].clientY - dragStart.y }); 
+            };
+            const handleTouchEnd = () => setIsDragging(false);
+
             return (
-                <div className="relative w-full h-full flex items-center justify-center overflow-hidden" onWheel={handleWheel} onMouseLeave={handleMouseUp} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
+                <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-checkered" 
+                     onWheel={handleWheel} 
+                     onMouseLeave={handleMouseUp} onMouseUp={handleMouseUp} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}
+                     onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+                >
                     <div className="absolute bottom-4 right-4 flex gap-2 z-10">
                         <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-2 rounded-xl shadow-lg flex items-center gap-2 border border-slate-200 dark:border-slate-700">
-                            <button onClick={() => setScale(s => Math.max(0.5, s - 0.2))} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><Icon name="minus" size={16} /></button>
+                            <button onClick={() => setScale(s => Math.max(0.5, s - 0.2))} className="p-2 md:p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><Icon name="minus" size={20} /></button>
                             <span className="text-xs font-mono w-12 text-center">{Math.round(scale * 100)}%</span>
-                            <button onClick={() => setScale(s => Math.min(5, s + 0.2))} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><Icon name="plus" size={16} /></button>
-                            <button onClick={() => { setScale(1); setPosition({ x: 0, y: 0 }) }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><Icon name="refresh-ccw" size={16} /></button>
+                            <button onClick={() => setScale(s => Math.min(5, s + 0.2))} className="p-2 md:p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><Icon name="plus" size={20} /></button>
+                            <button onClick={() => { setScale(1); setPosition({ x: 0, y: 0 }) }} className="p-2 md:p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><Icon name="refresh-ccw" size={20} /></button>
                         </div>
                     </div>
-                    <div className="cursor-grab active:cursor-grabbing transition-transform duration-75" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${scale})` }} onMouseDown={handleMouseDown}>
+                    <div className="transition-transform duration-75" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${scale})` }}>
                         <img src={fileUrl} alt={alt} draggable={false} className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-xl" />
                     </div>
                 </div>
@@ -427,14 +439,14 @@
             };
             return (
                 <div className="w-full h-full flex flex-col bg-white relative z-30">
-                    <div className="flex items-center gap-2 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                        <button onClick={() => document.execCommand('bold')} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Negrita"><Icon name="bold" size={16} /></button>
-                        <button onClick={() => document.execCommand('italic')} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Cursiva"><Icon name="italic" size={16} /></button>
-                        <button onClick={() => document.execCommand('underline')} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Subrayado"><Icon name="underline" size={16} /></button>
-                        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                        <button onClick={() => document.execCommand('insertUnorderedList')} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Lista"><Icon name="list" size={16} /></button>
+                    <div className="flex items-center gap-2 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-x-auto">
+                        <button onClick={() => document.execCommand('bold')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Negrita"><Icon name="bold" size={18} /></button>
+                        <button onClick={() => document.execCommand('italic')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Cursiva"><Icon name="italic" size={18} /></button>
+                        <button onClick={() => document.execCommand('underline')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Subrayado"><Icon name="underline" size={18} /></button>
+                        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1 shrink-0"></div>
+                        <button onClick={() => document.execCommand('insertUnorderedList')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300" title="Lista"><Icon name="list" size={18} /></button>
                     </div>
-                    <div className="flex-1 overflow-y-auto custom-scroll p-8 bg-white" style={{ backgroundColor: '#ffffff', color: '#000000' }}>
+                    <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 bg-white" style={{ backgroundColor: '#ffffff', color: '#000000' }}>
                         <div
                             ref={editorRef}
                             className="w-full max-w-4xl mx-auto min-h-full outline-none text-black prose prose-lg max-w-none bg-white"
@@ -460,70 +472,54 @@
             const [isEditing, setIsEditing] = useState(false);
             const [editContent, setEditContent] = useState("");
             const [dbReady, setDbReady] = useState(false);
+            // Iniciar sidebar cerrado en móviles (ancho < 768px)
+            const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768); 
             const inputRef = useRef(null);
 
             // --- DATA PERSISTENCE LOGIC ---
-
-            // Load from DB on start
             useEffect(() => {
                 const loadData = async () => {
                     setLoading(true);
-                    
-                    if (!window.LocalDB) {
-                         console.error("LocalDB helper not initialized.");
-                         setLoading(false);
-                         return;
-                    }
-
+                    if (!window.LocalDB) { console.error("LocalDB helper not initialized."); setLoading(false); return; }
                     setDbReady(true);
-
                     try {
                         const storedFiles = await window.LocalDB.get(DB_KEY);
                         if (storedFiles && Array.isArray(storedFiles)) {
-                            // Re-hydrate blobs (ObjectURLs expire on refresh, so we remake them from the stored blob)
                             const hydratedFiles = storedFiles.map(f => {
-                                if (f.isBlob && f.rawBlob) {
-                                    return { ...f, content: URL.createObjectURL(f.rawBlob) };
-                                }
+                                if (f.isBlob && f.rawBlob) { return { ...f, content: URL.createObjectURL(f.rawBlob) }; }
                                 return f;
                             });
                             setFiles(hydratedFiles);
-                            // Restore tabs if files exist
                             if (hydratedFiles.length > 0) {
                                 setOpenTabIds(hydratedFiles.map(f => f.id));
                                 setActiveTabId(hydratedFiles[0].id);
                             }
                         }
-                    } catch (err) {
-                        console.error("Error loading from DB:", err);
-                    } finally {
-                        setLoading(false);
-                    }
+                    } catch (err) { console.error("Error loading from DB:", err); } finally { setLoading(false); }
                 };
-                
                 loadData();
             }, []);
 
-            // Save entire file list to DB
+            // Auto-resize sidebar state
+            useEffect(() => {
+                const handleResize = () => {
+                    if (window.innerWidth >= 768) {
+                        setIsSidebarOpen(true);
+                    }
+                };
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+
             const saveFilesToDb = async (filesToSave) => {
                 if (!window.LocalDB) return;
-                
                 try {
-                    // We save the 'rawBlob' instead of the ObjectURL string for binaries
-                    // For text files, content is already the string we want.
                     await window.LocalDB.set(DB_KEY, filesToSave.map(f => {
-                        // Create a shallow copy to avoid mutating state
                         const fileForDb = { ...f };
-                        // If it's a blob based file, ensure we don't save the ephemeral URL
-                        if (f.isBlob) {
-                             fileForDb.content = null; // Don't save URL string
-                        }
+                        if (f.isBlob) { fileForDb.content = null; }
                         return fileForDb;
                     }));
-                    console.log("Datos guardados localmente en IndexedDB");
-                } catch (err) {
-                    console.error("Error saving to DB:", err);
-                }
+                } catch (err) { console.error("Error saving to DB:", err); }
             };
 
             useEffect(() => {
@@ -531,10 +527,7 @@
                 localStorage.setItem('theme', theme);
             }, [theme]);
 
-            useEffect(() => {
-                setIsEditing(false);
-                setEditContent("");
-            }, [activeTabId]);
+            useEffect(() => { setIsEditing(false); setEditContent(""); }, [activeTabId]);
 
             const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
@@ -543,255 +536,116 @@
                 const newFiles = [];
                 for (let i = 0; i < fileList.length; i++) {
                     const file = fileList[i];
+                    // Removed size alert to avoid blocking, just console log if huge
                     const fileSizeMB = file.size / (1024 * 1024);
-                    if (fileSizeMB > MAX_FILE_SIZE_MB) { alert(`Archivo ${file.name} demasiado grande.`); continue; }
-
+                    
                     const ext = file.name.split('.').pop().toLowerCase();
                     const id = Date.now() + i + Math.random().toString(36).substr(2, 9);
-                    
-                    // Structure: 
-                    // content: used for display (string or ObjectURL)
-                    // rawBlob: used for DB storage (Blob/File object)
-                    const fileData = { 
-                        id, 
-                        name: file.name, 
-                        type: file.type, 
-                        size: fileSizeMB < 1 ? (file.size / 1024).toFixed(2) + ' KB' : fileSizeMB.toFixed(2) + ' MB', 
-                        ext, 
-                        content: null, 
-                        status: 'loading',
-                        isBlob: false,
-                        rawBlob: null
-                    };
+                    const fileData = { id, name: file.name, type: file.type, size: fileSizeMB < 1 ? (file.size / 1024).toFixed(2) + ' KB' : fileSizeMB.toFixed(2) + ' MB', ext, content: null, status: 'loading', isBlob: false, rawBlob: null };
 
                     try {
                         if (['pdf'].includes(ext)) {
-                            fileData.content = URL.createObjectURL(file);
-                            fileData.rawBlob = file; // Persist original file
-                            fileData.isBlob = true;
-                            fileData.status = 'ready';
-                            fileData.viewer = 'pdf';
-                        }
-                        else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
-                            fileData.content = URL.createObjectURL(file);
-                            fileData.rawBlob = file; // Persist original file
-                            fileData.isBlob = true;
-                            fileData.status = 'ready';
-                            fileData.viewer = 'image';
-                        }
-                        else if (['xlsx', 'xls', 'ods', 'csv'].includes(ext)) {
+                            fileData.content = URL.createObjectURL(file); fileData.rawBlob = file; fileData.isBlob = true; fileData.status = 'ready'; fileData.viewer = 'pdf';
+                        } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
+                            fileData.content = URL.createObjectURL(file); fileData.rawBlob = file; fileData.isBlob = true; fileData.status = 'ready'; fileData.viewer = 'image';
+                        } else if (['xlsx', 'xls', 'ods', 'csv'].includes(ext)) {
                             try {
                                 const arrayBuffer = await file.arrayBuffer();
                                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                                const firstSheetName = workbook.SheetNames[0];
-                                const worksheet = workbook.Sheets[firstSheetName];
-                                const html = XLSX.utils.sheet_to_html(worksheet, { id: "excel-table", editable: false });
+                                const html = XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]], { id: "excel-table", editable: false });
                                 fileData.content = html; fileData.viewer = 'spreadsheet'; fileData.status = 'ready';
-                            } catch (err) { 
-                                console.error(err);
-                                fileData.content = `Error lectura hoja cálculo: ${err.message}`; 
-                                fileData.viewer = 'text'; 
-                                fileData.status = 'error'; 
-                            }
-                        }
-                        else if (ext === 'docx') {
+                            } catch (err) { fileData.content = `Error: ${err.message}`; fileData.viewer = 'text'; fileData.status = 'error'; }
+                        } else if (ext === 'docx') {
                             try {
-                                if (!window.mammoth) throw new Error("La librería Mammoth no se ha cargado correctamente.");
                                 const arrayBuffer = await file.arrayBuffer();
                                 const result = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-                                if (!result || !result.value) throw new Error("No se pudo extraer contenido de texto del archivo.");
-                                
-                                fileData.content = result.value; 
-                                fileData.viewer = 'html'; 
-                                fileData.status = 'ready';
-                                
-                                // Log warnings if any
-                                if (result.messages && result.messages.length > 0) {
-                                    console.warn("Mammoth warnings:", result.messages);
-                                }
-                            } catch (err) { 
-                                console.error("DOCX Error:", err);
-                                fileData.content = `Error al leer archivo DOCX: ${err.message}`; 
-                                fileData.viewer = 'text'; 
-                                fileData.status = 'error'; 
-                            }
-                        }
-                        else if (ext === 'doc') { 
-                            fileData.content = "El formato antiguo .doc (Word 97-2003) no es soportado directamente por el navegador. Por favor, abre el archivo en Word y guárdalo como .docx para poder visualizarlo aquí."; 
-                            fileData.viewer = 'text'; 
-                            fileData.status = 'warning'; 
-                        }
-                        else if (ext === 'odt') {
-                            fileData.content = "El formato .odt (OpenDocument Text) requiere conversión previa. Los navegadores no pueden renderizar este formato directamente. Por favor, guarda tu archivo como .docx o .pdf para visualizarlo aquí.";
-                            fileData.viewer = 'text';
-                            fileData.status = 'warning';
-                        }
-                        else {
-                            // Para cualquier otro formato (código, markdown, texto plano), leemos el contenido como texto
+                                fileData.content = result.value || "Documento vacío"; fileData.viewer = 'html'; fileData.status = 'ready';
+                            } catch (err) { fileData.content = `Error DOCX: ${err.message}`; fileData.viewer = 'text'; fileData.status = 'error'; }
+                        } else if (ext === 'doc' || ext === 'odt') {
+                            fileData.content = `Formato .${ext} no soportado directamente. Guardar como .docx o .pdf.`; fileData.viewer = 'text'; fileData.status = 'warning';
+                        } else {
                             try {
                                 const text = await file.text();
-                                fileData.content = text;
-                                fileData.status = 'ready';
-
-                                if (['js', 'jsx', 'ts', 'tsx'].includes(ext)) { 
-                                    fileData.viewer = 'code'; 
-                                    fileData.language = 'javascript'; 
-                                }
-                                else if (ext === 'css') { 
-                                    fileData.viewer = 'code'; 
-                                    fileData.language = 'css'; 
-                                }
-                                else if (ext === 'json') { 
-                                    fileData.viewer = 'code'; 
-                                    fileData.language = 'json'; 
-                                }
-                                else if (['html', 'xml', 'svg'].includes(ext)) { 
-                                    fileData.viewer = 'code'; 
-                                    fileData.language = 'markup'; 
-                                }
-                                else if (ext === 'java') { 
-                                    fileData.viewer = 'code'; 
-                                    fileData.language = 'java'; 
-                                }
-                                else if (['md', 'markdown'].includes(ext)) { 
-                                    fileData.viewer = 'markdown'; 
-                                    fileData.language = 'markdown'; 
-                                }
-                                else { 
-                                    fileData.viewer = 'text'; 
-                                }
-                            } catch (textErr) {
-                                console.error("Error leyendo texto:", textErr);
-                                fileData.content = "Error al leer el contenido del archivo.";
-                                fileData.status = 'error';
-                            }
+                                fileData.content = text; fileData.status = 'ready';
+                                if (['js', 'jsx', 'ts', 'tsx', 'css', 'json', 'html', 'xml', 'svg', 'java'].includes(ext)) { 
+                                    fileData.viewer = 'code'; fileData.language = ext === 'js' || ext === 'jsx' ? 'javascript' : ext;
+                                    if(ext === 'html' || ext === 'xml' || ext === 'svg') fileData.language = 'markup';
+                                } else if (['md', 'markdown'].includes(ext)) { 
+                                    fileData.viewer = 'markdown'; fileData.language = 'markdown'; 
+                                } else { fileData.viewer = 'text'; }
+                            } catch (textErr) { fileData.content = "Error leyendo texto."; fileData.status = 'error'; }
                         }
-                    } catch (e) { console.error(e); fileData.status = 'error'; }
+                    } catch (e) { fileData.status = 'error'; }
                     newFiles.push(fileData);
                 }
-                
                 const updatedFiles = [...files, ...newFiles];
                 setFiles(updatedFiles);
                 setOpenTabIds(prev => [...prev, ...newFiles.map(f => f.id)]);
                 if (newFiles.length > 0) setActiveTabId(newFiles[0].id);
                 setLoading(false);
-                
-                // Save to DB
                 saveFilesToDb(updatedFiles);
+                // On mobile, collapse sidebar after adding file to show content
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
             };
 
-            const handleDrag = (e) => { e.preventDefault(); e.stopPropagation(); if (e.type === "dragenter" || e.type === "dragover") setDragActive(true); else if (e.type === "dragleave") setDragActive(false); };
-            const handleDrop = (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); if (e.dataTransfer.files?.length) processFiles(e.dataTransfer.files); };
-
-            const handleCloseTab = (e, id) => {
-                e.stopPropagation();
-                const newTabs = openTabIds.filter(tid => tid !== id);
-                setOpenTabIds(newTabs);
-                if (activeTabId === id) { setActiveTabId(newTabs.length > 0 ? newTabs[newTabs.length - 1] : null); }
-                // Note: Closing a tab doesn't delete the file, so no DB update needed here unless we tracked open tabs in DB.
+            const handleDrag = (e) => { e.preventDefault(); e.stopPropagation(); if (e.type === "dragenter" || e.type === "dragover") { setDragActive(true); } else if (e.type === "dragleave") { setDragActive(false); } };
+            const handleDrop = (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); if (e.dataTransfer.files?.length) { processFiles(e.dataTransfer.files); } };
+            const handleCloseTab = (e, id) => { e.stopPropagation(); const newTabs = openTabIds.filter(tid => tid !== id); setOpenTabIds(newTabs); if (activeTabId === id) { setActiveTabId(newTabs.length > 0 ? newTabs[newTabs.length - 1] : null); } };
+            const handleDeleteFile = (e, id) => { e.stopPropagation(); const updatedFiles = files.filter(f => f.id !== id); setFiles(updatedFiles); const newTabs = openTabIds.filter(tid => tid !== id); setOpenTabIds(newTabs); if (activeTabId === id) { setActiveTabId(newTabs.length > 0 ? newTabs[newTabs.length - 1] : null); } saveFilesToDb(updatedFiles); };
+            const handleOpenFile = (id) => { 
+                if (!openTabIds.includes(id)) { setOpenTabIds(prev => [...prev, id]); } 
+                setActiveTabId(id);
+                // On mobile, auto close sidebar when opening a file
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
             };
-
-            const handleDeleteFile = (e, id) => {
-                e.stopPropagation();
-                const updatedFiles = files.filter(f => f.id !== id);
-                setFiles(updatedFiles);
-                
-                const newTabs = openTabIds.filter(tid => tid !== id);
-                setOpenTabIds(newTabs);
-                if (activeTabId === id) { setActiveTabId(newTabs.length > 0 ? newTabs[newTabs.length - 1] : null); }
-                
-                // Sync with DB
-                saveFilesToDb(updatedFiles);
-            };
-
-            const handleOpenFile = (id) => { if (!openTabIds.includes(id)) { setOpenTabIds(prev => [...prev, id]); } setActiveTabId(id); }
 
             const activeFile = useMemo(() => files.find(f => f.id === activeTabId), [files, activeTabId]);
             const filteredFiles = useMemo(() => files.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())), [files, searchQuery]);
-
-            const getFileIcon = (ext) => {
-                const map = { pdf: 'file-text', json: 'code-2', md: 'file-type-2', js: 'code', html: 'code', css: 'code', txt: 'align-left', png: 'image', jpg: 'image', jpeg: 'image', doc: 'file-text', docx: 'file-text', xml: 'code', java: 'coffee', xlsx: 'sheet', xls: 'sheet', ods: 'sheet', csv: 'table' };
-                return map[ext] || 'file';
-            };
-
+            const getFileIcon = (ext) => { const map = { pdf: 'file-text', json: 'code-2', md: 'file-type-2', js: 'code', html: 'code', css: 'code', txt: 'align-left', png: 'image', jpg: 'image', jpeg: 'image', doc: 'file-text', docx: 'file-text', xml: 'code', java: 'coffee', xlsx: 'sheet', xls: 'sheet', ods: 'sheet', csv: 'table' }; return map[ext] || 'file'; };
+            
             const handleStartEdit = () => { if (!activeFile) return; setEditContent(activeFile.content); setIsEditing(true); };
-            
-            const handleSaveEdit = () => { 
-                if (!activeFile) return; 
-                
-                const updatedFiles = files.map(f => { 
-                    if (f.id === activeFile.id) { 
-                        return { ...f, content: editContent }; 
-                    } 
-                    return f; 
-                });
-
-                setFiles(updatedFiles); 
-                setIsEditing(false);
-                
-                // Sync with DB
-                saveFilesToDb(updatedFiles);
-            };
-            
+            const handleSaveEdit = () => { if (!activeFile) return; const updatedFiles = files.map(f => { if (f.id === activeFile.id) { return { ...f, content: editContent }; } return f; }); setFiles(updatedFiles); setIsEditing(false); saveFilesToDb(updatedFiles); };
             const handleCancelEdit = () => { setIsEditing(false); setEditContent(""); };
-
-            const handleDownload = () => {
-                if (!activeFile) return;
-                let contentToDownload = activeFile.content;
-                let mimeType = 'text/plain';
-                if (['html', 'htm'].includes(activeFile.ext)) mimeType = 'text/html';
-                else if (['json'].includes(activeFile.ext)) mimeType = 'application/json';
-                else if (['js', 'jsx'].includes(activeFile.ext)) mimeType = 'text/javascript';
-                else if (['css'].includes(activeFile.ext)) mimeType = 'text/css';
-                else if (['md', 'markdown'].includes(activeFile.ext)) mimeType = 'text/markdown';
-
-                if (activeFile.viewer === 'image' || activeFile.viewer === 'pdf') {
-                    const link = document.createElement('a'); link.href = activeFile.content; link.download = activeFile.name; document.body.appendChild(link); link.click(); document.body.removeChild(link); return;
-                }
-                const blob = new Blob([contentToDownload], { type: mimeType });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a'); link.href = url; link.download = activeFile.name; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
-            };
-
+            const handleDownload = () => { if (!activeFile) return; const downloadLink = (href, name) => { const link = document.createElement('a'); link.href = href; link.download = name; document.body.appendChild(link); link.click(); setTimeout(() => { if(document.body.contains(link)) { document.body.removeChild(link); } if (href.startsWith('blob:')) { URL.revokeObjectURL(href); } }, 100); }; if (activeFile.viewer === 'image' || activeFile.viewer === 'pdf') { downloadLink(activeFile.content, activeFile.name); return; } const blob = new Blob([activeFile.content], { type: 'text/plain' }); const url = URL.createObjectURL(blob); downloadLink(url, activeFile.name); };
             const isActiveFileEditable = useMemo(() => { if (!activeFile) return false; return ['text', 'code', 'markdown', 'html', 'json'].includes(activeFile.viewer); }, [activeFile]);
-
 
             return (
                 <div 
-                    className="flex h-screen w-full relative overflow-hidden" 
+                    className="flex flex-col md:flex-row h-[100dvh] w-full relative overflow-hidden bg-gray-50 dark:bg-gray-900" 
                     onDragEnter={handleDrag} 
                     onDragOver={handleDrag} 
                     onDrop={handleDrop}
                 >
-                    <div className="absolute inset-0 pointer-events-none z-0">
-                        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-500/10 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob"></div>
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob animation-delay-2000"></div>
+                    {/* Background blob animation */}
+                    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                        <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-brand-500/10 rounded-full mix-blend-multiply filter blur-[60px] md:blur-[80px] opacity-70 animate-blob"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-purple-500/10 rounded-full mix-blend-multiply filter blur-[60px] md:blur-[80px] opacity-70 animate-blob animation-delay-2000"></div>
                     </div>
+
                     {dragActive && (
-                        <div
-                            className="absolute inset-0 z-50 bg-brand-500/20 backdrop-blur-md border-8 border-brand-400/50 flex items-center justify-center animate-fade-in transition-all"
-                            onDragEnter={handleDrag}
-                            onDragLeave={handleDrag}
-                            onDragOver={handleDrag}
-                            onDrop={handleDrop}
-                        >
-                            <div className="bg-white/80 dark:bg-slate-900/80 p-12 rounded-3xl shadow-2xl flex flex-col items-center animate-scale-in pointer-events-none">
+                        <div className="absolute inset-0 z-50 bg-brand-500/20 backdrop-blur-md border-4 md:border-8 border-brand-400/50 flex items-center justify-center animate-fade-in transition-all">
+                            <div className="bg-white/90 dark:bg-slate-900/90 p-8 md:p-12 rounded-3xl shadow-2xl flex flex-col items-center animate-scale-in pointer-events-none mx-4 text-center">
                                 <div className="bg-brand-500 p-6 rounded-full text-white mb-6 shadow-lg shadow-brand-500/40 animate-bounce">
                                     <Icon name="arrow-down" size={48} />
                                 </div>
-                                <h2 className="text-3xl font-bold dark:text-white tracking-tight">Suelta tus archivos</h2>
+                                <h2 className="text-2xl md:text-3xl font-bold dark:text-white tracking-tight">Suelta tus archivos</h2>
                             </div>
                         </div>
                     )}
-                    {/* BARRA LATERAL (SIDEBAR) */}
-                    <div className={`w-80 flex flex-col border-r z-20 m-3 rounded-2xl shadow-xl transition-all duration-300 ${theme === 'light' ? 'bg-purple-100/90 border-purple-200 backdrop-blur-xl' : 'bg-[#1D1336] border-white/5'}`}>
-                        <div className={`p-5 border-b ${theme === 'light' ? 'border-purple-200' : 'border-white/5'}`}>
-                            <div className="flex items-center justify-between mb-5">
+
+                    {/* SIDEBAR (Responsive) */}
+                    <div className={`
+                        flex flex-col border-b md:border-b-0 md:border-r z-20 
+                        transition-all duration-300 ease-in-out
+                        ${theme === 'light' ? 'bg-purple-100/90 border-purple-200 backdrop-blur-xl' : 'bg-[#1D1336] border-white/5'}
+                        ${isSidebarOpen ? 'max-h-[60vh] md:max-h-full' : 'max-h-16 md:max-h-full'}
+                        w-full md:w-80 md:h-full md:m-3 md:rounded-2xl shadow-xl
+                    `}>
+                        {/* Sidebar Header with Toggle */}
+                        <div className={`p-4 md:p-5 flex-shrink-0 flex flex-col gap-4 border-b ${theme === 'light' ? 'border-purple-200' : 'border-white/5'}`}>
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div
-                                        className="w-10 h-10 rounded-xl text-white shadow-lg flex items-center justify-center"
-                                        style={{ backgroundColor: theme === 'light' ? '#000000' : '#9333ea' }}
-                                    >
+                                    <div className="w-10 h-10 rounded-xl text-white shadow-lg flex items-center justify-center" style={{ backgroundColor: theme === 'light' ? '#000000' : '#9333ea' }}>
                                         <Icon name="layers" size={24} />
                                     </div>
                                     <div className="flex flex-col">
@@ -799,228 +653,109 @@
                                             OmniFile <span style={{ color: theme === 'light' ? '#6b21a8' : '#c084fc' }}>v3</span>
                                         </h1>
                                         <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-green-500 flex items-center gap-1">
-                                                <Icon name="database" size={10} /> Local Storage
-                                            </span>
-                                            {!dbReady && !loading && (
-                                                <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 flex items-center gap-1 ml-1" title="Persistence not available">
-                                                    (Offline)
-                                                </span>
-                                            )}
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-green-500 flex items-center gap-1"><Icon name="database" size={10} /> Local</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={toggleTheme}
-                                    style={theme === 'light' ? { backgroundColor: '#AF02E8', color: '#ffffff', boxShadow: '0 4px 6px -1px rgba(175, 2, 232, 0.4)' } : {}}
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition border border-transparent dark:border-gray-700 shadow-sm ${theme === 'light' ? 'hover:opacity-90' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}
-                                >
-                                    <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={20} />
-                                </button>
+                                <div className="flex gap-2">
+                                    <button onClick={toggleTheme} style={theme === 'light' ? { backgroundColor: '#AF02E8', color: '#ffffff' } : {}} className={`w-9 h-9 rounded-xl flex items-center justify-center transition border border-transparent dark:border-gray-700 shadow-sm ${theme === 'light' ? 'hover:opacity-90' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}>
+                                        <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={20} />
+                                    </button>
+                                    {/* Mobile toggle button */}
+                                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white">
+                                        <Icon name={isSidebarOpen ? 'chevron-up' : 'chevron-down'} size={20} />
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="relative group">
+                            {/* Search bar - hidden if collapsed on mobile */}
+                            <div className={`relative group ${!isSidebarOpen ? 'hidden md:block' : ''}`}>
                                 <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-white font-bold" />
-                                <input
-                                    type="text"
-                                    placeholder="BUSCAR ARCHIVO..."
-                                    className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm font-bold border-2 outline-none transition-all placeholder-gray-600 dark:placeholder-gray-400 ${theme === 'light' ? 'bg-white/60 border-purple-200 focus:border-purple-500 text-black' : 'bg-slate-900 border-gray-700 focus:border-brand-500 text-white'}`}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                                <input type="text" placeholder="BUSCAR..." className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm font-bold border-2 outline-none transition-all placeholder-gray-600 dark:placeholder-gray-400 ${theme === 'light' ? 'bg-white/60 border-purple-200 focus:border-purple-500 text-black' : 'bg-slate-900 border-gray-700 focus:border-brand-500 text-white'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto custom-scroll p-3 space-y-1">
+                        {/* File List - hidden if collapsed on mobile */}
+                        <div className={`flex-1 overflow-y-auto custom-scroll p-3 space-y-1 ${!isSidebarOpen ? 'hidden md:block' : ''}`}>
                             {loading ? (
-                                <div className="h-full flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
-                                </div>
+                                <div className="h-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div></div>
                             ) : filteredFiles.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                                    <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4 border-2 border-gray-300 dark:border-gray-700 shadow-sm">
-                                        <div style={{ color: theme === 'light' ? '#8211AD' : '' }} className="dark:text-brand-400 transition-colors">
-                                            <Icon name="folder-open" size={32} />
-                                        </div>
+                                    <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4 border-2 border-gray-300 dark:border-gray-700 shadow-sm">
+                                        <div style={{ color: theme === 'light' ? '#8211AD' : '' }} className="dark:text-brand-400"><Icon name="folder-open" size={28} /></div>
                                     </div>
-                                    <p className="text-xl font-black" style={{ color: theme === 'light' ? '#8211AD' : '#ffffff' }}>
-                                        SIN ARCHIVOS
-                                    </p>
-                                    <p className="text-sm mb-6 mt-2 font-bold" style={{ color: theme === 'light' ? '#4b5563' : '#d1d5db' }}>
-                                        La lista está vacía actualmente
-                                    </p>
-                                    <button
-                                        onClick={() => inputRef.current.click()}
-                                        style={{ backgroundColor: theme === 'light' ? '#8211AD' : '' }}
-                                        className="mt-2 text-sm font-bold dark:bg-brand-600 text-white px-8 py-3 rounded-xl hover:opacity-80 transition shadow-xl hover:scale-105 transform duration-200 tracking-wide uppercase border-2 border-transparent bg-black"
-                                    >
-                                        ABRIR EXPLORADOR
-                                    </button>
+                                    <p className="text-lg font-black" style={{ color: theme === 'light' ? '#8211AD' : '#ffffff' }}>VACÍO</p>
+                                    <button onClick={() => inputRef.current.click()} style={{ backgroundColor: theme === 'light' ? '#8211AD' : '' }} className="mt-4 text-xs font-bold dark:bg-brand-600 text-white px-6 py-2.5 rounded-xl shadow-lg border-2 border-transparent bg-black uppercase">Explorar</button>
                                 </div>
                             ) : (
                                 filteredFiles.map(file => (
-                                    <div
-                                        key={file.id}
-                                        onClick={() => handleOpenFile(file.id)}
-                                        style={activeTabId === file.id && theme === 'light' ? {
-                                            backgroundColor: '#AF02E8',
-                                            borderColor: '#AF02E8',
-                                            boxShadow: '0 10px 15px -3px rgba(175, 2, 232, 0.3)'
-                                        } : {}}
-                                        className={`group p-3 rounded-xl cursor-pointer transition-all duration-200 flex items-center gap-3 relative border-2 pr-10
-                                            ${activeTabId === file.id
-                                                ? 'dark:bg-slate-800 dark:border-brand-500 scale-[1.02] z-10'
-                                                : 'border-transparent hover:bg-white/60 dark:hover:bg-slate-800 hover:border-purple-300 dark:hover:border-gray-600'}
-                                        `}
-                                    >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm font-bold border
-                                            ${['pdf'].includes(file.ext) || ['doc', 'docx'].includes(file.ext) ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-400 border-red-200' :
-                                                ['json', 'js', 'java', 'xml', 'html'].includes(file.ext) ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 border-amber-200' :
-                                                    ['png', 'jpg'].includes(file.ext) ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-400 border-purple-200' :
-                                                        ['xlsx', 'xls', 'ods', 'csv'].includes(file.ext) ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-400 border-green-200' :
-                                                            'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-400 border-cyan-200'
-                                            }`}>
-                                            <Icon name={getFileIcon(file.ext)} size={20} />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p
-                                                className={`text-sm font-black truncate ${activeTabId === file.id ? '' : 'text-gray-900 dark:text-white'}`}
-                                                style={activeTabId === file.id && theme === 'light' ? { color: '#ffffff' } : {}}
-                                            >
-                                                {file.name}
-                                            </p>
-                                            <p
-                                                className={`text-xs font-bold uppercase tracking-wide ${activeTabId === file.id ? '' : 'text-gray-800 dark:text-gray-400'}`}
-                                                style={activeTabId === file.id && theme === 'light' ? { color: 'rgba(255, 255, 255, 0.9)' } : {}}
-                                            >
-                                                {file.ext} • {file.size}
-                                            </p>
-                                        </div>
-
-                                        <button
-                                            onClick={(e) => handleDeleteFile(e, file.id)}
-                                            style={activeTabId === file.id && theme === 'light' ? { color: '#ffffff', backgroundColor: 'rgba(255,255,255,0.2)' } : {}}
-                                            className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-20 
-                                            ${activeTabId === file.id
-                                                    ? 'hover:bg-red-500 hover:text-white shadow-md'
-                                                    : (theme === 'light' ? 'bg-white hover:bg-red-100 text-gray-400 hover:text-red-600 border border-gray-200 hover:border-red-200 shadow-sm' : 'bg-slate-700 hover:bg-red-900/30 text-gray-400 hover:text-red-400')
-                                                }`}
-                                            title="Eliminar archivo definitivamente"
-                                        >
-                                            <Icon name="trash-2" size={16} />
-                                        </button>
+                                    <div key={file.id} onClick={() => handleOpenFile(file.id)} style={activeTabId === file.id && theme === 'light' ? { backgroundColor: '#AF02E8', borderColor: '#AF02E8', boxShadow: '0 10px 15px -3px rgba(175, 2, 232, 0.3)' } : {}} className={`group p-3 rounded-xl cursor-pointer transition-all duration-200 flex items-center gap-3 relative border-2 pr-10 ${activeTabId === file.id ? 'dark:bg-slate-800 dark:border-brand-500 scale-[1.02] z-10' : 'border-transparent hover:bg-white/60 dark:hover:bg-slate-800 hover:border-purple-300 dark:hover:border-gray-600'}`}>
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm font-bold border ${['pdf'].includes(file.ext) || ['doc', 'docx'].includes(file.ext) ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-400 border-red-200' : ['json', 'js', 'java', 'xml', 'html'].includes(file.ext) ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 border-amber-200' : ['png', 'jpg'].includes(file.ext) ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-400 border-purple-200' : ['xlsx', 'xls', 'ods', 'csv'].includes(file.ext) ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-400 border-green-200' : 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-400 border-cyan-200'}`}><Icon name={getFileIcon(file.ext)} size={20} /></div>
+                                        <div className="min-w-0 flex-1"><p className={`text-sm font-black truncate ${activeTabId === file.id ? '' : 'text-gray-900 dark:text-white'}`} style={activeTabId === file.id && theme === 'light' ? { color: '#ffffff' } : {}}>{file.name}</p><p className={`text-xs font-bold uppercase tracking-wide ${activeTabId === file.id ? '' : 'text-gray-800 dark:text-gray-400'}`} style={activeTabId === file.id && theme === 'light' ? { color: 'rgba(255, 255, 255, 0.9)' } : {}}>{file.ext} • {file.size}</p></div>
+                                        <button onClick={(e) => handleDeleteFile(e, file.id)} style={activeTabId === file.id && theme === 'light' ? { color: '#ffffff', backgroundColor: 'rgba(255,255,255,0.2)' } : {}} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-20 ${activeTabId === file.id ? 'hover:bg-red-500 hover:text-white shadow-md' : (theme === 'light' ? 'bg-white hover:bg-red-100 text-gray-400 hover:text-red-600 border border-gray-200 hover:border-red-200 shadow-sm' : 'bg-slate-700 hover:bg-red-900/30 text-gray-400 hover:text-red-400')}`} title="Eliminar"><Icon name="trash-2" size={16} /></button>
                                     </div>
                                 ))
                             )}
                         </div>
 
-                        <div className={`p-4 border-t-2 ${theme === 'light' ? 'border-purple-200 bg-purple-50/50' : 'border-white/10 bg-black/20'}`}>
-                            <div
-                                onClick={() => inputRef.current.click()}
-                                className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all group ${theme === 'light' ? 'border-purple-400 hover:border-purple-700 bg-white/80' : 'border-slate-600 hover:border-brand-500 bg-slate-800/40'}`}
-                            >
-                                <div style={{ color: theme === 'light' ? '#000000' : '#ffffff' }} className="transition-colors">
-                                    <Icon name="plus" size={28} className="mx-auto group-hover:scale-110 transition-transform duration-200" />
-                                </div>
-                                <p
-                                    className="text-sm font-black transition-colors tracking-wide uppercase mt-2"
-                                    style={{ color: theme === 'light' ? '#000000' : '#ffffff' }}
-                                >
-                                    AÑADIR ARCHIVOS
-                                </p>
+                        {/* Add Button - hidden if collapsed on mobile */}
+                        <div className={`p-4 border-t-2 ${theme === 'light' ? 'border-purple-200 bg-purple-50/50' : 'border-white/10 bg-black/20'} ${!isSidebarOpen ? 'hidden md:block' : ''}`}>
+                            <div onClick={() => inputRef.current.click()} className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all group ${theme === 'light' ? 'border-purple-400 hover:border-purple-700 bg-white/80' : 'border-slate-600 hover:border-brand-500 bg-slate-800/40'}`}>
+                                <div style={{ color: theme === 'light' ? '#000000' : '#ffffff' }} className="transition-colors"><Icon name="plus" size={28} className="mx-auto group-hover:scale-110 transition-transform duration-200" /></div>
+                                <p className="text-sm font-black transition-colors tracking-wide uppercase mt-2" style={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>AÑADIR</p>
                                 <input ref={inputRef} type="file" multiple className="hidden" onChange={(e) => processFiles(e.target.files)} />
                             </div>
                         </div>
                     </div>
-                    <div className={`flex-1 flex flex-col min-w-0 z-10 my-3 mr-3 rounded-2xl overflow-hidden shadow-2xl ${theme === 'light' ? 'bg-fuchsia-100/90 border-fuchsia-200 backdrop-blur-xl' : 'glass-base'}`}>
 
-                        {/* BARRA DE PESTAÑAS (TOP TAB BAR) */}
-                        <div className={`flex items-center gap-2 p-2 overflow-x-auto custom-scroll border-b ${theme === 'light' ? 'border-fuchsia-200 bg-fuchsia-50/50' : 'border-white/5 bg-[#1D1336]'}`}>
+                    {/* MAIN CONTENT (Responsive) */}
+                    <div className={`
+                        flex-1 flex flex-col min-w-0 z-10 
+                        overflow-hidden shadow-2xl
+                        ${theme === 'light' ? 'bg-fuchsia-100/90 border-fuchsia-200 backdrop-blur-xl' : 'glass-base'}
+                        rounded-none md:rounded-2xl md:my-3 md:mr-3
+                    `}>
+                        {/* Tab Bar */}
+                        <div className={`flex items-center gap-2 p-2 overflow-x-auto custom-scroll border-b shrink-0 ${theme === 'light' ? 'border-fuchsia-200 bg-fuchsia-50/50' : 'border-white/5 bg-[#1D1336]'}`}>
+                            {openTabIds.length === 0 && <span className="text-xs text-gray-500 px-2 italic">Sin pestañas abiertas</span>}
                             {openTabIds.map(tabId => {
                                 const file = files.find(f => f.id === tabId);
                                 if (!file) return null;
                                 return (
-                                    <div
-                                        key={file.id}
-                                        onClick={() => setActiveTabId(file.id)}
-                                        style={activeTabId === file.id && theme === 'light' ? { backgroundColor: '#AF02E8', color: '#ffffff', boxShadow: '0 4px 6px -1px rgba(175, 2, 232, 0.3)' } : {}}
-                                        className={`
-                                            group flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer min-w-[140px] max-w-[220px] transition-all text-xs font-bold uppercase tracking-wide relative pr-8
-                                            ${activeTabId === file.id
-                                                ? 'dark:bg-slate-800 dark:text-brand-400 dark:ring-1 dark:ring-white/10'
-                                                : 'text-slate-600 hover:bg-white/40 dark:hover:bg-slate-800/30'}
-                                        `}
-                                    >
-                                        <Icon name={getFileIcon(file.ext)} size={14} className="opacity-70" />
-                                        <span className="truncate flex-1">{file.name}</span>
-
-                                        <button
-                                            onClick={(e) => handleCloseTab(e, file.id)}
-                                            style={activeTabId === file.id && theme === 'light' ? { color: '#ffffff', opacity: 0.8 } : {}}
-                                            className={`absolute right-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 ${theme === 'light' ? 'hover:bg-red-100 text-slate-400 hover:text-red-600' : 'hover:bg-white/10 text-slate-400 hover:text-red-400'}`}
-                                            title="Cerrar pestaña"
-                                        >
-                                            <Icon name="x" size={14} />
-                                        </button>
+                                    <div key={file.id} onClick={() => setActiveTabId(file.id)} style={activeTabId === file.id && theme === 'light' ? { backgroundColor: '#AF02E8', color: '#ffffff', boxShadow: '0 4px 6px -1px rgba(175, 2, 232, 0.3)' } : {}} className={`group flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer min-w-[120px] md:min-w-[140px] max-w-[180px] md:max-w-[220px] transition-all text-xs font-bold uppercase tracking-wide relative pr-8 ${activeTabId === file.id ? 'dark:bg-slate-800 dark:text-brand-400 dark:ring-1 dark:ring-white/10' : 'text-slate-600 hover:bg-white/40 dark:hover:bg-slate-800/30'}`}>
+                                        <Icon name={getFileIcon(file.ext)} size={14} className="opacity-70" /><span className="truncate flex-1">{file.name}</span>
+                                        <button onClick={(e) => handleCloseTab(e, file.id)} style={activeTabId === file.id && theme === 'light' ? { color: '#ffffff', opacity: 0.8 } : {}} className={`absolute right-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 ${theme === 'light' ? 'hover:bg-red-100 text-slate-400 hover:text-red-600' : 'hover:bg-white/10 text-slate-400 hover:text-red-400'}`} title="Cerrar"><Icon name="x" size={14} /></button>
                                     </div>
                                 );
                             })}
                         </div>
 
+                        {/* Toolbar (Responsive) */}
                         {activeFile && (
-                            <div className={`h-14 border-b flex items-center justify-between px-6 ${theme === 'light' ? 'border-fuchsia-200 bg-fuchsia-50/30' : 'border-white/5 bg-slate-900/10'}`}>
-                                <div className="flex items-center gap-4 text-xs font-medium text-slate-700 dark:text-slate-400">
-                                    <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${theme === 'light' ? 'bg-white/60' : 'bg-slate-800/40'}`}><Icon name="hard-drive" size={12} /> {activeFile.size}</span>
+                            <div className={`min-h-14 border-b flex flex-wrap md:flex-nowrap items-center justify-between px-4 py-2 gap-2 ${theme === 'light' ? 'border-fuchsia-200 bg-fuchsia-50/30' : 'border-white/5 bg-slate-900/10'}`}>
+                                <div className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-400 overflow-hidden">
+                                    <span className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${theme === 'light' ? 'bg-white/60' : 'bg-slate-800/40'}`}><Icon name="hard-drive" size={12} /> {activeFile.size}</span>
                                     <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg uppercase tracking-wider ${theme === 'light' ? 'bg-white/60' : 'bg-slate-800/40'}`}>{activeFile.ext}</span>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 ml-auto">
                                     {isActiveFileEditable && (
-                                        <>
-                                            {isEditing ? (
-                                                <>
-                                                    <button
-                                                        onClick={handleSaveEdit}
-                                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-bold transition-all shadow-md"
-                                                    >
-                                                        <Icon name="save" size={14} /> Guardar
-                                                    </button>
-                                                    <button
-                                                        onClick={handleCancelEdit}
-                                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold transition-all shadow-md"
-                                                    >
-                                                        <Icon name="x" size={14} /> Cancelar
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <button
-                                                    onClick={handleStartEdit}
-                                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm ${theme === 'light' ? 'bg-white border-purple-200 text-purple-700 hover:bg-purple-50' : 'bg-slate-800 border-gray-600 text-white hover:bg-slate-700'}`}
-                                                >
-                                                    <Icon name="edit-3" size={14} /> Editar
-                                                </button>
-                                            )}
-                                        </>
+                                        isEditing ? (
+                                            <>
+                                                <button onClick={handleSaveEdit} className="p-2 md:px-3 md:py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-bold shadow-md"><span className="hidden md:inline"><Icon name="save" size={14} /> Guardar</span><span className="md:hidden"><Icon name="save" size={16} /></span></button>
+                                                <button onClick={handleCancelEdit} className="p-2 md:px-3 md:py-1.5 rounded-lg bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold shadow-md"><span className="hidden md:inline"><Icon name="x" size={14} /> Cancelar</span><span className="md:hidden"><Icon name="x" size={16} /></span></button>
+                                            </>
+                                        ) : (
+                                            <button onClick={handleStartEdit} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm ${theme === 'light' ? 'bg-white border-purple-200 text-purple-700 hover:bg-purple-50' : 'bg-slate-800 border-gray-600 text-white hover:bg-slate-700'}`}><Icon name="edit-3" size={14} /> <span className="hidden md:inline">Editar</span></button>
+                                        )
                                     )}
-
-                                    <button
-                                        onClick={handleDownload}
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm ${theme === 'light' ? 'bg-white border-blue-200 text-blue-700 hover:bg-blue-50' : 'bg-slate-800 border-gray-600 text-white hover:bg-slate-700'}`}
-                                    >
-                                        <Icon name="download" size={14} /> Descargar
-                                    </button>
+                                    <button onClick={handleDownload} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm ${theme === 'light' ? 'bg-white border-blue-200 text-blue-700 hover:bg-blue-50' : 'bg-slate-800 border-gray-600 text-white hover:bg-slate-700'}`}><Icon name="download" size={14} /></button>
                                 </div>
 
                                 {['text', 'json', 'markdown', 'html', 'code'].includes(activeFile.viewer) && !isEditing && (
-                                    <div className={`flex items-center gap-3 px-4 py-2 rounded-xl border border-transparent transition-all w-72 ${theme === 'light' ? 'bg-white/60 focus-within:border-fuchsia-400' : 'bg-slate-900/50 focus-within:border-brand-700'}`}>
+                                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border border-transparent transition-all w-full md:w-48 order-last md:order-none ${theme === 'light' ? 'bg-white/60 focus-within:border-fuchsia-400' : 'bg-slate-900/50 focus-within:border-brand-700'}`}>
                                         <Icon name="search" size={14} className="text-slate-500" />
-                                        <input
-                                            type="text"
-                                            placeholder="Buscar contenido..."
-                                            className="bg-transparent border-none outline-none text-sm w-full text-black dark:text-slate-200 placeholder-slate-500"
-                                            value={contentSearch}
-                                            onChange={(e) => setContentSearch(e.target.value)}
-                                        />
+                                        <input type="text" placeholder="Buscar..." className="bg-transparent border-none outline-none text-xs w-full text-black dark:text-slate-200 placeholder-slate-500" value={contentSearch} onChange={(e) => setContentSearch(e.target.value)} />
                                     </div>
                                 )}
                             </div>
@@ -1030,11 +765,7 @@
                             {activeFile ? (
                                 <div className="absolute inset-0 animate-fade-in">
                                     {isEditing ? (
-                                        activeFile.viewer === 'html' ? (
-                                            <RichTextEditor content={editContent} onChange={setEditContent} theme={theme} />
-                                        ) : (
-                                            <Editor content={editContent} language={activeFile.language || 'text'} onChange={setEditContent} />
-                                        )
+                                        activeFile.viewer === 'html' ? <RichTextEditor content={editContent} onChange={setEditContent} theme={theme} /> : <Editor content={editContent} language={activeFile.language || 'text'} onChange={setEditContent} />
                                     ) : (
                                         (() => {
                                             switch (activeFile.viewer) {
@@ -1050,34 +781,16 @@
                                     )}
                                 </div>
                             ) : (
-                                <div className="h-full w-full flex flex-col items-center justify-center p-8 relative">
-
-                                    <div className={`relative z-10 backdrop-blur-2xl border p-12 rounded-[2rem] shadow-2xl text-center max-w-md w-full transform transition-all duration-500 hover:scale-[1.01] animate-scale-in ${theme === 'light' ? 'bg-white/60 border-fuchsia-200' : 'bg-slate-800/80 border-white/10'}`}>
-
-                                        <div className="mx-auto w-24 h-24 bg-gradient-to-tr from-fuchsia-500 to-purple-600 rounded-3xl shadow-[0_10px_40px_-10px_rgba(192,38,211,0.6)] flex items-center justify-center mb-8">
+                                <div className="h-full w-full flex flex-col items-center justify-center p-4 md:p-8 relative">
+                                    <div className={`relative z-10 backdrop-blur-2xl border p-8 md:p-12 rounded-[2rem] shadow-2xl text-center max-w-sm md:max-w-md w-full transform transition-all duration-500 hover:scale-[1.01] animate-scale-in ${theme === 'light' ? 'bg-white/60 border-fuchsia-200' : 'bg-slate-800/80 border-white/10'}`}>
+                                        <div className="mx-auto w-20 h-20 md:w-24 md:h-24 bg-gradient-to-tr from-fuchsia-500 to-purple-600 rounded-3xl shadow-[0_10px_40px_-10px_rgba(192,38,211,0.6)] flex items-center justify-center mb-6 md:mb-8">
                                             <Icon name="layers" size={40} className="text-white drop-shadow-md" />
                                         </div>
-
-                                        <h2 className={`text-3xl font-bold mb-3 tracking-tight ${theme === 'light' ? 'text-black' : 'text-white'}`}>
-                                            Listo para trabajar
-                                        </h2>
-
-                                        <p className={`mb-8 leading-relaxed font-medium ${theme === 'light' ? 'text-slate-800' : 'text-slate-300'}`}>
-                                            Arrastra tus documentos aquí.
-                                            <span className={`block mt-2 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 ${theme === 'light' ? 'text-purple-600' : 'text-purple-400'}`}>
-                                                <Icon name="database" size={12} /> Guardado automático local
-                                            </span>
-                                        </p>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <button onClick={() => inputRef.current.click()} className={`group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all duration-300 ${theme === 'light' ? 'bg-white border-fuchsia-100 hover:border-fuchsia-400 hover:shadow-lg' : 'bg-slate-700/50 border-white/5 hover:bg-slate-700'}`}>
-                                                <Icon name="folder-open" className="text-fuchsia-500 group-hover:scale-110 transition-transform" />
-                                                <span className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>Abrir</span>
-                                            </button>
-                                            <div className={`group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all duration-300 cursor-default ${theme === 'light' ? 'bg-white border-purple-100 hover:border-purple-400 hover:shadow-lg' : 'bg-slate-700/50 border-white/5 hover:bg-slate-700'}`}>
-                                                <Icon name="move" className="text-purple-500 group-hover:rotate-45 transition-transform" />
-                                                <span className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>Arrastrar</span>
-                                            </div>
+                                        <h2 className={`text-2xl md:text-3xl font-bold mb-3 tracking-tight ${theme === 'light' ? 'text-black' : 'text-white'}`}>Listo para trabajar</h2>
+                                        <p className={`mb-6 md:mb-8 leading-relaxed font-medium text-sm md:text-base ${theme === 'light' ? 'text-slate-800' : 'text-slate-300'}`}>Arrastra tus documentos aquí.<span className={`block mt-2 text-[10px] md:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 ${theme === 'light' ? 'text-purple-600' : 'text-purple-400'}`}><Icon name="database" size={12} /> Guardado automático</span></p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                                            <button onClick={() => inputRef.current.click()} className={`group flex flex-col items-center justify-center gap-2 p-3 md:p-4 rounded-2xl border transition-all duration-300 ${theme === 'light' ? 'bg-white border-fuchsia-100 hover:border-fuchsia-400 hover:shadow-lg' : 'bg-slate-700/50 border-white/5 hover:bg-slate-700'}`}><Icon name="folder-open" className="text-fuchsia-500 group-hover:scale-110 transition-transform" /><span className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>Abrir</span></button>
+                                            <div onClick={() => inputRef.current.click()} className={`group flex flex-col items-center justify-center gap-2 p-3 md:p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${theme === 'light' ? 'bg-white border-purple-100 hover:border-purple-400 hover:shadow-lg' : 'bg-slate-700/50 border-white/5 hover:bg-slate-700'}`}><Icon name="move" className="text-purple-500 group-hover:rotate-45 transition-transform" /><span className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>Arrastrar</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1087,7 +800,6 @@
                 </div>
             );
         };
-
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);

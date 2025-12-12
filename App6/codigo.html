@@ -6,14 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OmniFile Processor - Documentación Técnica</title>
 
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    <!-- Babel para JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -39,16 +36,13 @@
         }
     </script>
 
-    <!-- PrismJS para resaltar código -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
@@ -71,7 +65,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
         // --- Componentes UI ---
 
@@ -140,6 +134,16 @@
             const [activeSection, setActiveSection] = useState('intro');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+            // --- CONFIGURACIÓN DE TUS IMÁGENES AQUÍ ---
+            // Simplemente cambia las URLs y los títulos
+            const galeria = [
+                { id: 1, url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80', title: 'Dashboard Principal', desc: 'Vista general del sistema' },
+                { id: 2, url: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=800&q=80', title: 'Editor de Código', desc: 'Sintaxis resaltada' },
+                { id: 3, url: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&q=80', title: 'Vista de Base de Datos', desc: 'Estructura IndexedDB' },
+                { id: 4, url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', title: 'Análisis de Excel', desc: 'Procesamiento de datos' },
+                // Puedes añadir más objetos aquí...
+            ];
+
             const scrollTo = (id) => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -191,7 +195,7 @@
                                 { id: 'dependencies', label: 'Dependencias', icon: 'box' },
                                 { id: 'db', label: 'Persistencia', icon: 'database' },
                                 { id: 'processing', label: 'Procesamiento', icon: 'file-cog' },
-                                { id: 'state', label: 'Gestión de Estado', icon: 'cpu' }, // NUEVO ITEM
+                                { id: 'state', label: 'Gestión de Estado', icon: 'cpu' },
                                 { id: 'viewers', label: 'Visores', icon: 'eye' },
                                 { id: 'images', label: 'Galería de Imágenes', icon: 'image' }, 
                                 { id: 'ui', label: 'Estilos', icon: 'palette' },
@@ -200,9 +204,9 @@
                                     key={item.id}
                                     onClick={() => scrollTo(item.id)}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-left
-                                        ${activeSection === item.id 
-                                            ? 'bg-doc-accent/10 text-doc-accent border border-doc-accent/20' 
-                                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+                                    ${activeSection === item.id 
+                                        ? 'bg-doc-accent/10 text-doc-accent border border-doc-accent/20' 
+                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
                                 >
                                     <Icon name={item.icon} size={18} />
                                     {item.label}
@@ -263,17 +267,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- 1. Cargamos el motor (React) desde CDN -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>
     
-    <!-- 2. Cargamos el compilador (Babel) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- 3. Escribimos JSX directamente con type="text/babel" -->
     <script type="text/babel">
         const App = () => {
             return <h1>Hola Mundo sin Build Step!</h1>;
@@ -584,24 +585,34 @@ const RichTextEditor = ({ content, onChange }) => {
                             {/* NUEVA SECCIÓN: Galería de Imágenes */}
                             <Section id="images" title="Galería de Imágenes">
                                 <p className="mb-6 text-slate-300">
-                                    Aquí se mostrarán las capturas de pantalla de la aplicación en funcionamiento. 
-                                    Actualmente en desarrollo.
+                                    Aquí puedes ver algunas capturas del sistema en funcionamiento.
                                 </p>
-                                
-                                {/* Placeholder Grid */}
+                                                                
+                                {/* Grid de Imágenes Configurable */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {[1, 2, 3, 4, 5, 6, 7].map((item) => (
-                                        <div key={item} className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700">
-                                            {/* Imagen Placeholder con Animación Pulse */}
-                                            <div className="h-40 bg-slate-700 animate-pulse flex items-center justify-center relative group">
-                                                <Icon name="image" size={32} className="text-slate-600 group-hover:scale-110 transition-transform duration-300" />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                                    <span className="text-xs font-bold text-white">Captura {item}</span>
+                                    {galeria.map((item) => (
+                                        <div key={item.id} className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 shadow-xl group hover:border-doc-accent/50 transition-colors">
+                                            
+                                            {/* Contenedor de la Imagen */}
+                                            <div className="h-48 relative overflow-hidden bg-slate-900">
+                                                <img 
+                                                    src={item.url} 
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100" 
+                                                />
+                                                
+                                                {/* Overlay al pasar el mouse */}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                                    <span className="text-xs font-bold text-white uppercase tracking-wider bg-doc-accent/20 px-2 py-1 rounded border border-doc-accent/30 backdrop-blur-sm">
+                                                        Zoom
+                                                    </span>
                                                 </div>
                                             </div>
+
+                                            {/* Texto descriptivo debajo */}
                                             <div className="p-4">
-                                                <div className="h-4 bg-slate-700 rounded w-3/4 mb-2 animate-pulse"></div>
-                                                <div className="h-3 bg-slate-700 rounded w-1/2 animate-pulse"></div>
+                                                <h4 className="font-bold text-white text-lg mb-1 group-hover:text-doc-accent transition-colors">{item.title}</h4>
+                                                <p className="text-sm text-slate-400">{item.desc}</p>
                                             </div>
                                         </div>
                                     ))}

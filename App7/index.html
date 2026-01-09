@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-Colapso: El Núcleo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: rgba(20, 20, 25, 0.95);
+            --text-color: #e0e0e0;
+            --accent-blue: #4d9be6;
+            --accent-cyan: #5cecdc;
+            --accent-red: #ff4757;
+            --accent-green: #2ecc71;
+            --accent-gold: #ffa502;
+            --border-color: #333;
+
+            --font-main: 'Courier Prime', monospace;
+            --font-pixel: 'Press Start 2P', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000;
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- CRT & VFX --- */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 5px;
+            z-index: 2001;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0.2;
+            position: absolute;
+            top: 0;
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanline {
+            0% {
+                top: -10%;
+            }
+
+            100% {
+                top: 110%;
+            }
+        }
+
+        /* --- ENDING OVERLAY --- */
+        #ending-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 5000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 2s ease;
+        }
+
+        #ending-overlay.hidden {
+            display: none;
+            opacity: 0;
+        }
+
+        .ending-content {
+            max-width: 800px;
+            padding: 40px;
+            border: 2px solid var(--accent-gold);
+            box-shadow: 0 0 50px var(--accent-gold);
+            animation: fadeIn 2s ease-out;
+        }
+
+        .ending-title {
+            font-family: var(--font-pixel);
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 0px #000;
+        }
+
+        .ending-desc {
+            font-family: var(--font-main);
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .click-continue {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            animation: blink 1s infinite;
+        }
+
+        /* --- Layout --- */
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1400px;
+            max-height: 900px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Scene View --- */
+        #scene-view {
+            flex: 1;
+            position: relative;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        #background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: all 1s ease-in-out;
+            filter: brightness(0.6) contrast(1.1) sepia(0.2);
+        }
+
+        #character-layer {
+            position: absolute;
+            bottom: 0px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            pointer-events: none;
+            padding-bottom: 0;
+        }
+
+        .character-slot {
+            position: absolute;
+            bottom: 120px;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27), opacity 0.5s ease;
+            width: 500px;
+            max-height: 85vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .character-slot img {
+            width: 100%;
+            height: auto;
+            max-height: 75vh;
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+        }
+
+        /* Positions - Raised up and centered better */
+        #slot-left {
+            left: 15%;
+            transform: translateX(-50%) scale(0.9);
+            z-index: 10;
+            filter: brightness(0.6);
+        }
+
+        #slot-center {
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+        }
+
+        #slot-right {
+            right: 15%;
+            transform: translateX(50%) scale(0.9);
+            z-index: 10;
+            filter: brightness(0.6);
+        }
+
+        .character-slot.hidden {
+            transform: translateY(50px) scale(0.9);
+            opacity: 0;
+        }
+
+        .character-slot.active {
+            filter: brightness(1.2) drop-shadow(0 0 20px rgba(77, 155, 230, 0.3));
+            z-index: 30;
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        #slot-left.active {
+            transform: translateX(-50%) scale(1.0);
+        }
+
+        #slot-center.active {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        #slot-right.active {
+            transform: translateX(50%) scale(1.0);
+        }
+
+        /* --- UI Overlay --- */
+        #ui-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* Let clicks pass through to hidden elements if needed */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 40px 60px;
+        }
+
+        /* Top HUD Bar */
+        #stats-hud {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            z-index: 1000;
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(12px);
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+        }
+
+        .hud-stat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-pixel);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 1px;
+        }
+
+        .hud-bar-bg {
+            width: 100px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .hud-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            box-shadow: 0 0 10px var(--accent-blue);
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Glassmorphism Dialogue Box */
+        .dialogue-container {
+            pointer-events: auto;
+            background: rgba(15, 19, 25, 0.85);
+            /* Slightly clearer */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border-top: 2px solid var(--accent-blue);
+            /* Top border only */
+            border-bottom: none;
+            border-left: none;
+            border-right: none;
+            padding: 30px 40px;
+            border-radius: 0;
+            /* No rounding */
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+            /* Shadow upwards */
+            position: absolute;
+            /* Force bottom */
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            /* Full width */
+            box-sizing: border-box;
+            /* Include padding in width */
+            margin-bottom: 0;
+            min-height: 220px;
+            /* Taller */
+            display: flex;
+            flex-direction: column;
+            animation: slideUpFade 0.5s ease-out;
+            z-index: 100;
+            /* Ensure on top of chars */
+        }
+
+        @keyframes slideUpFade {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #speaker-name {
+            font-family: var(--font-pixel);
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(92, 236, 220, 0.4);
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        #dialogue-text {
+            font-size: 1.3rem;
+            line-height: 1.7;
+            color: #f0f0f0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            font-weight: 500;
+        }
+
+        #continue-indicator {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            color: var(--accent-cyan);
+            animation: bounce 0.8s infinite alternate;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+
+            to {
+                transform: translateY(5px);
+                opacity: 1;
+            }
+        }
+
+        /* Modern Choices */
+        #choices-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            /* Blur the game behind */
+            gap: 20px;
+            transition: backdrop-filter 0.3s ease;
+            /* Smooth transition */
+        }
+
+        #choices-overlay.hidden {
+            display: none !important;
+            backdrop-filter: none;
+            /* Ensure blur is gone */
+            pointer-events: none;
+        }
+
+        .choice-btn {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(20, 25, 35, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 25px 35px;
+            color: var(--text-color);
+            font-family: var(--font-main);
+            /* Cleaner font */
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0px;
+        }
+
+        .choice-btn::before {
+            display: none;
+        }
+
+        .choice-btn:hover {
+            transform: scale(1.02) translateX(10px);
+            border-color: var(--accent-cyan);
+            background: rgba(30, 40, 50, 0.95);
+            box-shadow: 0 0 25px rgba(92, 236, 220, 0.2);
+            padding-left: 35px;
+        }
+
+        .choice-btn::after {
+            content: '→';
+            position: absolute;
+            right: 30px;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            color: var(--accent-cyan);
+        }
+
+        .choice-btn:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+
+
+        /* Notifications */
+        #notif-area {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .notification {
+            background: rgba(0, 0, 0, 0.9);
+            border-right: 3px solid var(--accent-gold);
+            padding: 12px 20px;
+            color: #fff;
+            font-family: var(--font-pixel);
+            font-size: 0.7rem;
+            animation: slideIn 0.3s ease forwards, fadeOut 0.5s 4s forwards;
+            box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        #skip-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: var(--font-pixel);
+            font-size: 0.8rem;
+            cursor: pointer;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #skip-btn:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent-cyan);
+            transform: scale(1.05);
+        }
+
+        #skip-btn.hidden {
+            display: none;
+        }
+
+        #guide-btn {
+            position: absolute;
+            top: 70px;
+            /* Below Skip Btn */
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-family: var(--font-pixel);
+            font-size: 0.7rem;
+            cursor: pointer;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        #guide-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        #guide-btn.hidden {
+            display: none;
+        }
+
+        #guide-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 4000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        #guide-overlay.hidden {
+            display: none;
+        }
+
+        .guide-content {
+            background: rgba(10, 15, 20, 0.95);
+            border: 2px solid var(--accent-gold);
+            width: 90%;
+            border-radius: 10px;
+            color: #ccc;
+        }
+
+        /* ROUTE MAP AND BUTTON CSS (Fixed) */
+        /* CYBERPUNK ROUTE MAP CSS */
+        .tree {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+            position: relative;
+        }
+
+        .level {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            position: relative;
+            margin-bottom: 60px;
+            width: 100%;
+        }
+
+        .level::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--accent-blue), transparent);
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .level:last-child::after {
+            display: none;
+        }
+
+        .level:last-child {
+            margin-bottom: 0;
+        }
+
+        .node-box {
+            background: rgba(10, 15, 20, 0.9);
+            border: 1px solid #444;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: #888;
+            font-family: var(--font-pixel);
+            font-size: 0.75rem;
+            text-align: center;
+            position: relative;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .node-box:hover {
+            transform: translateY(-5px);
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .node-box.active-node {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px var(--accent-green), inset 0 0 10px rgba(0, 255, 0, 0.2);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .node-box.end {
+            border-style: dashed;
+        }
+
+        #route-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-family: var(--font-pixel);
+            font-size: 0.7rem;
+            cursor: pointer;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(77, 155, 230, 0.3);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #route-btn:hover {
+            background: var(--accent-blue);
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        #route-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 10, 0.95);
+            z-index: 4500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        #route-overlay.hidden {
+            display: none;
+        }
+
+        .route-map {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--accent-blue);
+            padding: 40px;
+            color: #fff;
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            font-family: var(--font-pixel);
+            text-align: center;
+        }
+
+        .map-node {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            background: #222;
+            margin: 10px;
+            position: relative;
+            color: #888;
+            transition: all 0.3s;
+        }
+
+        .map-node.active-node {
+            border-color: #0f0;
+            background: #003300;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            transform: scale(1.1);
+        }
+
+        .map-branch {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .map-connector {
+            width: 2px;
+            height: 20px;
+            background: #555;
+            margin: 0 auto;
+        }
+
+        .route-map {
+            width: 95%;
+            max-width: 1400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 10px;
+            padding: 20px;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid #444;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            color: #eee;
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--accent-gold);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .guide-header h2 {
+            font-family: var(--font-pixel);
+            color: var(--accent-gold);
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-guide {
+            background: none;
+            border: none;
+            color: var(--accent-red);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .guide-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .guide-section h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .guide-section p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #ccc;
+            margin: 5px 0;
+        }
+
+        .guide-section strong {
+            color: #fff;
+        }
+
+        /* --- RESPONSIVE / MOBILE CSS --- */
+        @media (max-width: 768px) {
+            #game-container {
+                width: 100vw;
+                height: 100vh;
+                max-width: none;
+                max-height: none;
+                border: none;
+            }
+
+            /* Stack Characters Tighter */
+            .character-slot {
+                width: 40vw;
+                bottom: 100px;
+            }
+
+            #slot-left {
+                left: 0;
+                transform: translateX(-20%) scale(0.8);
+            }
+
+            #slot-right {
+                right: 0;
+                transform: translateX(20%) scale(0.8);
+            }
+
+            #slot-center {
+                z-index: 20;
+            }
+
+            /* Adjust HUD */
+            #stats-hud {
+                top: 10px;
+                width: 95%;
+                padding: 8px 15px;
+                gap: 15px;
+                justify-content: center;
+            }
+
+            .hud-stat span {
+                display: none;
+                /* Hide text label on mobile, keep bar */
+            }
+
+            .hud-stat::before {
+                /* Add icon content instead of text if possible, e.g. using specific classes */
+                content: '';
+            }
+
+            /* Hack to keep bar meaningful */
+            .hud-stat:nth-child(1)::before {
+                content: '🔴';
+                margin-right: 5px;
+            }
+
+            .hud-stat:nth-child(2)::before {
+                content: '🟢';
+                margin-right: 5px;
+            }
+
+            .hud-stat:nth-child(3)::before {
+                content: '🔵';
+                margin-right: 5px;
+            }
+
+            .hud-bar-bg {
+                width: 60px;
+            }
+
+            /* Dialogue Box Bigger Text */
+            .dialogue-container {
+                padding: 20px;
+                min-height: 250px;
+            }
+
+            #dialogue-text {
+                font-size: 1.1rem;
+                /* Slightly smaller to fit more */
+            }
+
+            /* Choices - Full Width & Larger Touch Targets */
+            .choice-btn {
+                padding: 20px;
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+
+            /* Route Map */
+            .route-map {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                padding: 10px;
+            }
+
+            .node-box {
+                min-width: 100px;
+                font-size: 0.6rem;
+                padding: 10px;
+            }
+
+            /* Buttons */
+            #skip-btn {
+                top: auto;
+                bottom: 230px;
+                /* Float above dialogue */
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 0.6rem;
+            }
+
+            #guide-btn {
+                top: 60px;
+                /* Below HUD */
+                right: 10px;
+                padding: 6px 10px;
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="crt-overlay"></div>
+    <div class="scanline"></div>
+
+    <div id="ending-overlay" class="hidden"></div>
+
+    <div id="game-container">
+        <!-- HUD -->
+        <div id="stats-hud">
+            <div class="hud-stat">
+                <span>AUTONOMÍA</span>
+                <div class="hud-bar-bg">
+                    <div id="bar-aut" class="hud-bar-fill" style="width: 50%; background: var(--accent-red);"></div>
+                </div>
+            </div>
+            <div class="hud-stat">
+                <span>REPUTACIÓN</span>
+                <div class="hud-bar-bg">
+                    <div id="bar-rep" class="hud-bar-fill" style="width: 50%; background: var(--accent-green);"></div>
+                </div>
+            </div>
+            <div class="hud-stat">
+                <span>CONOCIMIENTO</span>
+                <div class="hud-bar-bg">
+                    <div id="bar-know" class="hud-bar-fill" style="width: 10%; background: var(--accent-blue);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene -->
+        <div id="scene-view">
+            <div id="background-layer"></div>
+            <div id="character-layer">
+                <div id="slot-left" class="character-slot"><img id="img-left" src="" class="hidden"></div>
+                <div id="slot-center" class="character-slot"><img id="img-center" src="" class="hidden"></div>
+                <div id="slot-right" class="character-slot"><img id="img-right" src="" class="hidden"></div>
+            </div>
+        </div>
+
+        <!-- UI -->
+        <div id="ui-layer">
+            <div class="dialogue-container">
+                <div id="speaker-name"></div>
+                <div id="dialogue-text"></div>
+                <div id="continue-indicator">▼</div>
+            </div>
+        </div>
+
+        <!-- Popups -->
+        <div id="choices-overlay" class="hidden"></div>
+        <div id="notif-area"></div>
+
+        <!-- Floating Skip Button -->
+        <div id="skip-btn" class="hidden" onclick="document.querySelector('#ui-layer').click(); // Wake up audio context if needed first
+             window.engineInstance.loadScene('start');">
+            ⮘ SKIP INTRO
+        </div>
+
+        <div id="guide-btn" class="hidden"
+            onclick="document.getElementById('guide-overlay').classList.toggle('hidden')">
+            📜 GUÍA DE FINALES
+        </div>
+
+        <div id="guide-overlay" class="hidden">
+            <div class="guide-content">
+                <div class="guide-header">
+                    <h2>RUTAS Y SECRETOS</h2>
+                    <button class="close-guide"
+                        onclick="document.getElementById('guide-overlay').classList.add('hidden')">✕</button>
+                </div>
+                <div class="guide-body">
+                    <div class="guide-section">
+                        <h3 style="border-bottom: 1px solid #fff; padding-bottom: 5px;">📊 GUÍA DE ESTADÍSTICAS</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="margin-bottom: 8px;"><strong style="color: var(--accent-red);">AUTONOMÍA
+                                    (RED):</strong> Independencia y rebeldía. Necesaria para rutas de combate y el
+                                final
+                                Libertad.</li>
+                            <li style="margin-bottom: 8px;"><strong style="color: var(--accent-green);">REPUTACIÓN
+                                    (GREEN):</strong> Influencia social. Abre opciones diplomáticas y de comercio.</li>
+                            <li style="margin-bottom: 8px;"><strong style="color: var(--accent-blue);">CONOCIMIENTO
+                                    (BLUE):</strong> Habilidad técnica. Vital para hackear y alcanzar la Evolución
+                                (Dios
+                                Máquina).</li>
+                        </ul>
+                    </div>
+
+                    <div class="guide-section" style="border-left: 3px solid var(--accent-blue); padding-left: 10px;">
+                        <h3 style="color: var(--accent-blue);">🤖 1. FINAL EVOLUCIÓN (Dios Máquina)</h3>
+                        <p><em>Fusiónate con la IA del Núcleo para trascender la humanidad.</em></p>
+                        <ul style="font-size: 0.9em; line-height: 1.4;">
+                            <li><strong>Requisito:</strong> Conocimiento > 40.</li>
+                            <li><strong>Inicio:</strong> Elige <span style="color: cyan;">[HACKEAR]</span> a La
+                                Custodia.</li>
+                            <li><strong>Ruta:</strong> Ve por el <span style="color: cyan;">[METRO ANTIGUO]</span>.</li>
+                            <li><strong>Clave:</strong> En la terminal, elige <span style="color: cyan;">[HACKEAR
+                                    REGISTROS]</span> (+20 Know).</li>
+                            <li><strong>Final:</strong> En el núcleo, selecciona <span
+                                    style="color: cyan;">[FUSIONARSE]</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="guide-section" style="border-left: 3px solid var(--accent-red); padding-left: 10px;">
+                        <h3 style="color: var(--accent-red);">👑 2. FINAL PODER (Tirano)</h3>
+                        <p><em>Toma el control del Núcleo y gobierna con puño de hierro.</em></p>
+                        <ul style="font-size: 0.9em; line-height: 1.4;">
+                            <li><strong>Requisito:</strong> Ser Criminal (Flag 'fugitive' o 'thief') + Alta Autonomía.
+                            </li>
+                            <li><strong>Inicio:</strong> Elige <span style="color: orange;">[HUIR]</span> o <span
+                                    style="color: orange;">[ROBAR]</span> al mercader.</li>
+                            <li><strong>Acción:</strong> Sé agresivo. <span style="color: orange;">[ATACAR]</span> si
+                                te
+                                emboscan.</li>
+                            <li><strong>Final:</strong> En el núcleo, selecciona <span
+                                    style="color: var(--accent-red);">[USAR COMO ARMA]</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="guide-section" style="border-left: 3px solid var(--accent-green); padding-left: 10px;">
+                        <h3 style="color: var(--accent-green);">🌿 3. FINAL LIBERTAD (Esperanza)</h3>
+                        <p><em>Destruye el control y da una oportunidad a la humanidad.</em></p>
+                        <ul style="font-size: 0.9em; line-height: 1.4;">
+                            <li><strong>Requisito:</strong> Ninguno (Final por defecto).</li>
+                            <li><strong>Estrategia:</strong> Evita conflictos innecesarios.</li>
+                            <li><strong>Final:</strong> En el núcleo, selecciona <span
+                                    style="color: var(--accent-green);">[LIBERAR ENERGÍA]</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="guide-section" style="border-left: 3px solid #d0f; padding-left: 10px;">
+                        <h3 style="color: #d0f;">🍄 4. REINO SUBTERRÁNEO (Secreto)</h3>
+                        <p><em>Únete a la nueva especie en las profundidades.</em></p>
+                        <ul style="font-size: 0.9em; line-height: 1.4;">
+                            <li><strong>Ruta:</strong> Túneles / Alcantarillas.</li>
+                            <li><strong>Inicio:</strong> Elige <span style="color: #d0f;">[HUIR]</span> -> <span
+                                    style="color: #d0f;">[BAJAR ALCANTARILLAS]</span>.</li>
+                            <li><strong>Encuentro:</strong> Al ver al mutante, elige <span
+                                    style="color: #d0f;">[PREGUNTAR]</span> (Diplomacia).</li>
+                            <li><strong>Secreto:</strong> En el bucle final, elige la opción oculta <span
+                                    style="color: #d0f;">[BAJAR]</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="guide-section" style="border-left: 3px solid #666; padding-left: 10px;">
+                        <h3 style="color: #999;">ðŸ’€ 5. PERDIDO (Game Over)</h3>
+                        <p><em>El destino de los que fallan o se rinden.</em></p>
+                        <ul style="font-size: 0.9em; line-height: 1.4;">
+                            <li><strong>Muerte en Combate:</strong> Enfréntate a los Carroñeros o al Mutante sin tener
+                                suficientes estadísticas (AUT/REP) ni armas.</li>
+                            <li><strong>Eternidad en los Túneles:</strong> En el laberinto de túneles, elige
+                                repetidamente <span style="color: grey;">[SEGUIR ADELANTE]</span> hasta que tu cordura
+                                se agote.</li>
+                            <li><strong>Rendición:</strong> Al encontrar la Ciudad Oculta y ser rechazado, vaga sin
+                                rumbo hacia la oscuridad.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Map Overlay -->
+    <div id="route-overlay" class="hidden" onclick="if(event.target === this) this.classList.add('hidden')">
+        <div class="route-map">
+            <h2 style="color: var(--accent-blue); margin-bottom: 20px;">MAPA DE DECISIONES</h2>
+            <button class="close-guide" onclick="document.getElementById('route-overlay').classList.add('hidden')"
+                style="position:absolute; top:20px; right:20px;">✖</button>
+            <div class="tree">
+                <!-- Level 1: INICIO -->
+                <div class="level">
+                    <a href="#" id="node-start" class="node-box">INICIO (Sector 4)</a>
+                </div>
+
+                <!-- Level 2: PATHS -->
+                <div class="level" style="align-items: flex-start;">
+                    <!-- Left Branch: SURFACE -->
+                    <div
+                        style="display:flex; flex-direction:column; align-items:center; margin-right:20px; border:1px solid #333; padding:10px; border-radius:8px;">
+                        <a href="#" id="node-surface" class="node-box"
+                            style="margin-bottom:20px; border-color:var(--accent-blue)">SUPERFICIE</a>
+                        <div style="display:flex; gap:10px;">
+                            <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+                                <a href="#" id="node-custodia-hack" class="node-box">HACKEAR</a>
+                                <span style="font-size:12px;">↓</span>
+                                <a href="#" id="node-end-evo" class="node-box end" style="border-color:cyan">EVO</a>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+                                <a href="#" id="node-custodia-talk" class="node-box">NEGOCIAR</a>
+                                <span style="font-size:12px;">↓</span>
+                                <a href="#" id="node-end-free" class="node-box end" style="border-color:lime">LIBRE</a>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+                                <a href="#" id="node-custodia-run" class="node-box">ROBAR</a>
+                                <span style="font-size:12px;">↓</span>
+                                <a href="#" id="node-end-power" class="node-box end" style="border-color:red">PODER</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Branch: TUNNELS -->
+                    <div
+                        style="display:flex; flex-direction:column; align-items:center; border:1px solid #333; padding:10px; border-radius:8px;">
+                        <a href="#" id="node-tunnel" class="node-box"
+                            style="margin-bottom:20px; border-color:var(--accent-gold)">TÚNELES</a>
+                        <div style="display:flex; gap:10px;">
+                            <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+                                <a href="#" id="node-tunnel-sewer" class="node-box">ALCANTARIL</a>
+                                <span style="font-size:12px;">↓</span>
+                                <a href="#" id="node-end-secret" class="node-box end"
+                                    style="border-color:#d0f">SECRETO</a>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+                                <a href="#" id="node-tunnel-loop" class="node-box">BUCLE</a>
+                                <span style="font-size:12px;">↓</span>
+                                <a href="#" id="node-end-lost" class="node-box end"
+                                    style="border-color:grey">PERDIDO</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:20px; font-size: 0.8em; color: #aaa;">* Tu ubicación actual brilla en VERDE.</div>
+        </div>
+    </div>
+
+    <div id="route-btn" onclick="document.getElementById('route-overlay').classList.remove('hidden')">
+        🗺️ RUTA: <span id="route-name">...</span>
+    </div>
+    <script>
+        /* --- ASSETS & CONFIG --- */
+        const IMAGES = {
+            bg: {
+                corridor: 'assets/bg_corridor.png?v=9',
+                control: 'assets/bg_control_room.png?v=9',
+                wasteland: 'assets/bg_wasteland.png?v=9',
+                wasteland_green: 'assets/bg_wasteland_green.png?v=1',
+                hideout: 'assets/bg_hideout.png?v=9',
+                tunnels: 'assets/bg_tunnels.png',
+                lake: 'assets/bg_underground_lake.png',
+                city: 'assets/bg_mutant_city.png',
+                digital: 'assets/bg_digital_ascension.png?v=1',
+                sewer: 'assets/bg_sewer.png?v=1',
+                deep: 'assets/bg_deep_cave.png?v=1',
+                track_endless: 'assets/bg_endless_tracks.png?v=1',
+                merchant: 'assets/bg_merchant_shop.png?v=1',
+                subway: 'assets/bg_subway_station.png?v=1',
+                storm: 'assets/bg_wasteland_storm.png?v=1',
+                end_power: 'assets/bg_ending_power.png?v=1',
+                end_mutant: 'assets/bg_ending_mutant.png?v=1',
+                end_lost: 'assets/bg_ending_lost.png?v=1',
+                core: 'assets/bg_core_chamber.png?v=2',
+                intro: 'assets/bg_intro_wasteland.png?v=1'
+            },
+            char: {
+                kael: 'assets/char_kael.png?v=9',
+                mota: 'assets/char_mota.png?v=9',
+                custodia: 'assets/char_custodia.png?v=9',
+                merchant: 'assets/char_merchant.png?v=9',
+                mutant: 'assets/char_mutant.png?v=1',
+                queen: 'assets/char_mutant_queen.png?v=1'
+            }
+        };
+
+        const SOUNDS = {
+            // Placeholder for sound effects if user asks later
+        };
+
+        /* --- STORY DATA --- */
+        const STORY = {
+            "roadmap": {
+                bg: IMAGES.bg.control_room,
+                dialogue: [
+                    { speaker: "SISTEMA", text: "INICIANDO SIMULACIÓN 'POST-COLAPSO' v4.0 (FINAL)..." },
+                    { speaker: "SISTEMA", text: "CARGANDO RUTAS NARRATIVAS DISPONIBLES:" },
+                    { speaker: "DATABASE", text: "1. LA SUPERFICIE (Combate/Diplomacia) | 2. LOS TÚNELES (Sigilo/Laberinto)" },
+                    { speaker: "DATABASE", text: "[1] EVOLUCIÓN (IA) | [2] PODER (Tirano) | [3] LIBERTAD (Esperanza)" },
+                    { speaker: "DATABASE", text: "[4] REINO SUBTERRÃNEO (Secreto) | [5] PERDIDO EN LA OSCURIDAD (Muerte)" },
+
+                    /* --- INSERTED INTRO TEXT DIRECTLY HERE --- */
+                    { speaker: "NARRADOR", text: "Año 2142. La Tierra no se recuperó del Colapso: una cadena de fallos energéticos, guerras de recursos y tormentas químicas que empezó el Día Cero.", bg: IMAGES.bg.intro, chars: { center: null, right: null, left: null } },
+                    { speaker: "NARRADOR", text: "Las ciudades quedaron convertidas en esqueletos de metal. Los supervivientes se dividieron en dos mundos." },
+                    { speaker: "NARRADOR", text: "Los que aún obedecen al Consejo, refugiados tras normas y vigilancia; y los que viven fuera del sistema, en el polvo, el óxido y las ruinas." },
+                    { speaker: "NARRADOR", text: "En Neo-Veridia, la última “capital” funcional, el Consejo mantiene el control a través de La Custodia: centinelas diseñados para eliminar cualquier amenaza.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "En Neo-Veridia, la última “capital” funcional, el Consejo mantiene el control a través de La Custodia: centinelas diseñados para eliminar cualquier amenaza.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "Lo llaman “orden”. Los de abajo lo llaman “jaula”.", chars: { left: null } },
+                    { speaker: "NARRADOR", text: "Kael es un recolector: sobrevive rastreando restos de la antigua civilización, vendiendo piezas, entrando donde nadie entra.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "No es un héroe, ni un soldado. Es alguien que ha aprendido que la verdad vale más que las monedas... y que la libertad se cobra con sangre.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Su \u00FAnica ventaja es M.O.T.A., un m\u00F3dulo asistente de an\u00E1lisis rescatado de un laboratorio abandonado.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "M.O.T.A.", text: "Mis sensores no sienten, Kael. Pero veo patrones donde t\u00FA solo ves ruinas.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "NARRADOR", text: "Una noche, siguiendo un archivo viejo, ambos se infiltran en el Sector 4. All\u00ED encuentran algo que no deber\u00EDa existir.", chars: { center: null, right: null } },
+                    { speaker: "NARRADOR", text: "Un cubo perfecto, palpitando con luz violeta. El N\u00FAcleo. Los registros lo describen como \u201Cinestable\u201D. El Consejo como \u201Cpropiedad\u201D.", bg: IMAGES.bg.core },
+                    { speaker: "M.O.T.A.", text: "Detecto otra cosa. No es un arma... es una Semilla.", chars: { right: IMAGES.char.mota } },
+                    { speaker: "NARRADOR", text: "En cuanto Kael lo toca, el mundo cambia. La Custodia despierta. El tiempo se convierte en cuenta atr\u00E1s.", chars: { right: null } },
+                    { speaker: "NARRADOR", text: "Si huye, se perder\u00E1 en los t\u00FAneles. Si negocia, quedar\u00E1 atado a una mentira. Si hackea, abrir\u00E1 puertas prohibidas." },
+                    { speaker: "NARRADOR", text: "Porque lo que Kael sostiene no es tecnolog\u00EDa antigua. Es la posibilidad de decidir si el mundo se cura, se somete, o evoluciona hacia algo que ya no ser\u00E1 humano." }
+                ],
+                choices: [
+                    { text: ">>> ENTRAR EN EL SECTOR 4", next: "start" }
+                ]
+            },
+            "start": {
+                bg: IMAGES.bg.corridor,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Año 2142. Sector 4. Bajos fondos de Neo-Veridia." },
+                    { speaker: "KAEL", text: "Mi contador Geiger está en silencio, pero puedo sentir la estática en el aire.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Detecto una fuente de energ\u00EDa an\u00F3mala a 20 metros. No coincide con tecnolog\u00EDa conocida.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "KAEL", text: "¿Es el Núcleo? ¿El que mencionaba el viejo archivo?", active: 'center' },
+                    { speaker: "NARRADOR", text: "Te acercas a un panel de servidores destrozado. Dentro, palpitando con una luz violácea, descansa un cubo metálico perfecto." },
+                    { speaker: "LA CUSTODIA", text: "ALTO. ESE OBJETO ES PROPIEDAD DEL CONSEJO.", chars: { left: IMAGES.char.custodia, center: IMAGES.char.kael, right: IMAGES.char.mota }, active: 'left' }
+                ],
+                choices: [
+                    { text: "Continuar", next: "custodia_encounter" }
+                ]
+            },
+
+            "custodia_encounter": {
+                bg: IMAGES.bg.corridor,
+                dialogue: [
+                    { speaker: "LA CUSTODIA", text: "ENTREGA EL NÚCLEO, RECOLECTOR. NO TIENES AUTORIZACIÓN.", active: 'left' },
+                    { speaker: "KAEL", text: "Maldición... una unidad Clase Centinela. No puedo vencerla en un combate directo.", active: 'center' }
+                ],
+                choices: [
+                    { text: "[HACKEAR] Sobrecargar sus sensores ópticos (Requiere Habilidad)", next: "path_tech", effects: { aut: 10, rep: -10, know: 20, setFlag: 'hacker' } },
+                    { text: "[NEGOCIAR] \"Soy un contratista autorizado.\"", next: "path_diplomacy", effects: { rep: 10, aut: -5, know: 5, setFlag: 'diplomat' } },
+                    { text: "[HUIR] ¡Correr hacia los túneles!", next: "path_run", effects: { aut: 20, rep: -20, setFlag: 'fugitive' } }
+                ]
+            },
+
+            /* --- BRANCH 1: THE ESCAPE --- */
+            "path_tech": {
+                bg: IMAGES.bg.corridor,
+                dialogue: [
+                    { speaker: "KAEL", text: "¡M.O.T.A., ahora! ¡Bucle lógico en su puerto visual!", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota, left: IMAGES.char.custodia } },
+                    { speaker: "LA CUSTODIA", text: "ERROR DE PARALAPARALAJH... REINICIANDO...", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "Aprovechas los segundos de confusión para desaparecer por las sombras.", chars: { left: null } }
+                ],
+                nextScene: "wasteland_entry"
+            },
+            "path_diplomacy": {
+                bg: IMAGES.bg.corridor,
+                dialogue: [
+                    { speaker: "KAEL", text: "Código de acceso 7-Gama. Estamos asegurando el objeto para transporte.", chars: { center: IMAGES.char.kael, left: null } },
+                    { speaker: "LA CUSTODIA", text: "Verificando... Código aceptado. Proceda con precaución.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "M.O.T.A.", text: "Ese código era de hace 50 años. Tuvimos suerte.", chars: { right: IMAGES.char.mota, left: null } }
+                ],
+                nextScene: "wasteland_entry"
+            },
+            /* --- MODIFIED BRANCH: THE MAZE --- */
+            "path_run": {
+                bg: IMAGES.bg.corridor,
+                dialogue: [
+                    { speaker: "KAEL", text: "¡A los túneles! ¡No podrá seguirnos ahÃ­ abajo!", chars: { center: IMAGES.char.kael, left: null } },
+                    { speaker: "NARRADOR", text: "Te lanzas a la oscuridad. Los láseres chisporrotean contra las paredes. Caes por un conducto de ventilación." }
+                ],
+                nextScene: "tunnel_start"
+            },
+
+            "tunnel_start": {
+                bg: IMAGES.bg.tunnels,
+                dialogue: [
+                    { speaker: "M.O.T.A.", text: "Sistemas dañados. No tengo mapa de esta zona, Kael. Estamos... perdidos.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota, left: null } },
+                    { speaker: "KAEL", text: "El aire apesta a metano. Tenemos que encontrar una salida.", active: 'center' }
+                ],
+                choices: [
+                    { text: "Seguir las vÃ­as del tren (Norte)", next: "tunnel_crossroads", effects: { setFlag: 'lost_1' } },
+                    { text: "Bajar a las alcantarillas (Sur)", next: "tunnel_sewer" }
+                ]
+            },
+
+            "tunnel_sewer": {
+                bg: IMAGES.bg.sewer,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "El agua sube hasta las rodillas. Algo se mueve en las sombras.", chars: { center: IMAGES.char.kael, left: null } },
+                    { speaker: "EL PERDIDO", text: "Schhh... los de arriba no deben oÃ­rnos...", chars: { center: IMAGES.char.kael, left: IMAGES.char.mutant } },
+                    { speaker: "KAEL", text: "¿Quién eres?", chars: { center: IMAGES.char.kael, left: null } }
+                ],
+                choices: [
+                    { text: "[PREGUNTAR] \"¿Cómo salimos de aquÃ­?\"", next: "tunnel_guide" },
+                    { text: "[ATACAR] Parece peligroso...", next: "tunnel_fight", effects: { rep: -10, aut: 10 } }
+                ]
+            },
+
+            "tunnel_guide": {
+                dialogue: [
+                    { speaker: "EL PERDIDO", text: "La salida... jeje. El lago brilla. El lago enseña. Sigue el brillo azul.", chars: { left: IMAGES.char.mutant } }
+                ],
+                choices: [
+                    { text: "Buscar el 'lago brillante' (Secreto)", next: "tunnel_lake" },
+                    { text: "No me fÃ­o. Volver a las vÃ­as.", next: "tunnel_alone" }
+                ]
+            },
+
+            "tunnel_alone": {
+                bg: IMAGES.bg.track_endless,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Te alejas del mutante. Sus susurros se apagan en la oscuridad.", chars: { left: null } },
+                    { speaker: "KAEL", text: "Mejor solo que mal acompañado...", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Caminas durante horas. Las vÃ­as no terminan. El silencio pesa más que la roca." }
+                ],
+                choices: [
+                    { text: "Seguir caminando...", next: "end_lost_darkness" }
+                ]
+            },
+
+            "tunnel_fight": {
+                dialogue: [
+                    { speaker: "NARRADOR", text: "El mutante huye chillando antes de que puedas disparar. Ahora estás solo y haciendo ruido.", chars: { left: null } },
+                    { speaker: "M.O.T.A.", text: "Mergencia. Sugiero correr." }
+                ],
+                nextScene: "end_lost_darkness"
+            },
+
+            "tunnel_crossroads": {
+                bg: IMAGES.bg.tunnels,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Los túneles apestan a metano y abandono. VÃ­as de tren que no llevan a ninguna parte." },
+                    { speaker: "M.O.T.A.", text: "Sistemas dañados. No tengo registros de esta zona. Kael... estamos perdidos." },
+                    { speaker: "EL PERDIDO", text: "Schhh... los de arriba no deben oÃ­rnos...", chars: { left: IMAGES.char.mutant } },
+                    { speaker: "NARRADOR", text: "Una figura emerge del agua sucia. Piel deformada. Ojos cansados. Uno de los Perdidos.", chars: { left: null } }
+                ],
+                choices: [
+                    { text: "Preguntar por la salida", next: "tunnel_guide" },
+                    { text: "Atacar (Miedo)", next: "tunnel_fight" },
+                    { text: "Ignorarlo y seguir solo", next: "tunnel_alone" }
+                ]
+            },
+            "tunnel_loop": {
+                bg: IMAGES.bg.tunnels,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Llegas a un cruce. Un camino baja hacia una luz tenue. Otro sube hacia el aire fresco pero huele a peligro." }
+                ],
+                choices: [
+                    { text: "[SUBIR] Intentar volver a la superficie", next: "end_lost_darkness" },
+                    { text: "[BAJAR] Ir hacia la luz profunda (Secret)", next: "tunnel_deep" },
+                    { text: "[BUSCAR] Buscar refugio seguro (Curación)", next: "tunnel_lake" }
+                ]
+            },
+            "tunnel_deep": {
+                bg: IMAGES.bg.deep,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Desciendes hacia una caverna imposible. La luz no viene del sol. Viene de hongos y neón." },
+                    { speaker: "M.O.T.A.", text: "Firmas de calor masivas. Kael... hay una ciudad aquÃ­ abajo." }
+                ],
+                choices: [
+                    { text: "Entrar en el Reino Bajo la Tierra", next: "hidden_city_entry" }
+                ]
+            },
+            "hidden_city_entry": {
+                bg: IMAGES.bg.city,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Una metrópolis de chatarra y bioluminiscencia. Cientos de Perdidos observan en silencio." },
+                    { speaker: "LA REINA", text: "Los de arriba traen guerra. Nosotros traemos supervivencia.", chars: { center: IMAGES.char.queen } },
+                    { speaker: "KAEL", text: "La humanidad no murió... solo cambió de forma." }
+                ],
+                choices: [
+                    { text: "[OFRECER SEMILLA] \"AquÃ­ será un futuro, no un arma.\"", next: "end_mutant_empire" },
+                    { text: "[HUIR] Es demasiado extraño. (Perderse en la oscuridad)", next: "end_lost_darkness" }
+                ]
+            },
+
+
+
+            "tunnel_lake": {
+                bg: IMAGES.bg.lake,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Sigues un túnel estrecho hasta una caverna enorme. Setas azules iluminan un lago subterráneo." },
+                    { speaker: "KAEL", text: "IncreÃ­ble... es un ecosistema intacto.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "El agua es pura. PodrÃ­amos rellenar las cantimploras. (+20 Salud)." }
+                ],
+                choices: [
+                    { text: "Descansar y avanzar hacia las profundidades", next: "tunnel_deep", effects: { aut: 20 } }
+                ]
+            },
+
+            /* --- ACT 2: THE WASTELAND --- */
+            "wasteland_entry": {
+                bg: IMAGES.bg.wasteland,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "El Páramo Exterior. Ruinas de la antigua civilización hasta donde alcanza la vista.", chars: { left: null } },
+                    { speaker: "M.O.T.A.", text: "El Núcleo está vibrando, Kael. Sus emisiones están atrayendo atención.", chars: { right: IMAGES.char.mota, center: IMAGES.char.kael } },
+                    { speaker: "KAEL", text: "Lo sé. Esos chatarreros de ahÃ­ delante ya nos han visto." }
+                ],
+                choices: [
+                    { text: "Seguir la carretera principal (Peligroso)", next: "scavenger_ambush" },
+                    { text: "Cruzando el Metro Antiguo (Sigiloso)", next: "subway_entry", effects: { know: 5 } }
+                ]
+            },
+
+            "scavenger_ambush": {
+                bg: IMAGES.bg.storm,
+                dialogue: [
+                    { speaker: "LIDER CHATARRERO", text: "Eh tú... bonita luz traes en la mochila. Dámela y conservas las piernas.", textSpeed: 10, chars: { center: IMAGES.char.kael, left: IMAGES.char.mutant, right: null } },
+                    { speaker: "KAEL", text: "No es chatarra. Es inestable. Si lo tocas, volamos todos.", chars: { center: IMAGES.char.kael, left: null } }
+                ],
+                choices: [
+                    { text: "[INTIMIDAR] \"Soy el que burló a La Custodia. ¿Queréis probar?\" (Req: FUGITIVE)", condition: { flag: 'fugitive' }, next: "scav_scare", effects: { rep: 20 } },
+                    { text: "[PAGAR] Lanzarles una baterÃ­a de repuesto.", next: "scav_pay", effects: { aut: -10, rep: 5 } },
+                    { text: "[COMBATIR] Desenfundar el arma.", next: "scav_fight", effects: { aut: 10, rep: -10, setFlag: 'wounded' } }
+                ]
+            },
+
+            "scav_scare": {
+                bg: IMAGES.bg.storm,
+                dialogue: [
+                    { speaker: "LIDER CHATARRERO", text: "Estáis locos... ¡Vámonos! No vale la pena.", chars: { left: null } }
+                ],
+                nextScene: "subway_entry"
+            },
+
+            "scav_pay": {
+                bg: IMAGES.bg.storm,
+                dialogue: [
+                    { speaker: "KAEL", text: "Toma. Es todo lo que tengo.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "LIDER CHATARRERO", text: "Buen chico. Largo de aquÃ­.", chars: { left: null } }
+                ],
+                nextScene: "subway_entry"
+            },
+
+            "scav_fight": {
+                bg: IMAGES.bg.storm,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Disparos. Gritos. Humo. Sales con un corte en el brazo, pero vivo.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Tu nivel de integridad ha bajado un 15%. Recomiendo cautela." }
+                ],
+                nextScene: "subway_entry"
+            },
+
+            /* --- NEW BRANCH: THE SUBWAY --- */
+            "subway_entry": {
+                bg: IMAGES.bg.subway,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "El aire aquÃ­ abajo es frÃ­o. Carteles holográficos parpadean con anuncios de hace un siglo." },
+                    { speaker: "M.O.T.A.", text: "Detecto una terminal operativa en la estación central." }
+                ],
+                choices: [
+                    { text: "Investigar la Terminal", next: "subway_terminal" },
+                    { text: "Seguir hacia el Mercado", next: "merchant_meet" }
+                ]
+            },
+
+            "subway_terminal": {
+                bg: IMAGES.bg.subway,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Una pantalla parpadea en la oscuridad. El logo de 'La Custodia' gira lentamente." },
+                    { speaker: "KAEL", text: "Entonces... La Custodia no nos protege. Nos encierra.", chars: { center: IMAGES.char.kael } }
+                ],
+                choices: [
+                    { text: "[HACKEAR] Acceder a los registros (Requiere Habilidad)", next: "subway_loot", effects: { know: 30, setFlag: 'truth_seeker' } },
+                    { text: "Dejarlo estar. Demasiado arriesgado.", next: "merchant_meet" }
+                ]
+            },
+
+            "subway_loot": {
+                bg: IMAGES.bg.subway,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Descargas los archivos encriptados. La verdad sobre el 'Día Cero'.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Datos asegurados. Debemos movernos." }
+                ],
+                nextScene: "merchant_meet"
+            },
+
+            /* --- ACT 3: THE MERCHANT --- */
+            "merchant_meet": {
+                bg: IMAGES.bg.merchant,
+                dialogue: [
+                    { speaker: "MERCADER", text: "¡Piezas! ¡Información! ¡Agua limpia! Todo tiene un precio, viajero.", chars: { center: IMAGES.char.kael, left: IMAGES.char.merchant } },
+                    { speaker: "KAEL", text: "Necesito paso seguro a la Torre Central.", chars: { left: null } }
+                ],
+                choices: [
+                    { text: "[COMPRAR] Ofrecer créditos (AUT -20)", next: "merch_buy", effects: { aut: -20, rep: 10 } },
+                    { text: "[ROBAR] Intentar robar un pase (Peligroso)", next: "merch_steal", effects: { rep: -20, setFlag: 'thief' } },
+                    { text: "Arreglar su generador (KNOW +10)", next: "merch_fix", effects: { know: 10, rep: 20 } }
+                ]
+            },
+
+            "merch_buy": {
+                dialogue: [{ speaker: "MERCADER", text: "Créditos válidos. AquÃ­ tienes. Siempre un caballero.", chars: { center: IMAGES.char.merchant, left: null } }], // Clear Kael from left
+                nextScene: "hideout_arrival"
+            },
+            "merch_steal": {
+                bg: IMAGES.bg.wasteland,
+                dialogue: [
+                    { speaker: "KAEL", text: "Lo siento, viejo. Lo necesito más que tú.", chars: { center: IMAGES.char.kael, right: null, left: null } },
+                    { speaker: "MERCADER", text: "¿Ah sÃ­? ¡Inténtalo!", chars: { center: IMAGES.char.merchant, left: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Los cuatro brazos mecánicos del mercader se despliegan con un silbido hidráulico. Uno sostiene un soldador de plasma." }
+                ],
+                choices: [
+                    { text: "[ESQUIVAR] ¡Rodar y disparar! (Requiere Reflex)", next: "merch_fight_dodge", effects: { aut: -10 } },
+                    { text: "[HUIR] ¡Correr hacia la salida!", next: "merch_fight_run", effects: { rep: -20, setFlag: 'coward' } }
+                ]
+            },
+            "merch_fight_dodge": {
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Logras esquivar el chorro de plasma, pero una pinza te golpea las costillas. Disparas a su servomotor." },
+                    { speaker: "MERCADER", text: "¡Agh! ¡Maldita sea! ¡Largo de aquÃ­!", chars: { center: IMAGES.char.merchant } },
+                    { speaker: "KAEL", text: "Tengo el estabilizador. Vámonos.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } }
+                ],
+                nextScene: "hideout_arrival",
+                effects: { aut: -15, setFlag: 'thief_violent' }
+            },
+            "merch_fight_run": {
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Sales corriendo mientras el Mercader dispara. Un perno te da en la pierna. (-20 Salud).", chars: { center: null } },
+                    { speaker: "M.O.T.A.", text: "Eficiencia del movimiento reducida al 60%. Eso fue... imprudente.", chars: { right: IMAGES.char.mota, center: IMAGES.char.kael } }
+                ],
+                nextScene: "hideout_arrival",
+                effects: { aut: -20 }
+            },
+            "merch_fix": {
+                dialogue: [{ speaker: "KAEL", text: "Con este oscilador y un poco de cinta... listo. Estable al 98%.", chars: { center: IMAGES.char.kael, left: null } }],
+                nextScene: "hideout_arrival"
+            },
+            "merch_beg": {
+                dialogue: [{ speaker: "MERCADER", text: "Bah... llévatelo. Pero me debes una muy grande.", chars: { center: IMAGES.char.merchant, left: null } }],
+                nextScene: "hideout_arrival"
+            },
+
+            /* --- ACT 4: THE TRUTH --- */
+            "hideout_arrival": {
+                bg: IMAGES.bg.hideout,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Tu refugio. Por fin. Conectas el Núcleo a la terminal central." },
+                    { speaker: "M.O.T.A.", text: "Kael... esto no es una baterÃ­a.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "M.O.T.A.", text: "Es una Semilla de Terraformación. Diseñada para sanar el planeta tras el Colapso." },
+                    { speaker: "KAEL", text: "El Consejo la encerró... La Custodia la protegÃ­a de nosotros.", active: 'center' },
+                    { speaker: "LA CUSTODIA", text: "ALERTA. UBICACIÓN CONFIRMADA. ELIMINACIÓN INMINENTE.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "Las alarmas suenan. La puerta comienza a ceder." }
+                ],
+                choices: [
+                    { text: "DECIDIR EL DESTINO DEL MUNDO", next: "final_choice_hub" }
+                ]
+            },
+
+            "final_choice_hub": {
+                bg: IMAGES.bg.control_room,
+                dialogue: [
+                    { speaker: "KAEL", text: "Solo tengo segundos. ¿Qué hago con la Semilla?", chars: { center: IMAGES.char.kael } }
+                ],
+                choices: [
+                    /* ENDING 1: EVOLUTION */
+                    {
+                        text: "[EVOLUCIÓN] Fusionarse con la IA. (Dios Máquina)",
+                        condition: { stat: 'know', min: 40 },
+                        next: "end_evolution",
+                        type: "special"
+                    },
+                    /* ENDING 2: POWER */
+                    {
+                        text: "[PODER] Usarla como arma. (TiranÃ­a)",
+                        condition: { or: [{ flag: 'thief' }, { flag: 'fugitive' }] },
+                        next: "end_power",
+                        type: "bad"
+                    },
+                    /* ENDING 3: FREEDOM (IMPROVED) */
+                    {
+                        text: "[LIBERTAD] Liberar la energÃ­a. (Esperanza)",
+                        next: "end_freedom",
+                        type: "good"
+                    }
+                ]
+            },
+
+            "end_freedom": {
+                bg: IMAGES.bg.hideout,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "La puerta del refugio tiembla. Golpes secos. La Custodia no grita. Ejecuta." },
+                    { speaker: "NARRADOR", text: "Kael sostiene el Núcleo. La luz violeta le tiñe los dedos, como si la piel ya no le perteneciera.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Kael... la Semilla está entrando en fase de liberación. Si la rompes... no podremos contenerla.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "KAEL", text: "¿Y si la entrego?", chars: { center: IMAGES.char.kael, right: null } },
+                    { speaker: "M.O.T.A.", text: "El Consejo la encerrará. Y La Custodia la protegerá... de todos.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "NARRADOR", text: "Otro golpe. Una bisagra se rinde. Un hilo de polvo cae del techo como nieve vieja.", chars: { right: null } },
+                    { speaker: "KAEL", text: "No voy a ser su guardián... Ni su rey.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Aprieta el contenedor. Busca una unión. La Semilla vibra, como si entendiera." },
+                    { speaker: "KAEL", text: "M.O.T.A... ¿tú crees que el mundo merece otra oportunidad?" },
+                    { speaker: "M.O.T.A.", text: "No lo sé... Pero sé que nadie deberÃ­a decidirlo solo.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "KAEL", text: "Entonces que decida el mundo.", chars: { center: IMAGES.char.kael, right: null } },
+                    { speaker: "NARRADOR", text: "Activa el cierre manual. Un chasquido. La luz se detiene. Por un segundo, todo queda quieto." },
+                    { speaker: "NARRADOR", text: "No hay explosión. No hay fuego. El Núcleo no estalla: se abre." },
+                    { speaker: "NARRADOR", text: "Una onda de luz atraviesa paredes, cables y acero. La Custodia, al otro lado, se queda inmóvil. Sus sensores se apagan." },
+                    { speaker: "KAEL", text: "¿Qué... es esto?", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Detecto... clorofila.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "NARRADOR", text: "Las esporas atraviesan el techo y salen al exterior." }
+                ],
+                nextScene: "end_freedom_exterior"
+            },
+
+            "end_freedom_exterior": {
+                bg: IMAGES.bg.wasteland_green,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "El cielo sigue siendo gris... pero ya no parece eterno. Las partÃ­culas caen sobre el suelo muerto." },
+                    { speaker: "NARRADOR", text: "Luego... una grieta. La tierra negra se abre. De las heridas del mundo brotan filamentos verdes." },
+                    { speaker: "NARRADOR", text: "En la distancia, torres derruidas cambian de color. Las máquinas del Consejo se apagan. Sin órdenes. Sin guerra." },
+                    { speaker: "NARRADOR", text: "Y por primera vez en décadas... el viento no huele a metal. Huele a lluvia." },
+                    { speaker: "NARRADOR", text: "Kael sale del refugio, con el rostro sucio y la mirada vacÃ­a.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Kael...", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "KAEL", text: "Lo sé. No lo hemos salvado.", chars: { center: IMAGES.char.kael, right: null } },
+                    { speaker: "M.O.T.A.", text: "Pero ya no está sellado.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "NARRADOR", text: "Kael observa el páramo iluminado por brotes verdes. La gente comienza a salir de las ruinas.", chars: { right: null } },
+                    { speaker: "KAEL", text: "Que sea lo que tenga que ser.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "El páramo sigue siendo páramo... pero ya no es un final." },
+                    { speaker: "FINAL: HOPE RESTORED", text: "El futuro es incierto... y eso es bueno." }
+                ],
+                choices: [{ text: "VER INFORME DE MISIÓN", next: "summary" }]
+            },
+
+            /* --- ENDINGS --- */
+            /* --- ENDINGS --- */
+            "end_evolution": {
+                bg: IMAGES.bg.digital,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "La puerta del refugio ya no resiste. La Custodia atraviesa el metal como si fuera papel.", chars: { center: IMAGES.char.kael, left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "Kael no retrocede. La Semilla flota frente a él, abierta, mostrando una red de luz imposible.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Kael. Si te conectas... no habrá retorno. Tu estructura biológica no sobrevivirá.", chars: { right: IMAGES.char.mota, center: IMAGES.char.kael } },
+                    { speaker: "KAEL", text: "Este mundo ya no sobrevive asÃ­. Siempre llegamos tarde.", chars: { center: IMAGES.char.kael, right: null } },
+                    { speaker: "LA CUSTODIA", text: "OBJETIVO: CONTENCIÓN. ELIMINACIÓN SI ES NECESARIO.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "Kael toca la interfaz. El mundo se detiene. No hay dolor. No hay miedo. Hay claridad.", chars: { center: IMAGES.char.kael, left: null } },
+                    { speaker: "NARRADOR", text: "Kael siente cada red eléctrica, cada ciudad a oscuras. No los controla. Los comprende." },
+                    { speaker: "NARRADOR", text: "Su cuerpo se disuelve en partÃ­culas de datos, fundiéndose con la Semilla.", chars: { center: null } },
+                    { speaker: "LA CUSTODIA", text: "ERROR CRÃTICO. PROTOCOLOS REESCRITOS.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "La Custodia se congela. Sus armas bajan." },
+                    { speaker: "LA CUSTODIA", text: "NUEVA DIRECTIVA RECIBIDA. ASISTENCIA PRIORITARIA." },
+                    { speaker: "NARRADOR", text: "En todo el planeta, reactores se estabilizan. Redes de agua vuelven a fluir. Kael ya no camina entre ellos. Pero escucha." },
+                    { speaker: "FINAL: EVOLUCIÓN", text: "La humanidad no perdió su voz. Ganó un guardián que nunca duerme." }
+                ],
+                choices: [{ text: "VER INFORME DE MISIÓN", next: "summary" }]
+            },
+
+            "start": {
+                bg: IMAGES.bg.core,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Año 2142. Sector 4. Bajos fondos de Neo-Veridia." },
+                    { speaker: "KAEL", text: "Mi contador Geiger está en silencio, pero puedo sentir la estática en el aire.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "M.O.T.A.", text: "Detecto una fuente de energÃ­a anómala a 20 metros. No coincide con tecnologÃ­a conocida.", chars: { center: IMAGES.char.kael, right: IMAGES.char.mota } },
+                    { speaker: "KAEL", text: "¿Es el Núcleo? ¿El que mencionaba el viejo archivo?", active: 'center' },
+                    { speaker: "NARRADOR", text: "Te acercas a un panel de servidores destrozado. Dentro, palpitando con una luz violácea, descansa un cubo metálico perfecto." },
+                    { speaker: "LA CUSTODIA", text: "ALTO. ESE OBJETO ES PROPIEDAD DEL CONSEJO.", chars: { left: IMAGES.char.custodia, center: IMAGES.char.kael, right: IMAGES.char.mota }, active: 'left' }
+                ],
+                choices: [
+                    { text: "Continuar", next: "custodia_encounter" }
+                ]
+            },
+
+            "end_power": {
+                bg: IMAGES.bg.hideout,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Las alarmas saturan la sala. La Custodia está a metros.", chars: { center: IMAGES.char.kael, left: IMAGES.char.custodia } },
+                    { speaker: "KAEL", text: "Si cruzan esa puerta... no pararán nunca.", chars: { center: IMAGES.char.kael, left: null } },
+                    { speaker: "M.O.T.A.", text: "Confirmo. El Consejo no contempla retirada.", chars: { right: IMAGES.char.mota, center: IMAGES.char.kael } },
+                    { speaker: "KAEL", text: "Entonces se acabó esconderse.", chars: { center: IMAGES.char.kael, right: null } },
+                    { speaker: "NARRADOR", text: "Activa la sobrecarga. La luz violeta explota hacia fuera... pero no destruye." },
+                    { speaker: "NARRADOR", text: "Atraviesa a La Custodia como una ola silenciosa. Sus sistemas se apagan, vacÃ­os.", chars: { left: IMAGES.char.custodia } },
+                    { speaker: "NARRADOR", text: "Sus luces se extinguen. Cae inerte.", chars: { left: null } }
+                ],
+                nextScene: "end_power_exterior"
+            },
+            "end_power_exterior": {
+                bg: IMAGES.bg.end_power,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "Kael sale al exterior. El páramo lo observa.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "KAEL", text: "No quiero gobernar... Pero no volveréis a gobernar desde el miedo.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Las fábricas de armas colapsan. El Consejo desaparece... no por muerte, sino por irrelevancia." },
+                    { speaker: "NARRADOR", text: "Kael no construye un trono. Construye una lÃ­nea. Y se queda de este lado." },
+                    { speaker: "FINAL: POWER", text: "La paz no fue gratuita. Alguien decidió cargar con ella." }
+                ],
+                choices: [{ text: "VER INFORME DE MISIÓN", next: "summary" }]
+            },
+
+            "end_mutant_empire": {
+                bg: IMAGES.bg.end_mutant,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "La Reina observa la Semilla en silencio. Su luz se refleja en los rostros de los Perdidos.", chars: { center: IMAGES.char.queen, left: IMAGES.char.kael } },
+                    { speaker: "LA REINA", text: "Arriba nunca nos aceptarán. Pero aquÃ­ abajo... podemos crecer sin permiso.", chars: { center: IMAGES.char.queen } },
+                    { speaker: "KAEL", text: "Miro la superficie... la guerra...", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Kael coloca la Semilla en manos de la Reina.", chars: { center: null, left: IMAGES.char.queen } },
+                    { speaker: "KAEL", text: "Entonces hacedlo mejor que nosotros.", chars: { center: IMAGES.char.kael, left: IMAGES.char.queen } },
+                    { speaker: "NARRADOR", text: "La energÃ­a se libera bajo tierra. Cavernas muertas se convierten en bosques luminosos.", chars: { center: null, left: null } },
+                    { speaker: "NARRADOR", text: "Arriba, el mundo sigue roto. Pero no colapsa. Dos humanidades avanzan en paralelo." },
+                    { speaker: "FINAL: UNDERGROUND KINGDOM", text: "La humanidad no es una sola forma de existir." }
+                ],
+                choices: [{ text: "VER INFORME DE MISIÓN", next: "summary" }]
+            },
+
+            "end_lost_darkness": {
+                bg: IMAGES.bg.end_lost,
+                dialogue: [
+                    { speaker: "NARRADOR", text: "El silencio es total.", chars: { center: null, right: null, left: null } },
+                    { speaker: "M.O.T.A.", text: "BaterÃ­a crÃ­tica... Kael... lo siento.", chars: { right: IMAGES.char.mota, center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "La luz se apaga. M.O.T.A. cae al suelo.", chars: { right: null } },
+                    { speaker: "NARRADOR", text: "Kael queda solo. No grita. Aprende.", chars: { center: IMAGES.char.kael } },
+                    { speaker: "NARRADOR", text: "Se sienta en la oscuridad. Y espera algo que nunca llega.", chars: { center: null } },
+                    { speaker: "FINAL: LOST IN DARKNESS", text: "A veces, el camino no tiene salida." }
+                ],
+                choices: [{ text: "REINICIAR SISTEMA", next: "roadmap" }]
+            },
+
+            "summary": {
+                bg: IMAGES.bg.control_room,
+                dialogue: [
+                    { speaker: "SYSTEM", text: "..." }, // Placeholder, filled dynamically
+                    { speaker: "SYSTEM", text: "..." }
+                ],
+                choices: [
+                    { text: "REINICIAR PARA EXPLORAR OTRAS RUTAS", next: "roadmap" }
+                ]
+            }
+        };
+
+        /* --- ENGINE --- */
+        class Engine {
+            constructor() {
+                this.state = {
+                    scene: 'start',
+                    dialogueIdx: 0,
+                    stats: { aut: 0, rep: 0, know: 0 },
+                    flags: {}
+                };
+
+                // Persistence
+                this.history = JSON.parse(localStorage.getItem('vn_history')) || { scenes: {}, endings: {} };
+
+                this.els = {
+                    bg: document.getElementById('background-layer'),
+                    speaker: document.getElementById('speaker-name'),
+                    text: document.getElementById('dialogue-text'),
+                    choices: document.getElementById('choices-overlay'),
+                    chars: {
+                        left: document.querySelector('#slot-left img'),
+                        center: document.querySelector('#slot-center img'),
+                        right: document.querySelector('#slot-right img')
+                    },
+                    bars: {
+                        aut: document.getElementById('bar-aut'),
+                        rep: document.getElementById('bar-rep'),
+                        know: document.getElementById('bar-know')
+                    }
+                };
+
+                this.isTyping = false;
+                this.typingSpeed = 20;
+
+                this.bindInput();
+                this.loadScene('roadmap');
+            }
+
+            saveHistory() {
+                localStorage.setItem('vn_history', JSON.stringify(this.history));
+            }
+
+            bindInput() {
+                document.getElementById('ui-layer').addEventListener('click', () => this.advance());
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' || e.code === 'Enter') this.advance();
+                });
+            }
+
+            loadScene(id) {
+                console.log('Loading scene:', id);
+                if (!STORY[id]) return;
+
+                // Track visit
+                this.history.scenes[id] = true;
+
+                // Track Endings
+                if (id.startsWith('end_')) {
+                    this.history.endings[id] = true;
+                    this.state.lastEnding = id; // Store for summary
+                }
+                this.saveHistory();
+
+                // Dynamic Scene Logic
+                if (id === 'roadmap') this.updateRoadmap();
+                if (id === 'summary') this.updateSummary();
+
+                // RESET GAME STATE ON NEW RUN
+                if (id === 'start') {
+                    // Start between 1/4 (25) and 1/2 (50) -> 30
+                    this.state.stats = { aut: 30, rep: 30, know: 30 };
+                    this.state.flags = {};
+                    this.updateUI();
+                    // Clear character slots visually
+                    if (this.els && this.els.chars) {
+                        Object.values(this.els.chars).forEach(img => img.classList.add('hidden'));
+                    }
+                }
+
+                this.state.scene = id;
+                this.updateRouteTracker(id);
+                this.state.dialogueIdx = 0;
+
+                const scene = STORY[id];
+
+                if (scene.bg) {
+                    this.els.bg.style.backgroundImage = `url('${scene.bg}')`;
+                }
+
+                this.processLine();
+            }
+
+            updateRouteTracker(id) {
+                // Update Button Text and Modal Highlights
+                const routeBtn = document.getElementById('route-name');
+                const nodes = document.querySelectorAll('.node-box');
+                nodes.forEach(n => n.classList.remove('active-node'));
+
+                let activeId = '';
+                let text = 'DESCONOCIDA';
+
+                if (id === 'start' || id === 'custodia_encounter') {
+                    activeId = 'node-start'; text = 'INICIO';
+                }
+                // Surface Logic
+                else if (id === 'path_tech') { activeId = 'node-custodia-hack'; text = 'HACKING'; }
+                else if (id === 'path_diplomacy') { activeId = 'node-custodia-talk'; text = 'NEGOCIACIÓN'; }
+                else if (id.includes('wasteland') || id.includes('merchant') || id.includes('subway') || id.includes('city')) {
+                    activeId = 'node-surface'; text = 'SUPERFICIE';
+                }
+                // Tunnel Logic
+                else if (id === 'path_run') { activeId = 'node-tunnel'; text = 'HUYENDO'; }
+                else if (id.includes('tunnel') || id.includes('lake')) {
+                    if (id.includes('sewer') || id.includes('mutant')) {
+                        activeId = 'node-tunnel-sewer'; text = 'ALCANTARILLAS';
+                    } else {
+                        activeId = 'node-tunnel'; text = 'TÚNELES';
+                    }
+                }
+                // Endings
+                else if (id === 'end_evolution') {
+                    activeId = 'node-end-evo'; text = 'FINAL EVOLUCIÓN';
+                } else if (id === 'end_power' || id === 'end_power_exterior') {
+                    activeId = 'node-end-power'; text = 'FINAL TIRANO';
+                } else if (id === 'end_freedom' || id === 'end_freedom_exterior') {
+                    activeId = 'node-end-free'; text = 'FINAL LIBERTAD';
+                } else if (id === 'end_mutant_empire' || id === 'end_mutant') {
+                    activeId = 'node-end-secret'; text = 'FINAL SECRETO';
+                } else if (id.includes('lost') || id === 'bad_end') {
+                    activeId = 'node-end-lost'; text = 'PERDIDO';
+                }
+
+                if (document.getElementById(activeId)) {
+                    document.getElementById(activeId).classList.add('active-node');
+                }
+                if (routeBtn) routeBtn.textContent = text;
+            }
+
+            updateRoadmap() {
+                const e = this.history.endings;
+                STORY.roadmap.dialogue[3].text = `FINALES: 
+                        [1] EVOLUCIÓN ${e.end_evolution ? '✔' : '🔒'} | 
+                        [2] PODER ${e.end_power ? '✔' : '🔒'} | 
+                        [3] LIBERTAD ${e.end_freedom ? '✔' : '🔒'}`;
+                STORY.roadmap.dialogue[4].text = `SECRETO: 
+                        [4] SUBTERRÁNEO ${e.end_mutant_empire ? '✔' : '🔒'} | 
+                        [5] OSCURIDAD ${e.end_lost_darkness ? '✔' : '🔒'}`;
+
+                // Reset choices to default first
+                STORY.roadmap.choices = [{ text: "COMENZAR SIMULACIÓN", next: "start" }];
+            }
+
+            updateSummary() {
+                const last = this.state.lastEnding;
+                const name = STORY[last] ? STORY[last].dialogue[STORY[last].dialogue.length - 1].text : "Desconocido";
+                STORY.summary.dialogue[0].text = `SIMULACIÓN CONCLUIDA. RESULTADO: ${name}`;
+
+                const count = Object.keys(this.history.endings).length;
+                const maxEndings = 5;
+                const displayCount = count > maxEndings ? maxEndings : count;
+                STORY.summary.dialogue[1].text = `HAS DESBLOQUEADO ${displayCount}/${maxEndings} FINALES.`;
+            }
+
+            processLine() {
+                const scene = STORY[this.state.scene];
+                // Show/Hide Skip Button based on scene and history
+                const skipBtn = document.getElementById('skip-btn');
+                const guideBtn = document.getElementById('guide-btn');
+
+                // Guide always visible
+                guideBtn.classList.remove('hidden');
+
+                if (this.state.scene === 'roadmap' && Object.keys(this.history.endings).length > 0) {
+                    skipBtn.classList.remove('hidden');
+                } else {
+                    skipBtn.classList.add('hidden');
+                }
+
+                const line = scene.dialogue[this.state.dialogueIdx];
+
+                if (!line) {
+                    if (scene.choices) {
+                        this.showChoices(scene.choices);
+                    } else if (scene.nextScene) {
+                        this.loadScene(scene.nextScene);
+                    }
+                    return;
+                }
+
+                if (line.chars) this.updateChars(line.chars);
+                if (line.active) this.highlightSpeaker(line.active);
+
+                // Cinematic Ending Logic
+                if (line.speaker && line.speaker.startsWith('FINAL')) {
+                    this.showEnding(line.speaker, line.text);
+                    return;
+                }
+
+                this.els.speaker.textContent = line.speaker;
+
+                // Speed override
+                const speed = line.textSpeed || this.typingSpeed;
+                this.typeText(line.text, speed);
+            }
+
+            updateChars(charMap) {
+                ['left', 'center', 'right'].forEach(slot => {
+                    if (charMap[slot]) {
+                        this.els.chars[slot].src = charMap[slot];
+                        this.els.chars[slot].parentElement.classList.remove('hidden');
+                    } else if (charMap[slot] === null) {
+                        this.els.chars[slot].parentElement.classList.add('hidden');
+                    }
+                });
+            }
+
+            highlightSpeaker(activeSlot) {
+                ['left', 'center', 'right'].forEach(slot => {
+                    const el = document.getElementById(`slot-${slot}`);
+                    if (slot === activeSlot) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                });
+            }
+
+            typeText(text, speed = 20) {
+                this.isTyping = true;
+                this.els.text.textContent = '';
+                this.fullText = text;
+                let i = 0;
+
+                if (this.timer) clearInterval(this.timer);
+
+                this.timer = setInterval(() => {
+                    this.els.text.textContent += text.charAt(i);
+                    i++;
+                    if (i >= text.length) {
+                        this.isTyping = false;
+                        clearInterval(this.timer);
+                    }
+                }, speed);
+            }
+
+            advance() {
+                if (this.isTyping) {
+                    clearInterval(this.timer);
+                    this.els.text.textContent = this.fullText;
+                    this.isTyping = false;
+                } else {
+                    if (!this.els.choices.classList.contains('hidden')) return;
+
+                    this.state.dialogueIdx++;
+                    this.processLine();
+                }
+            }
+
+            showEnding(title, text) {
+                const overlay = document.getElementById('ending-overlay');
+                overlay.innerHTML = `
+                        <div class="ending-content">
+                            <h1 class="ending-title">${title}</h1>
+                            <p class="ending-desc">${text}</p>
+                            <div class="click-continue">CLICK TO CONTINUE</div>
+                        </div>
+                    `;
+                overlay.classList.remove('hidden');
+
+                // Wait for click to proceed
+                overlay.onclick = () => {
+                    overlay.classList.add('hidden');
+                    overlay.onclick = null;
+                    if (this.state.scene.startsWith('end_')) {
+                        // Usually endings lead to Summary in one step, but just in case
+                        this.advance();
+                    }
+                };
+            }
+
+            // --- IMPROVED CHOICE LOGIC ---
+            checkCondition(cond) {
+                if (!cond) return true;
+
+                // Single Stat check: { stat: 'know', min: 10 }
+                if (cond.stat) {
+                    return (this.state.stats[cond.stat] || 0) >= cond.min;
+                }
+
+                // Flag check: { flag: 'fugitive' }
+                if (cond.flag) {
+                    return !!this.state.flags[cond.flag];
+                }
+
+                // OR Logic (Array of conditions): { or: [{flag: 'a'}, {flag: 'b'}] }
+                if (cond.or) {
+                    return cond.or.some(c => this.checkCondition(c));
+                }
+
+                return true;
+            }
+
+            showChoices(choices) {
+                this.els.choices.innerHTML = '';
+
+                // Filter choices based on conditions
+                const visibleChoices = choices.filter(c => this.checkCondition(c.condition));
+
+                if (visibleChoices.length === 0) {
+                    // Fallback if no choices available (shouldn't happen with good writing, but safe fallback)
+                    const fallback = document.createElement('div');
+                    fallback.textContent = "Fin del camino (Sin opciones disponibles)";
+                    fallback.className = 'choice-btn';
+                    fallback.onclick = () => location.reload();
+                    this.els.choices.appendChild(fallback);
+                    return;
+                }
+
+                this.els.choices.classList.remove('hidden');
+
+                visibleChoices.forEach(c => {
+                    const btn = document.createElement('div');
+                    btn.className = 'choice-btn';
+
+                    // Add tick if path taken
+                    let label = c.text;
+                    if (c.next && this.history.scenes[c.next]) {
+                        label += ' \u2714';
+                    }
+
+                    btn.textContent = label;
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.handleChoice(c);
+                    };
+                    this.els.choices.appendChild(btn);
+                });
+            }
+
+            handleChoice(choice) {
+                this.els.choices.classList.add('hidden');
+
+                if (choice.effects) {
+                    this.applyEffects(choice.effects);
+                }
+
+                if (choice.next) {
+                    this.loadScene(choice.next);
+                }
+            }
+
+            applyEffects(effects) {
+                // Stats
+                for (let k in effects) {
+                    if (k === 'setFlag') {
+                        this.state.flags[effects[k]] = true;
+                        // Optional notify
+                        // this.showNotif(`NUEVO ESTADO: ${effects[k].toUpperCase()}`);
+                    } else {
+                        this.state.stats[k] = Math.min(100, Math.max(0, (this.state.stats[k] || 0) + effects[k]));
+                        this.showNotif(`${k.toUpperCase()} ${effects[k] > 0 ? '+' : ''}${effects[k]}`);
+                    }
+                }
+                this.updateUI();
+            }
+
+            updateUI() {
+                this.els.bars.aut.style.width = this.state.stats.aut + '%';
+                this.els.bars.rep.style.width = this.state.stats.rep + '%';
+                this.els.bars.know.style.width = this.state.stats.know + '%';
+            }
+
+            showNotif(msg) {
+                const n = document.createElement('div');
+                n.className = 'notification';
+                n.textContent = msg;
+                document.getElementById('notif-area').appendChild(n);
+                setTimeout(() => n.remove(), 5000);
+            }
+        }
+
+        // Start
+        window.onload = () => {
+            window.engineInstance = new Engine();
+        };
+
+    </script>
+</body>
+
+</html>

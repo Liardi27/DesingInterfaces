@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevDoc: Post-Colapso</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- PALETA POST-APOCALÍPTICA (Rust & Dust) --- */
+            
+            /* Fondos: Tonos tierra oscura, asfalto y metal oxidado */
+            --bg-sidebar: #1c1917;  /* Warm Grey 900 */
+            --bg-main: #0c0a09;     /* Warm Grey 950 (Casi negro) */
+            --bg-card: #292524;     /* Warm Grey 800 */
+            --border: #44403c;      /* Warm Grey 700 */
+            
+            /* Textos: Blanco sucio y gris ceniza */
+            --text-primary: #e7e5e4;
+            --text-secondary: #a8a29e;
+            
+            /* Acento: Naranja Óxido / Peligro Biológico */
+            --accent: #ea580c;      /* Rust Orange */
+            --accent-hover: #c2410c;
+            
+            /* Código: Fondo terminal viejo */
+            --code-bg: #151412;
+            --highlight: #fbbf24;   /* Amber */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR (Barra Lateral) --- */
+        aside {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .brand span { color: var(--accent); }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .menu-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--accent); /* Color de acento para etiquetas */
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-left: 10px;
+            font-weight: 800; /* Más peso */
+            letter-spacing: 0.05em;
+            opacity: 0.8;
+        }
+
+        .nav-item {
+            background: transparent;
+            border: 1px solid transparent; /* Preparado para borde al hover */
+            color: var(--text-secondary);
+            padding: 10px 15px;
+            border-radius: 4px; /* Bordes más duros */
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(234, 88, 12, 0.1);
+            border-color: var(--border);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background-color: var(--accent);
+            color: white;
+            font-weight: 600;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3); /* Resplandor naranja */
+        }
+
+        .nav-item.inicio-btn {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        /* Estilo para el botón "muerto" */
+        .nav-item.dead-link {
+            margin-top: 20px;
+            border: 1px dashed var(--border);
+            opacity: 0.6;
+        }
+        .nav-item.dead-link:hover {
+            cursor: not-allowed;
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            scroll-behavior: smooth;
+            background-image: radial-gradient(circle at top right, #1c1917 0%, transparent 40%); /* Sutil degradado */
+        }
+
+        .content-section {
+            display: none;
+            padding: 50px 60px;
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease;
+        }
+        .content-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
+        .subtitle { font-size: 1.1rem; color: var(--accent); margin-bottom: 40px; font-weight: 400; border-left: 3px solid var(--accent); padding-left: 15px; }
+        
+        h2 { 
+            font-size: 1.5rem; 
+            margin-top: 50px; 
+            margin-bottom: 25px; 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        h2::before { content: '//'; color: var(--accent); opacity: 0.8; font-family: monospace; letter-spacing: -2px; }
+
+        h3 { font-size: 1.2rem; margin-top: 30px; margin-bottom: 15px; color: #e5e7eb; font-weight: 700; }
+
+        p { line-height: 1.8; color: var(--text-secondary); margin-bottom: 20px; font-size: 1rem; }
+
+        /* --- CARDS & BOXES --- */
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Decoración de esquina "warning" */
+        .info-card::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 20px 20px 0;
+            border-color: transparent var(--accent) transparent transparent;
+            opacity: 0.5;
+        }
+        .info-card h3 { color: #fff; margin-bottom: 10px; font-size: 1.1rem; margin-top: 0; }
+
+        /* --- CODE BLOCKS --- */
+        .code-wrapper {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 25px 0;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        pre { padding: 20px; overflow-x: auto; }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6; color: #e5e7eb; }
+        
+        /* Syntax Highlighting */
+        .k { color: #ea580c; font-weight: bold; } /* Keyword - Orange */
+        .s { color: #84cc16; } /* String - Dirty Green */
+        .c { color: #57534e; font-style: italic; } /* Comment - Dark Grey */
+        .f { color: #fbbf24; } /* Function - Amber */
+        .v { color: #f87171; } /* Variable/Tag - Redish */
+        .a { color: #d6d3d1; } /* Attribute - Stone */
+        .n { color: #fbbf24; } /* Number/Value - Amber */
+
+        /* --- INICIO HERO --- */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(12, 10, 9, 0) 100%);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            border-left: 4px solid var(--accent);
+        }
+        .hero-title { font-size: 3rem; margin-bottom: 15px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .stat-item {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--accent); display: block; margin-bottom: 5px; }
+        .stat-lbl { font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 10px; }
+            nav { flex-direction: row; overflow-x: auto; padding-bottom: 5px; }
+            .content-section { padding: 30px 20px; }
+            .brand { margin-bottom: 10px; }
+            .menu-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA LATERAL (Navegación) -->
+    <aside>
+        <div class="brand">
+            <span>☣</span> Post-Colapso
+        </div>
+
+        <nav>
+            <button class="nav-item inicio-btn active" onclick="showSection('inicio')">
+                🛖 Refugio (Inicio)
+            </button>
+
+            <div class="menu-label">Archivos del Sistema</div>
+            
+            <button class="nav-item" onclick="showSection('html')">
+                📄 Planos HTML
+            </button>
+            <button class="nav-item" onclick="showSection('css')">
+                🎨 Estética Visual
+            </button>
+            <button class="nav-item" onclick="showSection('js')">
+                ⚙️ Motor Lógico
+            </button>
+
+            <!-- BOTÓN QUE NO LLEVA A NINGUNA PARTE -->
+            <button class="nav-item dead-link">
+                <a href="./index.html"> Volver al Inicio </a>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main>
+        
+        <!-- SECCIÓN 1: INICIO (DASHBOARD) -->
+        <div id="inicio" class="content-section active">
+            <div class="hero-banner">
+                <h1 class="hero-title">Motor de Supervivencia</h1>
+                <p>Arquitectura monolítica resistente para narrativas en el yermo digital. Sin servidores. Sin dependencias. Solo código puro.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-val">1 Archivo</span>
+                    <span class="stat-lbl">Autosuficiente</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">3 Capas</span>
+                    <span class="stat-lbl">Blindaje Visual</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">JSON</span>
+                    <span class="stat-lbl">Banco de Datos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">100%</span>
+                    <span class="stat-lbl">Offline</span>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 50px;">Informe de Situación</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="info-card">
+                    <h3>🎯 Misión Principal</h3>
+                    <p>Desplegar un motor de juego funcional en entornos hostiles (navegadores sin conexión o dispositivos legacy). El sistema utiliza únicamente recursos estándar (HTML5, CSS3, ES6) para garantizar la ejecución perpetua sin mantenimiento de servidores.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>⚠️ Protocolos de Seguridad</h3>
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Persistencia Local:</strong> Los datos de la partida se guardan en el <code>localStorage</code> del terminal del usuario.</li>
+                        <li><strong>Diseño Adaptativo:</strong> La interfaz se reconfigura automáticamente ante anomalías de resolución (Responsive Design).</li>
+                        <li><strong>Carga Instantánea:</strong> Sin tiempos de espera de red. El búnker está siempre listo.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h2>Inventario Técnico</h2>
+            <div class="info-card">
+                <h3>📂 Estructura de Archivos</h3>
+                <pre style="background:transparent; padding:0; margin:0; border:none;"><code>index.html
+├── &lt;head&gt; (Suministros CSS)
+│   ├── Variables de Tema (Óxido/Neón)
+│   ├── Efectos CRT & Scanlines
+│   └── Tipografía de Emergencia
+└── &lt;body&gt;
+    ├── &lt;div id="game-container"&gt; (Búnker UI)
+    │   ├── HUD (Barras de Estado)
+    │   ├── Escenario (Capas Paralaje)
+    │   └── Terminal de Texto (Diálogos)
+    └── &lt;script&gt; (Núcleo Lógico)
+        ├── Motor de Estado (FSM)
+        └── Base de Datos JSON (Narrativa)</code></pre>
+            </div>
+
+            <div class="info-card">
+                <h3>🛠️ Requisitos del Sistema</h3>
+                <p>Compatible con cualquier navegador moderno (Chrome 60+, Firefox 55+, Safari 11+). No requiere conexión a la red neuronal global (Internet) una vez descargado.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: HTML -->
+        <div id="html" class="content-section">
+            <span style="color:var(--accent); font-weight:700; font-size:0.9rem;">ESTRUCTURA & DOM</span>
+            <h1>Los Cimientos (HTML)</h1>
+            <p class="subtitle">Estructura del búnker digital y capas de protección.</p>
+
+            <div class="info-card">
+                <h3>🏗️ Filosofía de Construcción: DOM vs Canvas</h3>
+                <p>En el yermo, la eficiencia es clave. Usamos el <strong>DOM</strong> directamente en lugar de Canvas pesado. Esto garantiza:</p>
+                <ul style="margin-top:10px;margin-bottom:0;">
+                    <li><strong>Accesibilidad Nativa:</strong> Los lectores de pantalla pueden interpretar los diálogos como texto real.</li>
+                    <li><strong>Nitidez Tipográfica:</strong> El texto no se pixela al hacer zoom, manteniendo la legibilidad en pantallas de alta densidad.</li>
+                    <li><strong>Optimización GPU:</strong> Delegamos las animaciones (transiciones de opacidad y posición) al motor CSS del navegador.</li>
+                </ul>
+            </div>
+
+            <h2>1. Configuración de Supervivencia (Head)</h2>
+            <p>Preparación del entorno para dispositivos hostiles (móviles).</p>
+            <div class="code-wrapper">
+                <div class="code-header">index.html (head)</div>
+                <pre><code><span class="c">&lt;!-- 1. Bloqueo de Viewport --&gt;</span>
+<span class="c">&lt;!-- Impide que el usuario haga zoom accidental al tocar botones rápidamente --&gt;</span>
+<span class="v">&lt;meta</span> <span class="a">name</span>=<span class="s">"viewport"</span> <span class="a">content</span>=<span class="s">"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"</span><span class="v">&gt;</span>
+
+<span class="c">&lt;!-- 2. Suministros Externos (Fuentes) --&gt;</span>
+<span class="c">&lt;!-- 'preconnect' inicia el saludo de manos con Google Fonts antes de pedir el archivo --&gt;</span>
+<span class="v">&lt;link</span> <span class="a">rel</span>=<span class="s">"preconnect"</span> <span class="a">href</span>=<span class="s">"https://fonts.googleapis.com"</span><span class="v">&gt;</span>
+<span class="v">&lt;link</span> <span class="a">href</span>=<span class="s">".../Courier+Prime...Press+Start+2P..."</span> <span class="a">rel</span>=<span class="s">"stylesheet"</span><span class="v">&gt;</span></code></pre>
+            </div>
+
+            <h2>2. Sistema de Capas (Layers)</h2>
+            <p>El juego utiliza una estrategia de "Z-Index Sandwich". Cada capa tiene una función específica y un nivel de profundidad.</p>
+
+            <div class="code-wrapper">
+                <div class="code-header">index.html (body structure)</div>
+                <pre><code><span class="c">&lt;!-- CAPA 0: Radiación Visual (VFX) --&gt;</span>
+<span class="c">&lt;!-- position: fixed; z-index: 2000; pointer-events: none; --&gt;</span>
+<span class="v">&lt;div</span> <span class="a">class</span>=<span class="s">"crt-overlay"</span><span class="v">&gt;&lt;/div&gt;</span> <span class="c">&lt;!-- Ruido estático --&gt;</span>
+<span class="v">&lt;div</span> <span class="a">class</span>=<span class="s">"scanline"</span><span class="v">&gt;&lt;/div&gt;</span>    <span class="c">&lt;!-- Barrido de monitor --&gt;</span>
+
+<span class="c">&lt;!-- CAPA 1: Contenedor Maestro --&gt;</span>
+<span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"game-container"</span><span class="v">&gt;</span>
+
+    <span class="c">&lt;!-- 1.1 HUD (Signos Vitales) --&gt;</span>
+    <span class="c">&lt;!-- position: absolute; top: 20px; --&gt;</span>
+    <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"stats-hud"</span><span class="v">&gt;</span>
+        <span class="v">&lt;div</span> <span class="a">class</span>=<span class="s">"hud-stat"</span><span class="v">&gt;</span>SALUD [|||||  ]<span class="v">&lt;/div&gt;</span>
+    <span class="v">&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- 1.2 Zona de Peligro (Escena) --&gt;</span>
+    <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"scene-view"</span><span class="v">&gt;</span>
+        <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"background-layer"</span><span class="v">&gt;&lt;/div&gt;</span>
+        <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"character-layer"</span><span class="v">&gt;</span>
+            <span class="c">&lt;!-- Slots flexibles para alineación de personajes --&gt;</span>
+            <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"slot-left"</span> <span class="a">class</span>=<span class="s">"character-slot"</span><span class="v">&gt;&lt;/div&gt;</span>
+            <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"slot-center"</span> <span class="a">class</span>=<span class="s">"character-slot"</span><span class="v">&gt;&lt;/div&gt;</span>
+            <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"slot-right"</span> <span class="a">class</span>=<span class="s">"character-slot"</span><span class="v">&gt;&lt;/div&gt;</span>
+        <span class="v">&lt;/div&gt;</span>
+    <span class="v">&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- 1.3 Terminal de Datos (UI) --&gt;</span>
+    <span class="c">&lt;!-- Capa superior interactiva --&gt;</span>
+    <span class="v">&lt;div</span> <span class="a">id</span>=<span class="s">"ui-layer"</span><span class="v">&gt;</span>
+        <span class="v">&lt;div</span> <span class="a">class</span>=<span class="s">"dialogue-box"</span><span class="v">&gt;</span>...<span class="v">&lt;/div&gt;</span>
+    <span class="v">&lt;/div&gt;</span>
+
+<span class="v">&lt;/div&gt;</span></code></pre>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: CSS -->
+        <div id="css" class="content-section">
+            <span style="color:var(--accent); font-weight:700; font-size:0.9rem;">ESTÉTICA</span>
+            <h1>Atmósfera Tóxica (CSS)</h1>
+            <p class="subtitle">Efectos visuales para un mundo en decadencia.</p>
+
+            <div class="info-card">
+                <h3>🎨 Tipografía Narrativa</h3>
+                <p>La elección de fuentes no es casual:</p>
+                <ul style="margin-bottom:0;">
+                    <li><strong>'Press Start 2P' (Arcade):</strong> Usada en encabezados y HUD para evocar tecnología antigua y robusta.</li>
+                    <li><strong>'Courier Prime' (Monospace):</strong> Usada en los diálogos. Simula informes de máquina de escribir o terminales de datos, mejorando la legibilidad.</li>
+                </ul>
+            </div>
+
+            <h2>1. Variables del Sistema</h2>
+            <div class="code-wrapper">
+                <div class="code-header">CSS (Definiciones)</div>
+                <pre><code><span class="v">:root</span> {
+    <span class="c">/* Colores de Supervivencia */</span>
+    <span class="a">--bg-color</span>: <span class="s">#050505</span>;       <span class="c">/* Oscuridad total (ahorro de batería) */</span>
+    <span class="a">--accent-cyan</span>: <span class="s">#5cecdc</span>;    <span class="c">/* Energía limpia (escasa) */</span>
+    <span class="a">--accent-red</span>: <span class="s">#ff4757</span>;     <span class="c">/* Alerta crítica / Sangre */</span>
+    
+    <span class="c">/* Fuentes */</span>
+    <span class="a">--font-main</span>: <span class="s">'Courier Prime'</span>, monospace;
+    <span class="a">--font-pixel</span>: <span class="s">'Press Start 2P'</span>, cursive;
+}</code></pre>
+            </div>
+
+            <h2>2. Interferencia de Señal (CRT)</h2>
+            <p>Simulamos un monitor con fallos de hardware. Esto se logra con dos elementos superpuestos que no bloquean los clics.</p>
+            <div class="code-wrapper">
+                <div class="code-header">CSS (VFX Layers)</div>
+                <pre><code><span class="c">/* Ruido estático y suciedad en pantalla */</span>
+<span class="v">.crt-overlay</span> {
+    <span class="a">background</span>: 
+        <span class="f">linear-gradient</span>(<span class="f">rgba</span>(18, 16, 16, 0) 50%, <span class="f">rgba</span>(0, 0, 0, 0.1) 50%),
+        <span class="f">linear-gradient</span>(90deg, <span class="f">rgba</span>(255, 0, 0, 0.03), <span class="f">rgba</span>(0, 255, 0, 0.01), <span class="f">rgba</span>(0, 0, 255, 0.03));
+    <span class="a">z-index</span>: 2000;
+    <span class="a">pointer-events</span>: <span class="s">none</span>; <span class="c">/* CRÍTICO: Permite interactuar con lo que hay debajo */</span>
+}</code></pre>
+            </div>
+
+            <h2>3. Interfaz Cristalizada (Glassmorphism)</h2>
+            <p>La caja de texto utiliza <code>backdrop-filter</code> para desenfocar el fondo. Es como mirar a través de un cristal sucio o empañado por la radiación.</p>
+            
+            <div class="code-wrapper">
+                <div class="code-header">CSS (UI Design)</div>
+                <pre><code><span class="v">.dialogue-container</span> {
+    <span class="a">background</span>: <span class="f">rgba</span>(15, 19, 25, 0.85); <span class="c">/* Semi-transparente */</span>
+    
+    <span class="c">/* Efecto de cristal sucio - Desenfoca lo que está detrás */</span>
+    <span class="a">backdrop-filter</span>: <span class="f">blur</span>(16px) <span class="f">saturate</span>(50%);
+    <span class="a">-webkit-backdrop-filter</span>: <span class="f">blur</span>(16px) <span class="f">saturate</span>(50%);
+    
+    <span class="a">border-top</span>: <span class="s">2px solid var(--accent-cyan)</span>;
+    <span class="a">box-shadow</span>: 0 -10px 40px <span class="f">rgba</span>(0, 0, 0, 0.5);
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: JS -->
+        <div id="js" class="content-section">
+            <span style="color:var(--accent); font-weight:700; font-size:0.9rem;">LÓGICA</span>
+            <h1>El Núcleo (Engine)</h1>
+            <p class="subtitle">Sistemas internos para la toma de decisiones.</p>
+
+            <h2>1. Base de Datos de Eventos</h2>
+            <p>El mundo se define en un objeto <code>STORY</code> inmutable. Cada entrada es una escena con propiedades configurables.</p>
+
+            <div class="code-wrapper">
+                <div class="code-header">javascript (Estructura de Escena)</div>
+                <pre><code><span class="k">const</span> <span class="v">STORY</span> = {
+    <span class="s">"encuentro_mutante"</span>: {
+        
+        <span class="c">// Entorno</span>
+        <span class="a">bg</span>: <span class="s">"assets/ruinas_toxicas.png"</span>,
+
+        <span class="c">// Transmisión (Array de objetos)</span>
+        <span class="a">dialogue</span>: [
+            { 
+                <span class="a">speaker</span>: <span class="s">"SOBREVIVIENTE"</span>, 
+                <span class="a">text</span>: <span class="s">"El contador Geiger está sonando..."</span>,
+                <span class="c">// Control de Sprites (null limpia el slot)</span>
+                <span class="a">chars</span>: { <span class="a">center</span>: <span class="s">"assets/kael_mascara.png"</span>, <span class="a">right</span>: <span class="k">null</span> } 
+            }
+        ],
+
+        <span class="c">// Bifurcación (Opciones)</span>
+        <span class="a">choices</span>: [
+            { 
+                <span class="a">text</span>: <span class="s">"Usar RadAway"</span>, 
+                <span class="a">next</span>: <span class="s">"zona_segura"</span>, <span class="c">// ID de la siguiente escena</span>
+                <span class="c">// Condición Lógica: Solo visible si tienes medicina</span>
+                <span class="a">condition</span>: { <span class="a">stat</span>: <span class="s">'meds'</span>, <span class="a">min</span>: <span class="n">1</span> }
+            }
+        ]
+    }
+};</code></pre>
+            </div>
+
+            <h2>2. Motor de Procesamiento</h2>
+            <p>La clase <code>Engine</code> es el cerebro. Gestiona el ciclo de vida y la persistencia de la partida.</p>
+
+            <div class="info-card">
+                <h3>💾 Sistema de Guardado (Persistencia)</h3>
+                <p>El motor guarda automáticamente en <code>localStorage</code>. Esto permite que el usuario cierre el navegador y mantenga sus finales desbloqueados.</p>
+            </div>
+
+            <div class="code-wrapper">
+                <div class="code-header">javascript (Engine Core Logic)</div>
+                <pre><code><span class="f">constructor</span>() {
+    <span class="c">// 1. Estado Volátil (Se reinicia en cada partida)</span>
+    <span class="k">this</span>.state = {
+        scene: <span class="s">'start'</span>,
+        stats: { aut: 0, rep: 0, know: 0 },
+        flags: {} <span class="c">// Banderas booleanas (ej: 'ha_conocido_jefe': true)</span>
+    };
+
+    <span class="c">// 2. Estado Persistente (Sobrevive al reinicio)</span>
+    <span class="k">this</span>.history = <span class="v">JSON</span>.<span class="f">parse</span>(<span class="v">localStorage</span>.<span class="f">getItem</span>(<span class="s">'vn_history'</span>)) || {};
+
+    <span class="c">// 3. Iniciar Ciclo</span>
+    <span class="k">this</span>.<span class="f">loadScene</span>(<span class="s">'roadmap'</span>);
+}
+
+<span class="f">loadScene</span>(id) {
+    <span class="c">// Lógica de transición de escena</span>
+    <span class="k">if</span> (!<span class="v">STORY</span>[id]) <span class="k">return</span>;
+    
+    <span class="c">// Limpieza visual antes de cargar</span>
+    <span class="k">this</span>.state.scene = id;
+    <span class="k">this</span>.state.dialogueIdx = <span class="n">0</span>; <span class="c">// Resetear contador de líneas</span>
+    <span class="k">this</span>.<span class="f">updateBackground</span>(<span class="v">STORY</span>[id].bg);
+    <span class="k">this</span>.<span class="f">processLine</span>();
+}</code></pre>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function showSection(id) {
+            // Actualizar menú
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            // Busca el botón que tenga el ID en su onclick
+            const activeBtn = Array.from(document.querySelectorAll('.nav-item')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"));
+            if(activeBtn) activeBtn.classList.add('active');
+
+            // Actualizar contenido con fade in
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.style.display = 'none';
+                sec.classList.remove('active');
+            });
+            
+            const activeSec = document.getElementById(id);
+            if(activeSec) {
+                activeSec.style.display = 'block';
+                setTimeout(() => activeSec.classList.add('active'), 10);
+            }
+        }
+    </script>
+</body>
+</html>

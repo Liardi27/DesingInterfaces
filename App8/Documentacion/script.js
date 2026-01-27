@@ -1,39 +1,39 @@
 // DATA
 const projectSteps = [
     {
-        category: "Planning & Design",
+        category: "Planificación y Diseño",
         items: [
-            "Analyze current codebase for VirtualBox and SSH integration",
-            "Create Implementation Plan including 'Premium' aesthetics",
-            "Design data flow for real-time statistics"
+            "Analizar el código actual para la integración de VirtualBox y SSH",
+            "Crear Plan de Implementación incluyendo estética 'Premium'",
+            "Diseñar el flujo de datos para estadísticas en tiempo real"
         ]
     },
     {
-        category: "Backend Implementation",
+        category: "Implementación Backend",
         items: [
-            "Implement `vbox` vs `ssh` server differentiation",
-            "Add VM Scanning/Sync feature using `VBoxManage list vms`",
-            "Implement Real Statistics APIs (SSH `top` & VBox simulation)",
-            "Implement Start/Stop/Reboot control for VMs",
-            "Implement `vbox-manager` executeGuestCommand"
+            "Implementar diferenciación de servidores `vbox` vs `ssh`",
+            "Añadir función de Escaneo/Sincronización de MVs usando `VBoxManage list vms`",
+            "Implementar APIs de Estadísticas Reales (`top` SSH y simulación VBox)",
+            "Implementar control de Inicio/Parada/Reinicio para MVs",
+            "Implementar `vbox-manager` executeGuestCommand"
         ]
     },
     {
-        category: "Frontend Implementation",
+        category: "Implementación Frontend",
         items: [
-            "Update `ServerCard` logic for different server types",
-            "Connect Real Stats to UI (CPU/RAM bars)",
-            "Create `CommandExecuteModal` component for remote commands",
-            "Add 'Terminal' button and quick commands",
-            "Enhance UI to 'Premium' standards"
+            "Actualizar lógica de `ServerCard` para diferentes tipos de servidor",
+            "Conectar Estadísticas Reales a la UI (barras de CPU/RAM)",
+            "Crear componente `CommandExecuteModal` para comandos remotos",
+            "Añadir botón 'Terminal' y comandos rápidos",
+            "Mejorar la UI a estándares 'Premium'"
         ]
     },
     {
-        category: "Verification",
+        category: "Verificación",
         items: [
-            "Verify SSH control (Shutdown/Reboot)",
-            "Verify VM control (Start/Stop/Open GUI)",
-            "Verify Command Execution (VBox & SSH)"
+            "Verificar control SSH (Apagar/Reiniciar)",
+            "Verificar control MV (Iniciar/Parar/Abrir GUI)",
+            "Verificar Ejecución de Comandos (VBox y SSH)"
         ]
     }
 ];
@@ -41,27 +41,27 @@ const projectSteps = [
 const userPrompts = [
     {
         id: 1,
-        title: "Initial Request",
+        title: "Petición Inicial",
         content: "NO, eso no, quero una aplicacion web, donde puedas gestionar tus servidores, y a poder ser de virtualbox."
     },
     {
         id: 2,
-        title: "Planning Request",
+        title: "Petición de Planificación",
         content: "bro implementa el planing"
     },
     {
         id: 3,
-        title: "Deployment Plan",
+        title: "Plan de Despliegue",
         content: "Creame una aplicacion web, sobre documentación de la aplicacion web que te he pedido antes, con todos los pasos y propmpts que te he dado"
     },
     {
         id: 4,
-        title: "Aesthetic Requirement",
+        title: "Requisito Estético",
         content: "He incluso imagenes de la aplicacion"
     },
     {
         id: 5,
-        title: "Framework Change",
+        title: "Cambio de Framework",
         content: "Quiero que sea un Html CSS y JAVASCRIPT"
     }
 ];
@@ -69,19 +69,19 @@ const userPrompts = [
 const screenshots = [
     {
         src: "images/uploaded_media_1769514036675.png",
-        caption: "Dashboard Overview - Server Cards"
+        caption: "Resumen del Dashboard - Tarjetas de Servidor"
     },
     {
         src: "images/uploaded_media_1769516472630.png",
-        caption: "Command Execution Modal"
+        caption: "Modal de Ejecución de Comandos"
     },
     {
         src: "images/uploaded_media_1_1769504704185.png",
-        caption: "Virtual Machine Monitoring"
+        caption: "Monitorización de Máquinas Virtuales"
     },
     {
         src: "images/uploaded_media_1769503303696.png",
-        caption: "Initial Prototype Interface"
+        caption: "Interfaz del Prototipo Inicial"
     }
 ];
 

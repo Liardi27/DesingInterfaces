@@ -1,0 +1,32 @@
+[
+  {
+    "id": "20495e98-84a6-4992-ab6c-d6dc7712074e",
+    "name": "Ubuntu_Server_1",
+    "host": "Local Virtual Machine",
+    "type": "vbox",
+    "vboxId": "f165e07a-a5ab-4654-87df-1e7d90f45935",
+    "username": "N/A",
+    "password": "",
+    "os": "Ubuntu (64-bit)"
+  },
+  {
+    "id": "e649ca86-14bc-45e8-b083-b6a33ce0e6da",
+    "name": "Ubuntu_Server_BACKEND",
+    "host": "Local Virtual Machine",
+    "type": "vbox",
+    "vboxId": "740ae74f-4391-4d57-ae4c-c931d3259e87",
+    "username": "N/A",
+    "password": "",
+    "os": "Ubuntu (64-bit)"
+  },
+  {
+    "id": "87e695a7-6ca3-4b48-b533-3887431c474f",
+    "name": "Ubuntu_Server_2",
+    "host": "Local Virtual Machine",
+    "type": "vbox",
+    "vboxId": "91a4d459-158c-435b-99f3-a3091cc01b1c",
+    "username": "N/A",
+    "password": "",
+    "os": "Ubuntu (64-bit)"
+  }
+]

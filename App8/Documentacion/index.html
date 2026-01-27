@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Server Control Docs</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span>N</span>
+                </div>
+                <span>Nexus Docs</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-item active" data-target="home">
+                    <i data-lucide="home"></i> Overview
+                </a>
+                <a href="#" class="nav-item" data-target="timeline">
+                    <i data-lucide="clock"></i> Timeline
+                </a>
+                <a href="#" class="nav-item" data-target="prompts">
+                    <i data-lucide="book-open"></i> Prompts
+                </a>
+                <a href="#" class="nav-item" data-target="gallery">
+                    <i data-lucide="image"></i> Gallery
+                </a>
+            </div>
+            <div>
+                <a href="#" class="btn btn-sm">
+                    <i data-lucide="github"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- HOME SECTION -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Documenting the Journey of <br>
+                        <span class="text-gradient">Nexus Server Control</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        A comprehensive look at how we built a premium server management dashboard using modern web
+                        technologies, from initial prompts to final delivery.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-lg" onclick="navigateTo('timeline')">
+                            View Timeline <i data-lucide="arrow-right"></i>
+                        </button>
+                        <button class="btn btn-outline btn-lg" onclick="navigateTo('gallery')">
+                            See Gallery
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="visual-glow"></div>
+                    <div class="card visual-card">
+                        <i data-lucide="activity" class="text-primary visual-icon"></i>
+                        <h3>Real-time Monitoring</h3>
+                        <p class="text-muted">Live CPU & RAM stats for all your servers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-features">
+                <div class="card">
+                    <i data-lucide="server" class="feature-icon text-secondary"></i>
+                    <h3>VirtualBox Integration</h3>
+                    <p class="text-muted">Seamlessly control local VMs including Start, Stop, and GUI access directly
+                        from the browser.</p>
+                </div>
+                <div class="card">
+                    <i data-lucide="shield" class="feature-icon text-primary"></i>
+                    <h3>Secure Command Execution</h3>
+                    <p class="text-muted">Execute terminal commands on remote SSH servers and local VMs with a unified
+                        interface.</p>
+                </div>
+                <div class="card">
+                    <i data-lucide="activity" class="feature-icon text-success"></i>
+                    <h3>Live Statistics</h3>
+                    <p class="text-muted">Instant visual feedback on server performance with animated progress bars and
+                        status indicators.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TIMELINE SECTION -->
+        <section id="timeline" class="section">
+            <h2 class="section-title">Development Timeline</h2>
+            <div class="timeline-container" id="timeline-content">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- PROMPTS SECTION -->
+        <section id="prompts" class="section">
+            <h2 class="section-title">Prompts Library</h2>
+            <div class="prompts-container" id="prompts-content">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- GALLERY SECTION -->
+        <section id="gallery" class="section">
+            <h2 class="section-title">Application Gallery</h2>
+            <div class="gallery-grid" id="gallery-content">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 Nexus Server Control. Documentation.</p>
+    </footer>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()"><i data-lucide="x"></i></button>
+        <img id="lightbox-img" src="" alt="Full size">
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

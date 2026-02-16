@@ -11,6 +11,7 @@ window.router = new window.Router();
 document.addEventListener('DOMContentLoaded', async () => {
     // Wait a tick just to be safe
     setTimeout(async () => {
+        if (window.i18n) window.i18n.init(); // Initialize language
         window.ui.applyAccessibilityModes(); // Apply saved preferences first
         await window.auth.init(); // Check session
         await window.store.init(); // Load data

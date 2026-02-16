@@ -58,15 +58,16 @@ class Router {
             this.updateActiveNav(route);
 
             // Update Title
+            const t = window.i18n ? (k) => window.i18n.t(k) : (k) => k;
             const titles = {
-                'home': 'Resumen',
-                'account': 'Mis Movimientos',
-                'add': 'Añadir Nueva',
-                'stats': 'Estadísticas',
-                'investments': 'Inversiones',
-                'piggybanks': 'Huchas',
-                'settings': 'Ajustes',
-                'login': 'Iniciar Sesión'
+                'home': t('header_summary'),
+                'account': t('nav_account'),
+                'add': t('nav_new_movement'),
+                'stats': t('nav_stats'),
+                'investments': t('nav_investments'),
+                'piggybanks': t('nav_piggybanks'),
+                'settings': t('nav_settings'),
+                'login': 'PocketFinance'
             };
             const titleEl = document.getElementById('page-title');
             if (titleEl) titleEl.innerText = titles[route] || 'PocketFinance';

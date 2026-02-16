@@ -24,13 +24,27 @@ class UI {
         return map[currency] || 'es-ES';
     }
 
-    updateCurrency(currency) {
-        window.store.updateSetting('currency', currency);
+    updateCurrency(currency, silent = false) {
+        if (!silent) window.store.updateSetting('currency', currency);
         this.currencyFormatter = new Intl.NumberFormat(this.getLocaleForCurrency(currency), { style: 'currency', currency: currency });
-        this.showNotification('Moneda actualizada a ' + currency);
-        // Re-render current view to apply changes
-        if (window.router.currentRoute === 'settings') this.renderSettings();
-        else window.router.navigate('home'); // Fallback to home/refresh
+
+        if (!silent) {
+            this.showNotification('Moneda actualizada a ' + currency);
+            // Re-render current view to apply changes
+            if (window.router.currentRoute === 'settings') this.renderSettings();
+            else window.router.navigate('home'); // Fallback to home/refresh
+        }
+    }
+
+    updateLanguage(lang) {
+        if (window.i18n) {
+            window.i18n.setLanguage(lang);
+        }
+        if (window.store) {
+            window.store.updateSetting('language', lang);
+        }
+        // Re-render current view
+        this.renderSettings('general');
     }
 
     updateDateRange(val) {
@@ -152,7 +166,7 @@ class UI {
                 <div class="bg-gradient-to-br from-brand-primary to-brand-accent rounded-3xl p-6 text-white shadow-xl shadow-blue-200 dark:shadow-none relative overflow-hidden transition-all">
                     <div class="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl"></div>
                     <div class="relative z-10">
-                        <p class="text-blue-100 text-sm font-medium mb-1">Balance Total</p>
+                        <p class="text-blue-100 text-sm font-medium mb-1">${window.i18n.t('balance_total')}</p>
                         <h1 class="text-4xl font-bold mb-6">${this.formatMoney(balance)}</h1>
                         
                         <div class="flex gap-4">
@@ -161,7 +175,7 @@ class UI {
                                     <div class="w-6 h-6 rounded-full bg-status-income/20 flex items-center justify-center text-status-income text-xs">
                                         <i class="fa-solid fa-arrow-down"></i>
                                     </div>
-                                    <span class="text-xs text-blue-100">Ingresos</span>
+                                    <span class="text-xs text-blue-100">${window.i18n.t('income')}</span>
                                 </div>
                                 <p class="font-semibold text-lg">${this.formatMoney(income)}</p>
                             </div>
@@ -170,7 +184,7 @@ class UI {
                                     <div class="w-6 h-6 rounded-full bg-status-expense/20 flex items-center justify-center text-status-expense text-xs">
                                         <i class="fa-solid fa-arrow-up"></i>
                                     </div>
-                                    <span class="text-xs text-blue-100">Gastos</span>
+                                    <span class="text-xs text-blue-100">${window.i18n.t('expenses')}</span>
                                 </div>
                                 <p class="font-semibold text-lg">${this.formatMoney(expense)}</p>
                             </div>
@@ -181,7 +195,7 @@ class UI {
                  <!-- Mini Chart -->
                 <div class="bg-white dark:bg-dark-surface rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-white/10 transition-colors mb-6">
                     <h3 class="font-bold text-brand-text dark:text-dark-text mb-4">
-                        ${this.currentFilter === 'week' ? 'Resumen Semanal' : (this.currentFilter === 'month' ? 'Resumen Mensual' : (this.currentFilter === 'year' ? 'Resumen Anual' : 'Resumen'))}
+                        ${window.i18n.t('weekly_summary')}
                     </h3>
                     <div class="h-40 w-full relative">
                         <canvas id="miniChart"></canvas>
@@ -191,10 +205,10 @@ class UI {
                 <!-- Recent Transactions -->
                 <div>
                     <div class="flex items-center justify-between mb-4 px-1">
-                        <h3 class="font-bold text-brand-text dark:text-dark-text">Recientes</h3>
+                        <h3 class="font-bold text-brand-text dark:text-dark-text">${window.i18n.t('recent_activity')}</h3>
                         <div class="relative group">
                             <button class="text-brand-primary dark:text-blue-400 text-sm font-medium flex items-center gap-1" onclick="window.router.navigate('account')">
-                                <span>Ver todo</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                                <span>${window.i18n.t('see_all')}</span> <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
                         </div>
                     </div>
@@ -912,7 +926,7 @@ class UI {
         return document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
     }
 
-    applyTheme(themeName) {
+    applyTheme(themeName, silent = false) {
         const root = document.documentElement;
         const themes = {
             'default': {
@@ -954,10 +968,9 @@ class UI {
             root.style.setProperty(key, value);
         }
 
-        // Save if initialized with valid store
-        if (window.store) {
+        // Save if initialized with valid store AND not silent
+        if (window.store && !silent) {
             window.store.updateSetting('theme', themeName);
-            // Re-render settings if actively viewing settings (check for tab bar or palette icon)
             // This ensures feedback loop is closed
             if (window.router && window.router.currentRoute === 'settings') {
                 this.renderSettings('appearance');
@@ -978,9 +991,9 @@ class UI {
 
         // --- Tabs Logic ---
         const tabs = [
-            { id: 'general', label: 'General', icon: 'fa-sliders' },
-            { id: 'appearance', label: 'Apariencia', icon: 'fa-palette' },
-            { id: 'account', label: 'Cuenta', icon: 'fa-user-shield' }
+            { id: 'general', label: window.i18n.t('settings_general'), icon: 'fa-sliders' },
+            { id: 'appearance', label: window.i18n.t('settings_appearance'), icon: 'fa-palette' },
+            { id: 'account', label: window.i18n.t('settings_account'), icon: 'fa-user-shield' }
         ];
 
         // --- Content rendering based on activeTab ---
@@ -998,7 +1011,7 @@ class UI {
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
                                     <i class="fa-solid fa-coins"></i>
                                 </div>
-                                <span class="font-bold text-slate-700 dark:text-slate-200">Moneda Principal</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-200">${window.i18n.t('settings_main_currency')}</span>
                             </div>
                             <div class="relative group">
                                 <select onchange="window.ui.updateCurrency(this.value)" class="appearance-none bg-gray-100 dark:bg-white/10 hover:bg-gray-200 border-none text-brand-primary dark:text-white font-bold text-sm rounded-xl focus:ring-0 cursor-pointer py-2.5 pl-4 pr-10 transition-colors">
@@ -1007,6 +1020,26 @@ class UI {
                                     <option value="GBP" ${currentCurrency === 'GBP' ? 'selected' : ''}>GBP (£)</option>
                                     <option value="JPY" ${currentCurrency === 'JPY' ? 'selected' : ''}>JPY (¥)</option>
                                     <option value="PLN" ${currentCurrency === 'PLN' ? 'selected' : ''}>PLN (zł)</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-brand-muted pointer-events-none group-hover:text-brand-primary transition-colors"></i>
+                            </div>
+                        </div>
+
+                        <!-- Language Selector -->
+                        <div class="flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                             <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                                    <i class="fa-solid fa-language"></i>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-200">${window.i18n.t('settings_language')}</span>
+                            </div>
+                            <div class="relative group">
+                                <select onchange="window.ui.updateLanguage(this.value)" class="appearance-none bg-gray-100 dark:bg-white/10 hover:bg-gray-200 border-none text-brand-primary dark:text-white font-bold text-sm rounded-xl focus:ring-0 cursor-pointer py-2.5 pl-4 pr-10 transition-colors">
+                                    ${Object.keys(window.i18n.supportedLanguages).map(code => {
+                const lang = window.i18n.supportedLanguages[code];
+                const selected = window.i18n.currentLang === code ? 'selected' : '';
+                return `<option value="${code}" ${selected}>${lang.flag} ${lang.name}</option>`;
+            }).join('')}
                                 </select>
                                 <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-brand-muted pointer-events-none group-hover:text-brand-primary transition-colors"></i>
                             </div>
@@ -1035,7 +1068,7 @@ class UI {
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
                                     <i class="fa-solid fa-font"></i>
                                 </div>
-                                <span class="font-bold text-slate-700 dark:text-slate-200">Lectura Fácil</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-200">${window.i18n.t('settings_dyslexic')}</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" class="sr-only peer" onchange="window.ui.setAccessMode('dyslexic', this.checked)" ${isDyslexic ? 'checked' : ''}>
@@ -1048,7 +1081,7 @@ class UI {
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
                                     <i class="fa-solid fa-circle-half-stroke"></i>
                                 </div>
-                                <span class="font-bold text-slate-700 dark:text-slate-200">Alto Contraste</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-200">${window.i18n.t('settings_contrast')}</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" class="sr-only peer" onchange="window.ui.setAccessMode('contrast', this.checked)" ${isHighContrast ? 'checked' : ''}>
@@ -1063,7 +1096,7 @@ class UI {
                 <div class="space-y-6 animate-fade-in" id="appearance-tab-content">
                     <!-- Themes -->
                     <div class="bg-white dark:bg-dark-surface rounded-3xl p-6 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-white/5">
-                        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">Tema de Color</h4>
+                        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">${window.i18n.t('settings_theme')}</h4>
                         <!-- Added pt-4 and px-2 to prevent clipping of scale/ring -->
                         <div class="flex gap-6 overflow-x-auto pb-4 pt-4 px-2 no-scrollbar sm:justify-start justify-between">
                             ${this._renderThemeOption('default', '#6366f1', currentTheme)}
@@ -1079,7 +1112,7 @@ class UI {
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-500/30">
                                 <i class="fa-solid fa-moon"></i>
                             </div>
-                            <span class="font-bold text-slate-700 dark:text-slate-200">Modo Oscuro</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200">${window.i18n.t('settings_dark_mode')}</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" class="sr-only peer" onchange="window.ui.toggleDarkMode()" ${isDark ? 'checked' : ''}>
@@ -1094,8 +1127,8 @@ class UI {
                                 <i class="fa-solid fa-eye"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Modo Daltonismo</h4>
-                                <span class="text-xs text-slate-400">Ajusta los colores para tu visión</span>
+                                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">${window.i18n.t('settings_colorblind')}</h4>
+                                <span class="text-xs text-slate-400">${window.i18n.t('settings_colorblind_desc')}</span>
                             </div>
                         </div>
                         
@@ -1196,7 +1229,7 @@ class UI {
                 </div>
 
                 <!-- Tab Bar -->
-                <div class="bg-white dark:bg-dark-surface p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 flex gap-1 sticky top-0 z-20 backdrop-blur-xl bg-opacity-80 dark:bg-opacity-80">
+                <div class="bg-white dark:bg-dark-surface p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 flex gap-1 sticky top-0 z-20">
                     ${tabs.map(tab => `
                         <button id="tab-btn-${tab.id}" onclick="window.ui.renderSettings('${tab.id}')" 
                             class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === tab.id ? 'bg-brand-bg dark:bg-white/10 text-brand-primary dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-white/5'}">
@@ -1224,7 +1257,7 @@ class UI {
 
         return `
             <button onclick="window.ui.applyTheme('${value}')" class="group relative flex flex-col items-center gap-3 min-w-[80px]">
-                <div class="w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${isActive ? 'scale-110 shadow-lg shadow-brand-primary/30 ring-4 ring-brand-primary/20' : 'hover:scale-105 shadow-sm hover:shadow-md'} overflow-hidden relative">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${isActive ? 'shadow-lg shadow-brand-primary/30 ring-4 ring-brand-primary/20' : 'shadow-sm hover:shadow-md'} overflow-hidden relative">
                     <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent z-10"></div>
                     <div style="background-color: ${color}" class="absolute inset-0"></div>
                     ${isActive ? '<i class="fa-solid fa-check text-white text-xl z-20 drop-shadow-md animate-fade-in"></i>' : ''}
@@ -1242,11 +1275,11 @@ class UI {
             <button onclick="window.ui.setAccessMode('colorblind', '${mode}')" 
                 class="relative p-5 rounded-2xl border-2 transition-all duration-300 text-left group
                 ${isActive
-                ? 'border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10 shadow-md shadow-brand-primary/20 scale-[1.02]'
-                : 'border-transparent bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 hover:scale-[1.01]'}">
+                ? 'border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10 shadow-md shadow-brand-primary/20'
+                : 'border-transparent bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10'}">
                 
                 <div class="flex items-center gap-4 mb-3">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center ${colorClass} text-xl shadow-sm transition-transform group-hover:scale-110">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center ${colorClass} text-xl shadow-sm transition-transform">
                         <i class="fa-solid ${icon}"></i>
                     </div>
                     ${isActive ? '<div class="absolute top-4 right-4 bg-brand-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-check"></i></div>' : ''}
@@ -1256,6 +1289,20 @@ class UI {
                 <span class="text-xs text-slate-400 group-hover:text-slate-500 transition-colors">
                     ${mode === 'none' ? 'Visión Normal' : 'Filtro de corrección activo'}
                 </span>
+            </button>
+        `;
+    }
+
+    _renderLanguageOption(langCode) {
+        const currentLang = window.i18n ? window.i18n.currentLang : 'es';
+        const isActive = currentLang === langCode;
+        const langInfo = window.i18n ? window.i18n.supportedLanguages[langCode] : { flag: '❓', name: langCode };
+
+        return `
+            <button onclick="window.ui.updateLanguage('${langCode}')" 
+                class="flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/30' : 'bg-gray-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-white/10'}">
+                <span class="text-lg leading-none">${langInfo.flag}</span>
+                <span class="text-xs font-bold leading-none">${langInfo.name}</span>
             </button>
         `;
     }
@@ -1677,11 +1724,27 @@ class UI {
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-xs font-bold text-brand-muted dark:text-dark-text/60 uppercase mb-1">Inversión (€)</label>
-                        <input type="number" id="calc-amount" value="${amount}" class="w-full bg-gray-50 dark:bg-white/5 dark:text-dark-text rounded-xl px-3 py-2 font-bold text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary" oninput="window.ui.updateCalculator()">
+                        <input type="text" inputmode="decimal" id="calc-amount" value="${amount}" placeholder="0.00"
+                            class="w-full bg-gray-50 dark:bg-white/5 dark:text-dark-text rounded-xl px-3 py-2 font-bold text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary" 
+                            onkeydown="if(!/^[0-9.]$/.test(event.key) && event.key.length === 1 && !event.ctrlKey && !event.metaKey) event.preventDefault()"
+                            oninput="
+                                this.value = this.value.replace(/[^0-9.]/g, '');
+                                const parts = this.value.split('.');
+                                if (parts.length > 2) {
+                                    this.value = parts[0] + '.' + parts.slice(1).join('');
+                                }
+                                if (parts[1] && parts[1].length > 2) {
+                                    this.value = parts[0] + '.' + parts[1].substring(0, 2);
+                                }
+                                window.ui.updateCalculator();
+                            ">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-brand-muted dark:text-dark-text/60 uppercase mb-1">Duración (Años)</label>
-                        <input type="number" id="calc-years" value="${years}" max="50" min="1" class="w-full bg-gray-50 dark:bg-white/5 dark:text-dark-text rounded-xl px-3 py-2 font-bold text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary" oninput="window.ui.updateCalculator()">
+                        <input type="number" id="calc-years" value="${years}" max="50" min="1" 
+                            class="w-full bg-gray-50 dark:bg-white/5 dark:text-dark-text rounded-xl px-3 py-2 font-bold text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary" 
+                            onkeydown="if(['-','+','e','.'].includes(event.key)) event.preventDefault()"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value > 50) this.value = 50; window.ui.updateCalculator()">
                     </div>
                 </div>
 

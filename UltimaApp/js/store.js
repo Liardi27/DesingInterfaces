@@ -15,7 +15,8 @@ class Store {
         ];
         this.settings = {
             currency: 'EUR',
-            theme: 'default'
+            theme: 'default',
+            language: 'es'
         };
         this.investmentPlans = [
             {
@@ -81,7 +82,6 @@ class Store {
         }
 
         // Load Settings
-        // Load Settings
         const localSettings = localStorage.getItem('finance_settings');
         if (localSettings) {
             this.settings = { ...this.settings, ...JSON.parse(localSettings) };
@@ -93,6 +93,20 @@ class Store {
             if (cloudSettings) {
                 this.settings = { ...this.settings, ...cloudSettings };
                 localStorage.setItem('finance_settings', JSON.stringify(this.settings));
+            }
+        }
+
+        // Apply loaded settings to UI (Theme & Currency)
+        if (window.ui) {
+            window.ui.applyTheme(this.settings.theme, true);
+            if (this.settings.currency) window.ui.updateCurrency(this.settings.currency, true); // true = skip save, just update UI
+        }
+
+        // Sync Language with i18n
+        if (window.i18n && this.settings.language) {
+            // Only set if different to avoid redundant updates on load
+            if (window.i18n.currentLang !== this.settings.language) {
+                window.i18n.setLanguage(this.settings.language);
             }
         }
 
@@ -127,17 +141,38 @@ class Store {
         }
 
         // 2. Transactions (Table)
-        const { data, error } = await window.supabaseClient
-            .from('transactions')
-            .select('*')
-            .eq('user_id', window.auth.user.id)
-            .order('date', { ascending: false });
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('transactions')
+                .select('*')
+                .eq('user_id', window.auth.user.id)
+                .order('date', { ascending: false });
 
-        if (error) {
-            console.error('Error loading transactions:', error);
-            this.transactions = [];
-        } else {
+            if (error) throw error;
+
             this.transactions = data || [];
+            // Cache to localStorage for offline fallback
+            localStorage.setItem('finance_transactions_cache', JSON.stringify(this.transactions));
+
+            // Clear any previous error flags
+            window.IS_OFFLINE_MODE = false;
+
+        } catch (err) {
+            console.error('Error loading transactions (Using Cache):', err);
+
+            // Mark app as running in offline/cached mode
+            window.IS_OFFLINE_MODE = true;
+
+            // FALLBACK: Use locally cached transactions
+            const localTx = localStorage.getItem('finance_transactions_cache');
+            this.transactions = localTx ? JSON.parse(localTx) : [];
+
+            // Notify User via UI
+            const alert = document.createElement('div');
+            alert.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-full shadow-lg z-[50] text-sm font-bold flex items-center gap-2 animate-pulse';
+            alert.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Modo Sin Conexión (Datos en Caché)';
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
         }
     }
 

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PocketFinance</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome (Icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Custom Config for Tailwind -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: 'var(--color-brand-primary)',
+              secondary: 'var(--color-brand-secondary)',
+              accent: 'var(--color-brand-accent)',
+              bg: 'var(--color-brand-bg)',
+              text: 'var(--color-brand-text)',
+              muted: 'var(--color-brand-muted)'
+            },
+            status: {
+              income: '#dcfce7',
+              incomeText: '#166534',
+              expense: '#fee2e2',
+              expenseText: '#991b1b'
+            },
+            dark: {
+              bg: 'var(--color-dark-bg)',
+              surface: 'var(--color-dark-surface)',
+              text: 'var(--color-dark-text)'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['DM Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Hide Native Spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    .animate-fade-in-down {
+      animation: fadeInDown 0.3s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Premium Mesh Gradient */
+    .mesh-gradient-bg {
+      background-color: hsla(270, 50%, 40%, 1);
+      background-image:
+        radial-gradient(at 80% 0%, hsla(260, 50%, 60%, 1) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, hsla(280, 80%, 70%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 50%, hsla(240, 80%, 70%, 1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(280, 50%, 60%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, hsla(240, 50%, 40%, 1) 0px, transparent 50%),
+        radial-gradient(at 0% 0%, hsla(260, 50%, 60%, 1) 0px, transparent 50%);
+      background-size: 150% 150%;
+      animation: meshAnimation 20s ease infinite;
+    }
+
+    @keyframes meshAnimation {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+  </style>
+
+  <style id="theme-vars">
+    :root {
+      /* Default Theme (Indigo) */
+      --color-brand-primary: #6366f1;
+      --color-brand-secondary: #4f46e5;
+      --color-brand-accent: #818cf8;
+      --color-brand-bg: #f8fafc;
+      --color-brand-text: #1e293b;
+      --color-brand-muted: #64748b;
+
+      --color-dark-bg: #0f172a;
+      --color-dark-surface: #1e293b;
+      --color-dark-text: #f1f5f9;
+
+      --body-bg-light: #F5F2FF;
+      --body-bg-dark: #0F0B1F;
+    }
+
+    body {
+      background-color: var(--body-bg-light);
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    .dark body {
+      background-color: var(--body-bg-dark);
+    }
+
+    /* Hide scrollbar for clean UI */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Accessibility Classes */
+    .font-dyslexic {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif !important;
+      line-height: 1.6 !important;
+      letter-spacing: 0.05em !important;
+    }
+
+    .high-contrast {
+      filter: contrast(125%) saturate(110%);
+    }
+
+    /* Color Blindness Filters */
+    /* Color Blindness Filters */
+    .protanopia {
+      filter: url(#protanopia-filter);
+    }
+
+    .deuteranopia {
+      filter: url(#deuteranopia-filter);
+    }
+
+    .tritanopia {
+      /* Fallback/Approximation for Tritanopia (Pink/Cyan palette) using standard CSS filters to avoid SVG layout/rendering issues */
+      filter: grayscale(0.2) sepia(0.8) hue-rotate(-50deg) saturate(2) contrast(0.9);
+    }
+
+    /* Selection Highlighting */
+    ::selection {
+      background-color: #6A4CFF;
+      color: white;
+    }
+
+    /* Dark Mode Form Elements Fix */
+    .dark option {
+      background-color: #171226;
+      color: #EDE9FF;
+    }
+
+    /* Active Navigation Item */
+    .nav-item-active {
+      background-color: #EFF6FF;
+      color: #6A4CFF;
+    }
+
+    .dark .nav-item-active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+    }
+  </style>
+</head>
+
+<body
+  class="text-brand-text dark:text-dark-text h-screen w-full overflow-hidden flex flex-col md:flex-row transition-colors duration-300 bg-brand-bg dark:bg-dark-bg">
+
+
+
+  <!-- Accessibility SVG Filters -->
+  <svg style="position: absolute; height: 0; width: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="protanopia-filter">
+        <feColorMatrix type="matrix"
+          values="0.567, 0.433, 0, 0, 0 0.558, 0.442, 0, 0, 0 0, 0.242, 0.758, 0, 0 0, 0, 0, 1, 0" />
+      </filter>
+      <filter id="deuteranopia-filter">
+        <feColorMatrix type="matrix" values="0.625, 0.375, 0, 0, 0 0.7, 0.3, 0, 0, 0 0, 0.3, 0.7, 0, 0 0, 0, 0, 1, 0" />
+      </filter>
+      <filter id="tritanopia-filter">
+        <feColorMatrix type="matrix"
+          values="0.95, 0.05, 0, 0, 0 0, 0.433, 0.567, 0, 0 0, 0.475, 0.525, 0, 0 0, 0, 0, 1, 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- SIDEBAR (Desktop) - Hidden on Mobile -->
+  <aside
+    class="hidden md:flex flex-col w-64 bg-white dark:bg-dark-surface border-r border-gray-100 dark:border-white/10 h-full p-6 shadow-sm z-20 transition-colors duration-300">
+    <div class="flex items-center gap-3 mb-10">
+      <div
+        class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none">
+        <i class="fa-solid fa-wallet"></i>
+      </div>
+      <h1 class="font-display font-bold text-xl text-brand-text dark:text-dark-text tracking-tight">PocketFinance</h1>
+    </div>
+
+    <nav class="flex-1 space-y-2">
+      <!-- Main CTA for Desktop -->
+      <button onclick="router.navigate('add')"
+        class="w-full bg-brand-primary hover:bg-brand-accent text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 mb-6 transition-all transform hover:scale-[1.02] active:scale-95">
+        <i class="fa-solid fa-plus"></i>
+        <span>Nuevo Movimiento</span>
+      </button>
+
+      <button onclick="router.navigate('home')"
+        class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
+        <i class="fa-solid fa-house text-lg transition-transform group-hover:scale-110"></i>
+        <span class="font-medium">Inicio</span>
+      </button>
+      <button onclick="router.navigate('account')"
+        class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
+        <i class="fa-solid fa-receipt text-lg transition-transform group-hover:scale-110"></i>
+        <span class="font-medium">Cuenta</span>
+      </button>
+      <button onclick="router.navigate('investments')"
+        class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
+        <i class="fa-solid fa-arrow-trend-up text-lg transition-transform group-hover:scale-110"></i>
+        <span class="font-medium">Inversiones</span>
+      </button>
+      <button onclick="router.navigate('piggybanks')"
+        class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
+        <i class="fa-solid fa-piggy-bank text-lg transition-transform group-hover:scale-110"></i>
+        <span class="font-medium">Huchas</span>
+      </button>
+      <button onclick="router.navigate('stats')"
+        class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
+        <i class="fa-solid fa-chart-pie text-lg transition-transform group-hover:scale-110"></i>
+        <span class="font-medium">Estadísticas</span>
+      </button>
+      <button onclick="router.navigate('settings')"
+        class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
+        <i class="fa-solid fa-gear text-lg transition-transform group-hover:scale-110"></i>
+        <span class="font-medium">Ajustes</span>
+      </button>
+    </nav>
+
+    <div class="mt-auto pt-6 border-t border-gray-100 dark:border-white/10 relative">
+      <button onclick="window.ui.toggleUserMenu(this)"
+        class="w-full flex items-center gap-3 p-2 -mx-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left group">
+        <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+          <img id="sidebar-user-image" src="https://ui-avatars.com/api/?name=User&background=random" alt="User"
+            class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1 min-w-0">
+          <p id="sidebar-username" class="text-sm font-bold text-brand-text dark:text-dark-text truncate">Mi Usuario
+          </p>
+
+        </div>
+        <i class="fa-solid fa-chevron-up text-xs text-gray-400 group-hover:text-brand-primary transition-colors"></i>
+      </button>
+
+      <!-- User Menu Container (Hidden by default) -->
+      <div id="sidebar-user-menu"
+        class="hidden absolute bottom-full left-0 w-full mb-3 bg-white dark:bg-dark-surface rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-2 animate-fade-in z-50">
+        <button onclick="window.router.navigate('settings'); window.ui.toggleUserMenu()"
+          class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-3">
+          <i class="fa-solid fa-user-gear"></i>
+          <span>Mi Perfil</span>
+        </button>
+        <button onclick="window.auth.signOut()"
+          class="w-full text-left px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-3">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <main
+    class="flex-1 flex flex-col h-full relative overflow-hidden bg-brand-bg dark:bg-dark-bg transition-colors duration-300">
+
+    <!-- TOPBAR (Desktop) - Hidden on Mobile -->
+    <header class="hidden md:flex items-center justify-between px-8 py-5 bg-transparent z-10">
+      <h2 id="page-title" class="text-2xl font-display font-bold text-brand-text dark:text-dark-text">Resumen</h2>
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <select onchange="window.ui && window.ui.updateDateRange(this.value)"
+            class="appearance-none bg-white dark:bg-dark-surface rounded-full shadow-sm border border-gray-100 dark:border-white/10 pl-4 pr-10 py-2 text-sm font-medium text-slate-600 dark:text-dark-text/60 focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer">
+            <option value="week" selected>Esta Semana</option>
+            <option value="month">Este Mes</option>
+            <option value="year">Este Año</option>
+          </select>
+          <i
+            class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+        </div>
+        <button onclick="window.ui.showNotificationsHistory()"
+          class="w-10 h-10 bg-white dark:bg-dark-surface rounded-full shadow-sm border border-gray-100 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white hover:shadow-md transition-all">
+          <i class="fa-regular fa-bell"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW CONTAINER -->
+    <div id="app-view" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-24 md:pb-8 relative">
+      <!-- Views will be injected here -->
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV (Mobile) - Hidden on Desktop -->
+  <div
+    class="md:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-dark-surface border-t border-gray-100 dark:border-white/10 py-2 px-6 flex justify-between items-end shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 rounded-t-2xl">
+    <button onclick="router.navigate('home')"
+      class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
+      <i class="fa-solid fa-house text-xl mb-0.5"></i>
+      <span class="text-[10px] font-medium">Inicio</span>
+    </button>
+    <button onclick="router.navigate('account')"
+      class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
+      <i class="fa-solid fa-receipt text-xl mb-0.5"></i>
+      <span class="text-[10px] font-medium">Cuenta</span>
+    </button>
+    <button onclick="router.navigate('piggybanks')"
+      class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
+      <i class="fa-solid fa-piggy-bank text-xl mb-0.5"></i>
+      <span class="text-[10px] font-medium">Huchas</span>
+    </button>
+
+    <!-- FAB (Floating Action Button) embedded in nav -->
+    <div class="relative -top-6">
+      <button onclick="router.navigate('add')"
+        class="w-14 h-14 bg-brand-primary rounded-full shadow-lg shadow-blue-400/50 dark:shadow-none flex items-center justify-center text-white text-2xl transform transition-transform active:scale-95 hover:scale-105 hover:bg-brand-accent">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+
+    <button onclick="router.navigate('stats')"
+      class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
+      <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
+      <span class="text-[10px] font-medium">Gráficos</span>
+    </button>
+    <button onclick="router.navigate('settings')"
+      class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
+      <i class="fa-solid fa-gear text-xl mb-0.5"></i>
+      <span class="text-[10px] font-medium">Ajustes</span>
+    </button>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/supa-client.js?v=6"></script>
+  <script src="js/auth.js?v=6"></script>
+  <script src="js/store.js?v=6"></script>
+  <script src="js/router.js?v=6"></script>
+  <script src="js/ui.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
+
+  <script>
+    // App is initialized in js/app.js via DOMContentLoaded
+  </script>
+</body>
+
+</html>

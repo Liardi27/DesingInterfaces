@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PocketFinance</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -68,6 +70,7 @@
 
     input[type=number] {
       -moz-appearance: textfield;
+      appearance: textfield;
     }
 
     /* Animations */
@@ -311,7 +314,7 @@
       <!-- User Menu Container (Hidden by default) -->
       <div id="sidebar-user-menu"
         class="hidden absolute bottom-full left-0 w-full mb-3 bg-white dark:bg-dark-surface rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-2 animate-fade-in z-50">
-        <button onclick="window.router.navigate('settings'); window.ui.toggleUserMenu()"
+        <button onclick="window.ui.renderEditProfileModal(); window.ui.toggleUserMenu()"
           class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-3">
           <i class="fa-solid fa-user-gear"></i>
           <span>Mi Perfil</span>
@@ -397,15 +400,18 @@
   </div>
 
   <!-- SCRIPTS -->
-  <script src="js/supa-client.js?v=6"></script>
-  <script src="js/auth.js?v=6"></script>
-  <script src="js/store.js?v=6"></script>
-  <script src="js/router.js?v=6"></script>
-  <script src="js/ui.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/supa-client.js?v=7"></script>
+  <script src="js/auth.js?v=7"></script>
+  <script src="js/store.js?v=7"></script>
+  <script src="js/router.js?v=7"></script>
+  <script src="js/ui.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 
   <script>
     // App is initialized in js/app.js via DOMContentLoaded
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
   </script>
 </body>
 

@@ -130,6 +130,7 @@ class UI {
     }
 
     getCategory(id) {
+        if (id === 'cat_piggy') return { name: 'Huchas', icon: 'fa-piggy-bank', color: 'bg-teal-100 text-teal-600' };
         return window.store.categories.find(c => c.id === id) || { name: 'General', icon: 'fa-tag', color: 'bg-gray-100 text-gray-600' };
     }
 
@@ -179,7 +180,9 @@ class UI {
 
                  <!-- Mini Chart -->
                 <div class="bg-white dark:bg-dark-surface rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-white/10 transition-colors mb-6">
-                    <h3 class="font-bold text-brand-text dark:text-dark-text mb-4">Resumen Semanal</h3>
+                    <h3 class="font-bold text-brand-text dark:text-dark-text mb-4">
+                        ${this.currentFilter === 'week' ? 'Resumen Semanal' : (this.currentFilter === 'month' ? 'Resumen Mensual' : (this.currentFilter === 'year' ? 'Resumen Anual' : 'Resumen'))}
+                    </h3>
                     <div class="h-40 w-full relative">
                         <canvas id="miniChart"></canvas>
                     </div>
@@ -425,7 +428,7 @@ class UI {
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-brand-muted dark:text-dark-text/60 uppercase mb-1">Categoría (Opcional)</label>
                         <div class="grid grid-cols-3 gap-2" id="category-grid">
-                            ${window.store.categories.map(cat => `
+                            ${window.store.categories.filter(c => c.id !== 'cat_piggy').map(cat => `
                                 <div class="category-item cursor-pointer rounded-xl p-2 border border-gray-100 dark:border-white/10 flex flex-col items-center gap-1 hover:bg-blue-50 dark:hover:bg-white/10 transition-colors" onclick="window.ui.selectCategory('${cat.id}', this)">
                                     <div class="w-8 h-8 rounded-full ${cat.color} flex items-center justify-center text-xs">
                                         <i class="fa-solid ${cat.icon}"></i>
@@ -738,6 +741,12 @@ class UI {
         // Hucha is now a permanent category, so no need to push manually unless we want to hide it if empty?
         // But renderStats logic relies on iterating ALL categories.
         // Let's just remove the manual push for piggy
+        // Add 'Huchas' to categories list if it has data (since it's no longer in default list)
+        // Only if not already present (failsafe for migration edge cases)
+        if (totalsByCategory['cat_piggy'] && !categories.find(c => c.id === 'cat_piggy')) {
+            categories.push(piggyCat);
+        }
+
         if (totalsByCategory['cat_other']) categories.push(otherCat);
 
         const labels = categories.map(c => c.name);
@@ -760,8 +769,9 @@ class UI {
         // Let's construct a color array that matches `categories` length
         const baseColors = currentType === 'expense' ? expenseColors : incomeColors;
         const chartColors = categories.map((c, i) => {
-            if (c.id === 'cat_piggy') return '#2dd4bf';
-            if (c.id === 'cat_other') return '#94a3b8';
+            if (c.id === 'cat_piggy') return '#2dd4bf'; // Teal-400
+            if (c.id === 'cat_tech') return '#06b6d4'; // Cyan-500
+            if (c.id === 'cat_other') return '#94a3b8'; // Slate-400
             // Fallback to index mapping for standard cats
             return baseColors[i] || '#cbd5e1';
         });
@@ -1264,13 +1274,35 @@ class UI {
         const currentName = user.user_metadata?.full_name || '';
         const currentPhoto = user.user_metadata?.avatar_url || '';
         const currentBio = user.user_metadata?.bio || '';
-        const currentPhone = user.user_metadata?.phone || '';
+        let currentPhone = user.user_metadata?.phone || '';
         const currentLocation = user.user_metadata?.location || '';
         const currentEmail = user.email || '';
 
+        // Country Codes Configuration
+        const countries = [
+            { code: 'ES', dial: '+34', flag: '🇪🇸', maxLength: 9 },
+            { code: 'US', dial: '+1', flag: '🇺🇸', maxLength: 10 },
+            { code: 'UK', dial: '+44', flag: '🇬🇧', maxLength: 10 },
+            { code: 'FR', dial: '+33', flag: '🇫🇷', maxLength: 9 },
+            { code: 'DE', dial: '+49', flag: '🇩🇪', maxLength: 11 },
+            { code: 'IT', dial: '+39', flag: '🇮🇹', maxLength: 10 },
+            { code: 'PT', dial: '+351', flag: '🇵🇹', maxLength: 9 }
+        ];
+
+        // Detect current country logic
+        let selectedCountry = countries[0]; // Default ES
+        let phoneNumber = currentPhone;
+
+        // Try to match dial code
+        const foundCountry = countries.find(c => currentPhone.startsWith(c.dial));
+        if (foundCountry) {
+            selectedCountry = foundCountry;
+            phoneNumber = currentPhone.replace(foundCountry.dial, '').trim();
+        }
+
         const modalHtml = `
             <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in" onclick="this.remove()">
-                <div class="bg-white dark:bg-dark-surface w-full max-w-lg rounded-3xl p-6 shadow-2xl relative border border-gray-100 dark:border-white/10 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <div class="bg-white dark:bg-dark-surface w-full max-w-lg rounded-3xl p-6 shadow-2xl relative border border-gray-100 dark:border-white/10 max-h-[90vh] overflow-y-auto no-scrollbar" onclick="event.stopPropagation()">
                     <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white" onclick="this.closest('.fixed').remove()">
                         <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
@@ -1279,25 +1311,121 @@ class UI {
                     
                     <form onsubmit="event.preventDefault(); window.ui.handleProfileUpdate(event, this)">
                         
-                        <!-- Read-Only Email -->
-                         <div class="mb-4">
-                            <label class="block text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">Email (No editable)</label>
-                            <input type="email" value="${currentEmail}" disabled
-                                class="w-full bg-slate-100 dark:bg-white/5 border border-transparent rounded-xl px-4 py-3 font-medium text-slate-500 dark:text-slate-400 cursor-not-allowed">
+                         <div class="mb-6">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Foto de Perfil</label>
+                            
+                            <!-- Preview & Upload -->
+                            <div class="flex items-center gap-4 mb-3">
+                                <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden flex items-center justify-center border border-slate-200 dark:border-white/10 group relative">
+                                    <img id="avatar-preview" src="${currentPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentName)}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                         <i class="fa-solid fa-camera text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <label for="avatar-upload" class="cursor-pointer bg-brand-primary text-white border border-transparent px-4 py-2 rounded-xl text-sm font-bold hover:bg-brand-secondary transition-colors inline-flex items-center gap-2 mb-2 shadow-lg shadow-brand-primary/20">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Subir imagen
+                                    </label>
+                                    <input type="file" id="avatar-upload" name="avatarFile" accept="image/*" class="hidden" 
+                                        onchange="const file = this.files[0]; if(file) { const reader = new FileReader(); reader.onload = (e) => document.getElementById('avatar-preview').src = e.target.result; reader.readAsDataURL(file); }">
+                                        
+                                    <p class="text-xs text-slate-400 dark:text-slate-500">Recomendado: 500x500px. JPG, PNG.</p>
+                                </div>
+                            </div>
+
+                            <!-- URL Fallback Toggle -->
+                            <details class="text-xs text-slate-400">
+                                <summary class="cursor-pointer hover:text-brand-primary transition-colors">Usar URL externa</summary>
+                                <input type="url" name="avatarUrl" value="${currentPhoto}" placeholder="https://example.com/avatar.jpg" 
+                                    class="w-full mt-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm"
+                                    oninput="document.getElementById('avatar-preview').src = this.value || 'https://ui-avatars.com/api/?name=User'">
+                            </details>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="mb-4">
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nombre Completo</label>
-                                <input type="text" name="fullName" value="${currentName}" placeholder="Tu nombre" required
-                                    class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
-                            </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nombre Completo</label>
+                            <input type="text" name="fullName" value="${currentName}" placeholder="Tu nombre" required
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                        </div>
 
-                             <div class="mb-4">
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Teléfono</label>
-                                <input type="tel" name="phone" value="${currentPhone}" placeholder="+34 600 000 000"
-                                    class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                         <div class="mb-4">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Teléfono</label>
+                            <div class="flex gap-2 relative">
+                                <!-- Hidden input to store the selected code -->
+                                <input type="hidden" name="phoneCode" id="phoneCodeInput" value="${selectedCountry.dial}">
+                                
+                                <!-- Custom Dropdown Trigger -->
+                                <button type="button" id="country-trigger" 
+                                    onclick="document.getElementById('country-list').classList.toggle('hidden')"
+                                    class="w-32 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm flex items-center justify-between gap-2">
+                                    <span id="selected-flag">${selectedCountry.flag}</span>
+                                    <span id="selected-dial">${selectedCountry.dial}</span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                                </button>
+
+                                <!-- Custom Dropdown List -->
+                                <div id="country-list" class="hidden absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-white/10 z-50 max-h-60 overflow-y-auto no-scrollbar animate-fade-in">
+                                    ${countries.map(c => `
+                                        <div onclick="
+                                            document.getElementById('phoneCodeInput').value = '${c.dial}';
+                                            document.getElementById('selected-flag').textContent = '${c.flag}';
+                                            document.getElementById('selected-dial').textContent = '${c.dial}';
+                                            const phoneInput = document.getElementById('phone-number-input');
+                                            phoneInput.maxLength = ${c.maxLength};
+                                            if(phoneInput.value.length > ${c.maxLength}) phoneInput.value = phoneInput.value.slice(0, ${c.maxLength});
+                                            document.getElementById('country-list').classList.add('hidden');
+                                        " class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-gray-50 dark:border-white/5 last:border-0">
+                                            <span class="text-lg">${c.flag}</span>
+                                            <span class="font-bold text-slate-700 dark:text-slate-200">${c.dial}</span>
+                                            <span class="text-xs text-slate-400 ml-auto">${c.code}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <!-- Backdrop to close -->
+                                <div onclick="document.getElementById('country-list').classList.add('hidden')" class="fixed inset-0 z-40 hidden" id="country-backdrop"></div>
+                                <script>
+                                    // Toggle backdrop with list
+                                    const trigger = document.getElementById('country-trigger');
+                                    const list = document.getElementById('country-list');
+                                    const backdrop = document.getElementById('country-backdrop');
+                                    
+                                    trigger.onclick = () => {
+                                        const isHidden = list.classList.contains('hidden');
+                                        list.classList.toggle('hidden');
+                                        backdrop.classList.toggle('hidden');
+                                    }
+                                    backdrop.onclick = () => {
+                                        list.classList.add('hidden');
+                                        backdrop.classList.add('hidden');
+                                    }
+                                </script>
+
+                                <input type="tel" id="phone-number-input" name="phoneNumber" value="${phoneNumber}" placeholder="000 00 00 00" maxlength="${selectedCountry.maxLength}"
+                                    class="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Email (Doble Verificación)</label>
+                            <div class="relative">
+                                <input type="email" name="email" id="input-email" value="${currentEmail}" placeholder="tu@email.com" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all"
+                                oninput="document.getElementById('password-verify-container').classList.toggle('hidden', this.value === '${currentEmail}')">
+                                <i class="fa-solid fa-envelope absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1 pl-1">Si cambias el email, deberás confirmarlo en ambas cuentas.</p>
+                        </div>
+                        
+                        <!-- Password Verification (Hidden by default) -->
+                        <div id="password-verify-container" class="hidden mb-4 animate-fade-in">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Contraseña Actual <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="password" name="password" placeholder="Confirma tu contraseña para continuar"
+                                    class="w-full bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
+                                <i class="fa-solid fa-lock absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500"></i>
+                            </div>
+                             <p class="text-xs text-red-500 mt-1 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Requerido para cambiar el email</p>
                         </div>
 
                          <div class="mb-4">
@@ -1306,45 +1434,23 @@ class UI {
                                 class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
                         </div>
 
-                         <div class="mb-4">
+                         <div class="mb-6">
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Biografía</label>
                             <textarea name="bio" rows="3" placeholder="Cuéntanos un poco sobre ti..."
                                 class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all resize-none">${currentBio}</textarea>
                         </div>
-
-                        <div class="mb-6">
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Foto de Perfil</label>
-                            
-                            <!-- Preview & Upload -->
-                            <div class="flex items-center gap-4 mb-3">
-                                <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden flex items-center justify-center border border-slate-200 dark:border-white/10">
-                                    <img id="avatar-preview" src="${currentPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentName)}" class="w-full h-full object-cover text-xs text-center text-slate-400">
-                                </div>
-                                <div class="flex-1">
-                                    <label for="avatar-upload" class="cursor-pointer bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-white/10 transition-colors inline-block text-center w-full">
-                                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Subir imagen
-                                    </label>
-                                    <input type="file" id="avatar-upload" name="avatarFile" accept="image/*" class="hidden" 
-                                        onchange="const file = this.files[0]; if(file) { const reader = new FileReader(); reader.onload = (e) => document.getElementById('avatar-preview').src = e.target.result; reader.readAsDataURL(file); }">
-                                </div>
-                            </div>
-
-                            <!-- URL Fallback -->
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fa-solid fa-link text-slate-400 text-xs"></i>
-                                </div>
-                                <input type="url" name="avatarUrl" value="${currentPhoto}" placeholder="O pega una URL..." 
-                                    class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-4 py-3 font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm"
-                                    oninput="document.getElementById('avatar-preview').src = this.value || 'https://ui-avatars.com/api/?name=User'">
-                            </div>
-                        </div>
                         
-                        <div id="profile-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 p-2 rounded-lg mb-4"></div>
+                        <div id="profile-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 dark:bg-red-900/20 p-2 rounded-lg mb-4 border border-red-100 dark:border-red-900/10"></div>
+                        <div id="profile-success" class="hidden text-green-500 text-sm text-center font-bold bg-green-50 dark:bg-green-900/20 p-2 rounded-lg mb-4 border border-green-100 dark:border-green-900/10"></div>
 
-                        <button type="submit" class="w-full py-3 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-brand-primary/30 hover:scale-[1.02] transition-transform active:scale-95">
-                            Guardar Cambios
-                        </button>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 py-3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/60 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="flex-1 py-3 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-brand-primary/30 hover:scale-[1.02] transition-transform active:scale-95">
+                                Guardar Cambios
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1357,8 +1463,13 @@ class UI {
         const fullName = formData.get('fullName');
         let avatarUrl = formData.get('avatarUrl'); // Default to URL input
         const bio = formData.get('bio');
-        const phone = formData.get('phone');
+        const phoneCode = formData.get('phoneCode');
+        const phoneNumber = formData.get('phoneNumber');
         const location = formData.get('location');
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        const phone = phoneNumber ? `${phoneCode} ${phoneNumber}` : '';
 
         // Check for file upload
         const fileInput = document.getElementById('avatar-upload');
@@ -1375,24 +1486,56 @@ class UI {
 
         const btn = formEl.querySelector('button[type="submit"]');
         const errorEl = formEl.querySelector('#profile-error');
+        const successEl = formEl.querySelector('#profile-success');
 
         // Loading state
         const originalText = btn.textContent;
         btn.textContent = 'Guardando...';
         btn.disabled = true;
         errorEl.classList.add('hidden');
+        if (successEl) successEl.classList.add('hidden');
 
         try {
-            await window.auth.updateProfile({ fullName, avatarUrl, bio, phone, location });
-            // Close modal
-            formEl.closest('.fixed').remove();
-            // Refresh visuals
-            this.renderSettings('account'); // Re-open account tab
+            // Check if email changed
+            const currentEmail = window.auth.user.email;
+            let emailChanged = email && email !== currentEmail;
+
+            if (emailChanged && !password) {
+                throw new Error("Para cambiar el email, debes confirmar tu contraseña actual.");
+            }
+
+            const result = await window.auth.updateProfile({
+                fullName,
+                avatarUrl,
+                bio,
+                phone,
+                location,
+                email: emailChanged ? email : null,
+                password: emailChanged ? password : null
+            });
+
+            // Show success
+            if (successEl) {
+                successEl.textContent = 'Perfil actualizado correctamente';
+                successEl.classList.remove('hidden');
+
+                if (result && result.emailUpdated) {
+                    successEl.textContent += '. Revisa tu nuevo correo (y el antiguo) para confirmar el cambio.';
+                }
+            }
+
+            // Short delay to show success message before closing
+            setTimeout(() => {
+                // Close modal
+                formEl.closest('.fixed').remove();
+                // Refresh visuals
+                this.renderSettings('account'); // Re-open account tab
+            }, 2000);
+
         } catch (err) {
             console.error(err);
             errorEl.classList.remove('hidden');
-            errorEl.textContent = 'Error al actualizar perfil';
-        } finally {
+            errorEl.textContent = err.message || 'Error al actualizar perfil';
             btn.textContent = originalText;
             btn.disabled = false;
         }
@@ -1792,65 +1935,7 @@ class UI {
         `;
     }
 
-    renderEditProfileModal() {
-        const user = window.auth.user;
-        const currentName = user.user_metadata?.full_name || '';
 
-        const modalHtml = `
-            <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in" onclick="this.remove()">
-                <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative" onclick="event.stopPropagation()">
-                    <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" onclick="this.closest('.fixed').remove()">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
-                    
-                    <h2 class="text-xl font-bold text-brand-text mb-6 text-center">Editar Perfil</h2>
-                    
-                    <form onsubmit="event.preventDefault(); window.ui.handleProfileUpdate(event, this)">
-                        <div class="mb-6">
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
-                            <input type="text" name="fullName" value="${currentName}" placeholder="Tu nombre" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
-                        </div>
-                        
-                        <div id="profile-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 p-2 rounded-lg mb-4"></div>
-
-                        <button type="submit" class="w-full py-3 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:scale-[1.02] transition-transform active:scale-95">
-                            Guardar Cambios
-                        </button>
-                    </form>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    async handleProfileUpdate(e, formEl) {
-        const formData = new FormData(e.target);
-        const fullName = formData.get('fullName');
-        const btn = formEl.querySelector('button[type="submit"]');
-        const errorEl = formEl.querySelector('#profile-error');
-
-        // Loading state
-        const originalText = btn.textContent;
-        btn.textContent = 'Guardando...';
-        btn.disabled = true;
-        errorEl.classList.add('hidden');
-
-        try {
-            await window.auth.updateProfile({ fullName });
-            // Close modal
-            formEl.closest('.fixed').remove();
-            // Refresh visuals
-            this.renderSettings();
-        } catch (err) {
-            console.error(err);
-            errorEl.classList.remove('hidden');
-            errorEl.textContent = 'Error al actualizar perfil';
-        } finally {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }
-    }
 
     toggleUserMenu(btn) {
         const menu = document.getElementById('sidebar-user-menu');
@@ -1922,10 +2007,15 @@ class UI {
                             
                             <!-- Actions -->
                             <div class="flex gap-2">
-                                <button onclick="window.ui.renderDepositToPiggyBankForm('${b.id}')" class="flex-1 py-2 bg-gray-50 dark:bg-white/5 hover:bg-brand-primary hover:text-white dark:hover:bg-brand-primary text-brand-text dark:text-dark-text/80 rounded-xl text-sm font-bold transition-colors">
+                                <button onclick="window.ui.renderDepositToPiggyBankForm('${b.id}')" class="flex-1 py-2 bg-brand-primary text-white hover:bg-brand-secondary rounded-xl text-sm font-bold transition-colors shadow-lg shadow-brand-primary/20">
                                     <i class="fa-solid fa-plus mr-1"></i> Añadir
                                 </button>
-                                <!-- Future: Withdraw / History -->
+                                <button onclick="window.ui.renderEditPiggyBankForm('${b.id}')" class="w-10 py-2 bg-gray-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white rounded-xl transition-colors">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="if(confirm('¿Seguro que quieres borrar esta hucha? El dinero (${this.formatMoney(b.current)}) se devolverá a tu cuenta.')) { window.store.deletePiggyBank('${b.id}'); window.ui.renderPiggyBanks(); }" class="w-10 py-2 bg-gray-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-500 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                         </div>
                     `;
@@ -1997,10 +2087,96 @@ class UI {
             type: formData.get('type'),
             // Random default color/icon for now
             color: 'bg-purple-100 text-purple-600',
-            icon: 'fa-star'
+            icon: 'fa-piggy-bank'
         };
 
         window.store.addPiggyBank(data);
+        this.renderPiggyBanks();
+    }
+
+    renderEditPiggyBankForm(id) {
+        const bank = window.store.piggyBanks.find(b => b.id == id);
+        if (!bank) return;
+
+        this.app.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 animate-fade-in bg-slate-50 dark:bg-dark-bg">
+                <div class="w-full max-w-md bg-white dark:bg-dark-surface rounded-3xl p-8 shadow-xl shadow-blue-100 dark:shadow-none relative">
+                    <button onclick="window.ui.renderPiggyBanks()" class="absolute top-6 left-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <i class="fa-solid fa-arrow-left text-xl"></i>
+                    </button>
+                    <div class="text-center mb-8 mt-4">
+                        <h2 class="text-2xl font-bold text-brand-text dark:text-dark-text">Editar Hucha</h2>
+                        <p class="text-brand-muted dark:text-dark-text/60">Modifica tus metas.</p>
+                    </div>
+
+                    <form onsubmit="window.ui.handleEditPiggyBank(event, '${bank.id}')" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Nombre</label>
+                            <input type="text" name="name" required value="${bank.name}" placeholder="Ej: Viaje a Japón" maxlength="20"
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Objetivo (€)</label>
+                            <input type="number" name="target" required value="${bank.target}" placeholder="1000"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')"
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Tipo</label>
+                            <select name="type" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all cursor-pointer">
+                                <option value="simple" ${bank.type === 'simple' ? 'selected' : ''}>Hucha Simple</option>
+                                <option value="interest" ${bank.type === 'interest' ? 'selected' : ''}>Genera Interés (2% Anual)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Color</label>
+                            <select name="color" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all cursor-pointer">
+                                <option value="bg-purple-100 text-purple-600" ${bank.color.includes('purple') ? 'selected' : ''}>Morado</option>
+                                <option value="bg-blue-100 text-blue-600" ${bank.color.includes('blue') ? 'selected' : ''}>Azul</option>
+                                <option value="bg-green-100 text-green-600" ${bank.color.includes('green') ? 'selected' : ''}>Verde</option>
+                                <option value="bg-yellow-100 text-yellow-600" ${bank.color.includes('yellow') ? 'selected' : ''}>Amarillo</option>
+                                <option value="bg-red-100 text-red-600" ${bank.color.includes('red') ? 'selected' : ''}>Rojo</option>
+                                <option value="bg-pink-100 text-pink-600" ${bank.color.includes('pink') ? 'selected' : ''}>Rosa</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Icono</label>
+                            <select name="icon" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all cursor-pointer">
+                                <option value="fa-piggy-bank" ${bank.icon === 'fa-piggy-bank' ? 'selected' : ''}>Cerdito</option>
+                                <option value="fa-plane" ${bank.icon === 'fa-plane' ? 'selected' : ''}>Viaje</option>
+                                <option value="fa-car" ${bank.icon === 'fa-car' ? 'selected' : ''}>Coche</option>
+                                <option value="fa-house" ${bank.icon === 'fa-house' ? 'selected' : ''}>Casa</option>
+                                <option value="fa-laptop" ${bank.icon === 'fa-laptop' ? 'selected' : ''}>Tecnología</option>
+                                <option value="fa-gift" ${bank.icon === 'fa-gift' ? 'selected' : ''}>Regalo</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none hover:scale-[1.02] transition-transform active:scale-95 mt-6">
+                            Guardar Cambios
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    handleEditPiggyBank(e, id) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+            name: formData.get('name'),
+            target: formData.get('target'),
+            type: formData.get('type'),
+            color: formData.get('color'),
+            icon: formData.get('icon')
+        };
+
+        window.store.updatePiggyBank(id, data);
+        this.showNotification('Hucha actualizada');
         this.renderPiggyBanks();
     }
 

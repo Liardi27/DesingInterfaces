@@ -94,6 +94,15 @@ class Auth {
         }
         const { error } = await window.supabaseClient.auth.signOut();
         if (error) throw error;
+
+        // Session Cleanup: Clear user-specific local data to prevent leaks
+        localStorage.removeItem('finance_piggybanks');
+        localStorage.removeItem('finance_settings');
+        localStorage.removeItem('finance_categories');
+        localStorage.removeItem('finance_data'); // Just in case
+
+        // Force reload to reset application state
+        window.location.reload();
     }
 
     async deleteAccount() {
@@ -143,8 +152,9 @@ class Auth {
         }
     }
 
-    async updateProfile({ fullName, avatarUrl, bio, phone, location }) {
-        console.log('updateProfile called with:', { fullName, avatarUrl, bio, phone, location });
+    async updateProfile({ fullName, avatarUrl, bio, phone, location, email, password }) {
+        console.log('updateProfile called with:', { fullName, avatarUrl, bio, phone, location, emailChanged: !!email });
+
         const newMetadata = {
             ...this.user.user_metadata,
             full_name: fullName,
@@ -156,11 +166,33 @@ class Auth {
 
         if (this.isGuest) {
             this.user.user_metadata = newMetadata;
+            if (email) this.user.email = email; // Allow mock email change in guest mode
             localStorage.setItem('finance_guest_profile', JSON.stringify(newMetadata));
             this.updateUI();
-            return { data: { user: this.user }, error: null };
+            return { data: { user: this.user }, error: null, emailUpdated: !!email };
         }
 
+        // 1. Handle Email Change (Requires Password Verification)
+        let emailUpdated = false;
+        if (email && email !== this.user.email) {
+            if (!password) throw new Error("Se requiere contraseña para cambiar el email.");
+
+            // Verify password by signing in (Double Verification)
+            const { error: signInError } = await window.supabaseClient.auth.signInWithPassword({
+                email: this.user.email,
+                password: password
+            });
+
+            if (signInError) throw new Error("Contraseña incorrecta. No se pudo verificar la identidad.");
+
+            // Update Email
+            const { error: emailError } = await window.supabaseClient.auth.updateUser({ email: email });
+            if (emailError) throw emailError;
+
+            emailUpdated = true;
+        }
+
+        // 2. Update Metadata
         const { data, error } = await window.supabaseClient.auth.updateUser({
             data: newMetadata
         });
@@ -172,7 +204,8 @@ class Auth {
             this.user = data.user;
             this.updateUI();
         }
-        return data;
+
+        return { ...data, emailUpdated };
     }
 
     async handleRegisterSubmit(e) {

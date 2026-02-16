@@ -11,6 +11,7 @@ class Store {
             { id: 'cat_5', name: 'Salud', icon: 'fa-heart-pulse', color: 'bg-red-100 text-red-600' },
             { id: 'cat_6', name: 'Salario', icon: 'fa-money-bill-wave', color: 'bg-green-100 text-green-600' },
             { id: 'cat_piggy', name: 'Huchas', icon: 'fa-piggy-bank', color: 'bg-teal-100 text-teal-600' },
+            { id: 'cat_tech', name: 'Tecnología', icon: 'fa-laptop', color: 'bg-cyan-100 text-cyan-600' },
         ];
         this.settings = {
             currency: 'EUR',
@@ -57,19 +58,45 @@ class Store {
         const localCategories = localStorage.getItem('finance_categories');
         if (localCategories) {
             this.categories = JSON.parse(localCategories);
+            // Remove "Huchas" dynamically if present in localStorage (cleanup)
+            const hadPiggy = this.categories.find(c => c.id === 'cat_piggy');
+            if (hadPiggy) {
+                this.categories = this.categories.filter(c => c.id !== 'cat_piggy');
+                this.saveCategories();
+            }
             // Ensure Huchas category exists (migration)
             if (!this.categories.find(c => c.id === 'cat_piggy')) {
                 this.categories.push({ id: 'cat_piggy', name: 'Huchas', icon: 'fa-piggy-bank', color: 'bg-teal-100 text-teal-600' });
             }
+            // Ensure Tecnología exists (migration)
+            const tech = this.categories.find(c => c.id === 'cat_tech');
+            if (!tech) {
+                this.categories.push({ id: 'cat_tech', name: 'Tecnología', icon: 'fa-laptop', color: 'bg-cyan-100 text-cyan-600' });
+            } else {
+                // Force update color if it exists
+                tech.color = 'bg-cyan-100 text-cyan-600';
+                tech.icon = 'fa-laptop'; // Ensure icon is correct too
+                this.saveCategories();
+            }
         }
 
+        // Load Settings
         // Load Settings
         const localSettings = localStorage.getItem('finance_settings');
         if (localSettings) {
             this.settings = { ...this.settings, ...JSON.parse(localSettings) };
         }
 
-        // ALWAYS load Piggy Banks from LocalStorage
+        // Sync with Cloud Settings (Metadata)
+        if (window.auth.user && !window.auth.isGuest) {
+            const cloudSettings = window.auth.user.user_metadata?.settings;
+            if (cloudSettings) {
+                this.settings = { ...this.settings, ...cloudSettings };
+                localStorage.setItem('finance_settings', JSON.stringify(this.settings));
+            }
+        }
+
+        // ALWAYS load Piggy Banks from LocalStorage first as cache/offline
         const localPiggyBanks = localStorage.getItem('finance_piggybanks');
         this.piggyBanks = localPiggyBanks ? JSON.parse(localPiggyBanks) : [];
 
@@ -90,7 +117,16 @@ class Store {
             return;
         }
 
-        // SUPABASE MODE: Load from Cloud
+        // SUPABASE MODE: Load Pigs from Metadata & Transactions from Table
+        // 1. Piggy Banks (Metadata)
+        if (window.auth.user.user_metadata && window.auth.user.user_metadata.piggybanks) {
+            // Overwrite local cache with cloud truth if available
+            this.piggyBanks = window.auth.user.user_metadata.piggybanks;
+            // Update local cache
+            localStorage.setItem('finance_piggybanks', JSON.stringify(this.piggyBanks));
+        }
+
+        // 2. Transactions (Table)
         const { data, error } = await window.supabaseClient
             .from('transactions')
             .select('*')
@@ -118,8 +154,6 @@ class Store {
     }
 
     deleteCategory(id) {
-        // Prevent deleting if it's the only one or strictly required? 
-        // For now allow deleting, transactions will fall back to 'Other' display logic
         this.categories = this.categories.filter(c => c.id !== id);
         this.saveCategories();
     }
@@ -134,7 +168,19 @@ class Store {
     }
 
     saveSettings() {
+        // 1. Local Save
         localStorage.setItem('finance_settings', JSON.stringify(this.settings));
+
+        // 2. Cloud Sync
+        if (!window.auth.isGuest && window.auth.user) {
+            window.supabaseClient.auth.updateUser({
+                data: { settings: this.settings }
+            }).then(({ data, error }) => {
+                if (error) console.error('Error syncing settings:', error);
+                // Update local auth user reference immediately to avoid stale metadata
+                if (data && data.user) window.auth.user = data.user;
+            });
+        }
     }
 
     async addTransaction(data) {
@@ -147,27 +193,25 @@ class Store {
             concept: data.concept,
             category: data.category,
             notes: data.notes || '',
-            invoice: data.invoice || null, // Base64 string
+            invoice: data.invoice || null,
             date: data.date
         };
 
-        // GUEST MODE: Save to LocalStorage
+        // GUEST MODE
         if (window.auth.isGuest) {
             const newTx = { ...dbData, id: Date.now() };
             this.transactions.unshift(newTx);
             this.saveLocal();
-            if (window.router.currentRoute === 'home') window.ui.renderHome();
+            if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
             return;
         }
 
-        // SUPABASE MODE: Optimistic UI + Cloud Save
+        // SUPABASE MODE
         const tempId = Date.now();
         const optimisticTx = { ...dbData, id: tempId };
         this.transactions.unshift(optimisticTx);
-        // Refresh UI immediately
-        if (window.router.currentRoute === 'home') window.ui.renderHome();
+        if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
 
-        // Send to Cloud
         const { data: inserted, error } = await window.supabaseClient
             .from('transactions')
             .insert([dbData])
@@ -175,34 +219,25 @@ class Store {
 
         if (error) {
             console.error('Error saving to Cloud:', error);
-            alert('Error al guardar en la nube. Verifica tu conexión.');
-            // Revert optimistic update
+            alert('Error al guardar en la nube.');
             this.transactions = this.transactions.filter(t => t.id !== tempId);
-            if (window.router.currentRoute === 'home') window.ui.renderHome();
-        } else {
-            // Update the temporary ID with real ID
-            if (inserted && inserted[0]) {
-                const index = this.transactions.findIndex(t => t.id === tempId);
-                if (index !== -1) {
-                    this.transactions[index] = inserted[0];
-                }
-            }
+            if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
+        } else if (inserted && inserted[0]) {
+            const index = this.transactions.findIndex(t => t.id === tempId);
+            if (index !== -1) this.transactions[index] = inserted[0];
         }
     }
 
     async deleteTransaction(id) {
-        // Optimistic Delete
         const prevTxs = [...this.transactions];
         this.transactions = this.transactions.filter(t => t.id !== id);
-        if (window.router.currentRoute === 'home') window.ui.renderHome();
+        if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
 
-        // GUEST MODE: Update LocalStorage
         if (window.auth.isGuest) {
             this.saveLocal();
             return;
         }
 
-        // SUPABASE MODE: Delete from Cloud
         const { error } = await window.supabaseClient
             .from('transactions')
             .delete()
@@ -210,24 +245,39 @@ class Store {
 
         if (error) {
             console.error('Error deleting from Cloud:', error);
-            alert('No se pudo borrar. Verifica tu conexión.');
-            this.transactions = prevTxs; // Revert
-            if (window.router.currentRoute === 'home') window.ui.renderHome();
+            alert('No se pudo borrar.');
+            this.transactions = prevTxs;
+            if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
         }
     }
 
-    // Persist data
     saveLocal() {
         if (window.auth.isGuest) {
             localStorage.setItem('finance_guest_data', JSON.stringify(this.transactions));
             localStorage.setItem('finance_guest_investments', JSON.stringify(this.activeInvestments));
         }
-        // Always save piggy banks locally (shared behavior for now)
+        // Also save piggybanks as backup
         localStorage.setItem('finance_piggybanks', JSON.stringify(this.piggyBanks));
+    }
+
+    savePiggyBanks() {
+        // 1. Save Local (Backup/Cache/Guest)
+        localStorage.setItem('finance_piggybanks', JSON.stringify(this.piggyBanks));
+
+        // 2. Save Cloud (If Logged In)
+        if (!window.auth.isGuest && window.auth.user) {
+            window.supabaseClient.auth.updateUser({
+                data: { piggybanks: this.piggyBanks }
+            }).then(({ error }) => {
+                if (error) console.error('Error syncing piggy banks:', error);
+                else console.log('Piggy Banks synced to cloud');
+            });
+        }
     }
 
     // Piggy Banks Logic
     addPiggyBank(data) {
+        // ... (creation logic same as before) ...
         const initialAmount = parseFloat(data.initial) || 0;
         const targetAmount = parseFloat(data.target) || 0;
 
@@ -263,7 +313,41 @@ class Store {
         }
 
         this.piggyBanks.unshift(newBank);
-        this.saveLocal();
+        this.savePiggyBanks();
+    }
+
+    updatePiggyBank(id, data) {
+        const index = this.piggyBanks.findIndex(b => b.id == id);
+        if (index === -1) return;
+
+        const bank = this.piggyBanks[index];
+
+        // Update fields
+        if (data.name) bank.name = data.name;
+        if (data.target) bank.target = parseFloat(data.target) || bank.target;
+        if (data.color) bank.color = data.color;
+        if (data.icon) bank.icon = data.icon;
+        if (data.type) bank.type = data.type; // simple or interest
+        if (data.rate) bank.interestRate = parseFloat(data.rate) || bank.interestRate;
+
+        this.savePiggyBanks();
+    }
+
+    deletePiggyBank(id) {
+        const bank = this.piggyBanks.find(b => b.id == id);
+        if (bank && bank.current > 0) {
+            this.addTransaction({
+                type: 'income',
+                amount: bank.current,
+                concept: `Cierre ${bank.name}`,
+                category: 'cat_piggy',
+                date: new Date().toISOString(),
+                notes: 'Dinero devuelto de hucha eliminada'
+            });
+        }
+
+        this.piggyBanks = this.piggyBanks.filter(b => b.id != id);
+        this.savePiggyBanks();
     }
 
     depositToPiggyBank(id, amount) {
@@ -294,7 +378,7 @@ class Store {
             notes: 'Ahorro automático'
         });
 
-        this.saveLocal();
+        this.savePiggyBanks();
     }
 
     filterTransactions(filter) {
@@ -368,33 +452,35 @@ class Store {
         let expenseData = [];
 
         if (filter === 'week') {
-            labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+            labels = [];
             incomeData = new Array(7).fill(0);
             expenseData = new Array(7).fill(0);
 
-            // Calculate start of current week (Monday)
-            const day = now.getDay() || 7; // 1=Mon, 7=Sun
-            const startOfWeek = new Date(now);
-            startOfWeek.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
-            startOfWeek.setDate(now.getDate() - day + 1);
+            const daysMap = ['D', 'L', 'M', 'X', 'J', 'V', 'S']; // 0=Sun, 1=Mon...
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+
+            // Generate labels for last 7 days (Today-6 to Today)
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(todayStart);
+                d.setDate(d.getDate() - i);
+                labels.push(daysMap[d.getDay()]);
+            }
 
             txs.forEach(t => {
                 const d = new Date(t.date);
-                // Difference in days from start of week
-                const diffTime = Math.abs(d - startOfWeek);
+                d.setHours(0, 0, 0, 0);
+
+                // Difference in days from Today
+                const diffTime = todayStart.getTime() - d.getTime();
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-                // Only count if within the last 7 days actually (or specifically this Mon-Sun window)
-                // Since `filterTransactions` already cuts to "last 7 days" roughly, let's map accurately to 0-6 index
-                // Note: The `filterTransactions('week')` logic just did `now - 7 days`. 
-                // Let's rely on standard JS getDay().
-
-                // Map JS getDay() (0=Sun, 1=Mon) to index (0=Mon, 6=Sun)
-                let dayIndex = d.getDay() - 1;
-                if (dayIndex === -1) dayIndex = 6;
-
-                if (t.type === 'income') incomeData[dayIndex] += t.amount;
-                else expenseData[dayIndex] += t.amount;
+                // If within last 7 days (0 to 6)
+                if (diffDays >= 0 && diffDays < 7) {
+                    const index = 6 - diffDays; // Today is index 6, Yesterday is 5...
+                    if (t.type === 'income') incomeData[index] += t.amount;
+                    else expenseData[index] += t.amount;
+                }
             });
 
         } else if (filter === 'year') {

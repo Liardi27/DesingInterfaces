@@ -8,7 +8,7 @@ class Router {
             'stats': () => window.ui.renderStats(),
             'investments': () => window.ui.renderInvestments(),
             'piggybanks': () => window.ui.renderPiggyBanks(),
-            'settings': () => window.ui.renderSettings(),
+            'settings': (activeTab) => window.ui.renderSettings(activeTab),
             'login': () => window.ui.renderLogin(),
         };
         this.currentRoute = null;
@@ -20,7 +20,7 @@ class Router {
         this.navigate(initialRoute);
     }
 
-    navigate(route) {
+    navigate(route, ...args) {
         // Simple Auth Guard detection
         const isAuth = (window.auth && window.auth.user) || (window.auth && window.auth.isGuest);
 
@@ -54,7 +54,7 @@ class Router {
         }
 
         if (this.routes[route]) {
-            this.routes[route]();
+            this.routes[route](...args);
             this.updateActiveNav(route);
 
             // Update Title

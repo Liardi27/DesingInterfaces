@@ -56,6 +56,28 @@ if (window.IS_LOCAL_FILE) {
         const { error } = await window.supabaseClient.from('transactions').select('count', { count: 'exact', head: true });
 
         if (error) {
+            console.error('Supabase Client Failed. Trying Raw Fetch...');
+
+            // INTENTO DE CÓDIGO PURO (Sin librería) para ver si tienes razón
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=count`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                if (response.ok) {
+                    console.log('✅ ¡EL FETCH PURO FUNCIONA! Es culpa de la librería.');
+                    alert('¡Descubierto! El código de la librería fallaba, pero el Fetch manual funciona. Vamos a arreglarlo.');
+                    return; // Si esto funciona, salimos y no mostramos error
+                } else {
+                    console.error('❌ El Fetch puro también falla:', response.status);
+                }
+            } catch (fetchErr) {
+                console.error('❌ Error de Red en Fetch puro:', fetchErr);
+            }
+
+            // Si llegamos aquí, fallaron los dos
             console.error('Supabase Connection Error:', error);
 
             // Global Error Handler for UI

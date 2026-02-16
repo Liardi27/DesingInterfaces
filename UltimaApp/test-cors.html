@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Supabase Connection Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Prueba de Conexión Supabase (Aislada)</h1>
+    <p>Esta es una página mínima. Si esto falla, el problema es de la red/navegador. Si funciona, el problema es de la
+        App.</p>
+
+    <div id="results">Probando conexión...</div>
+
+    <script>
+        const SUPABASE_URL = 'https://qtcdkqqjlrphfxrhzpkx.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0Y2RrcXFqbHJwaGZ4cmh6cGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMjYxNjEsImV4cCI6MjA4NTYwMjE2MX0.43vwOFUXGMTRLKary-rYct95g5ZRjGRpuU6h6qYMoW8';
+
+        async function runTest() {
+            const resultsDiv = document.getElementById('results');
+            try {
+                // 1. Init Client
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+                // 2. Simple Ping (no auth required usually for health check or public table)
+                // Using 'count' on transactions just to check connectivity
+                const { data, error, count } = await supabase
+                    .from('transactions')
+                    .select('count', { count: 'exact', head: true });
+
+                if (error) {
+                    throw error;
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="status success">
+                        ✅ ¡ÉXITO!<br>
+                        Conexión establecida correctamente.<br>
+                        Status: OK<br>
+                    </div>
+                    <p>Si ves esto verde, <strong>tu código de 'supa-client.js' o 'Login' tiene el problema</strong>.</p>
+                `;
+
+            } catch (err) {
+                console.error(err);
+                resultsDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ FALLO<br>
+                        Error: ${err.message}<br>
+                        Code: ${err.code || 'N/A'}<br>
+                        Hint: ${err.hint || 'N/A'}
+                    </div>
+                    <p>Si ves esto rojo, el problema es tu <strong>Navegador o Configuración de Supabase</strong> (CORS/URL).</p>
+                    <p>Asegúrate de haber añadido <code>http://localhost:5500</code> a la lista de Allowlist en Supabase.</p>
+                `;
+            }
+        }
+
+        runTest();
+    </script>
+</body>
+
+</html>

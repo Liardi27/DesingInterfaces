@@ -183,19 +183,17 @@
       filter: contrast(125%) saturate(110%);
     }
 
-    /* Color Blindness Filters */
-    /* Color Blindness Filters */
+    /* Color Blindness Filters - CSS Approximations */
     .protanopia {
-      filter: url(#protanopia-filter);
+      filter: sepia(60%) hue-rotate(-10deg) contrast(1.1) saturate(0.8) !important;
     }
 
     .deuteranopia {
-      filter: url(#deuteranopia-filter);
+      filter: sepia(60%) hue-rotate(10deg) contrast(1.1) saturate(0.8) !important;
     }
 
     .tritanopia {
-      /* Fallback/Approximation for Tritanopia (Pink/Cyan palette) using standard CSS filters to avoid SVG layout/rendering issues */
-      filter: grayscale(0.2) sepia(0.8) hue-rotate(-50deg) saturate(2) contrast(0.9);
+      filter: sepia(30%) hue-rotate(180deg) contrast(1.1) saturate(1.2) !important;
     }
 
     /* Selection Highlighting */
@@ -224,26 +222,11 @@
 </head>
 
 <body
-  class="text-brand-text dark:text-dark-text h-screen w-full overflow-hidden flex flex-col md:flex-row transition-colors duration-300 bg-brand-bg dark:bg-dark-bg">
+  class="text-brand-text dark:text-dark-text h-screen w-full overflow-hidden flex flex-col md:flex-row bg-brand-bg dark:bg-dark-bg">
 
 
 
-  <!-- Accessibility SVG Filters -->
-  <svg style="position: absolute; height: 0; width: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="protanopia-filter">
-        <feColorMatrix type="matrix"
-          values="0.567, 0.433, 0, 0, 0 0.558, 0.442, 0, 0, 0 0, 0.242, 0.758, 0, 0 0, 0, 0, 1, 0" />
-      </filter>
-      <filter id="deuteranopia-filter">
-        <feColorMatrix type="matrix" values="0.625, 0.375, 0, 0, 0 0.7, 0.3, 0, 0, 0 0, 0.3, 0.7, 0, 0 0, 0, 0, 1, 0" />
-      </filter>
-      <filter id="tritanopia-filter">
-        <feColorMatrix type="matrix"
-          values="0.95, 0.05, 0, 0, 0 0, 0.433, 0.567, 0, 0 0, 0.475, 0.525, 0, 0 0, 0, 0, 1, 0" />
-      </filter>
-    </defs>
-  </svg>
+
 
   <!-- SIDEBAR (Desktop) - Hidden on Mobile -->
   <aside
@@ -261,38 +244,38 @@
       <button onclick="router.navigate('add')"
         class="w-full bg-brand-primary hover:bg-brand-accent text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 mb-6 transition-all transform hover:scale-[1.02] active:scale-95">
         <i class="fa-solid fa-plus"></i>
-        <span>Nuevo Movimiento</span>
+        <span data-i18n="nav_new_movement">Nuevo Movimiento</span>
       </button>
 
       <button onclick="router.navigate('home')"
         class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
         <i class="fa-solid fa-house text-lg transition-transform group-hover:scale-110"></i>
-        <span class="font-medium">Inicio</span>
+        <span class="font-medium" data-i18n="nav_home">Inicio</span>
       </button>
       <button onclick="router.navigate('account')"
         class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
         <i class="fa-solid fa-receipt text-lg transition-transform group-hover:scale-110"></i>
-        <span class="font-medium">Cuenta</span>
+        <span class="font-medium" data-i18n="nav_account">Cuenta</span>
       </button>
       <button onclick="router.navigate('investments')"
         class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
         <i class="fa-solid fa-arrow-trend-up text-lg transition-transform group-hover:scale-110"></i>
-        <span class="font-medium">Inversiones</span>
+        <span class="font-medium" data-i18n="nav_investments">Inversiones</span>
       </button>
       <button onclick="router.navigate('piggybanks')"
         class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
         <i class="fa-solid fa-piggy-bank text-lg transition-transform group-hover:scale-110"></i>
-        <span class="font-medium">Huchas</span>
+        <span class="font-medium" data-i18n="nav_piggybanks">Huchas</span>
       </button>
       <button onclick="router.navigate('stats')"
         class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
         <i class="fa-solid fa-chart-pie text-lg transition-transform group-hover:scale-110"></i>
-        <span class="font-medium">Estadísticas</span>
+        <span class="font-medium" data-i18n="nav_stats">Estadísticas</span>
       </button>
       <button onclick="router.navigate('settings')"
         class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-brand-muted dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-all duration-200 group">
         <i class="fa-solid fa-gear text-lg transition-transform group-hover:scale-110"></i>
-        <span class="font-medium">Ajustes</span>
+        <span class="font-medium" data-i18n="nav_settings">Ajustes</span>
       </button>
     </nav>
 
@@ -317,12 +300,12 @@
         <button onclick="window.ui.renderEditProfileModal(); window.ui.toggleUserMenu()"
           class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-dark-text/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-3">
           <i class="fa-solid fa-user-gear"></i>
-          <span>Mi Perfil</span>
+          <span data-i18n="nav_profile">Mi Perfil</span>
         </button>
         <button onclick="window.auth.signOut()"
           class="w-full text-left px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-3">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          <span>Cerrar Sesión</span>
+          <span data-i18n="nav_logout">Cerrar Sesión</span>
         </button>
       </div>
     </div>
@@ -334,14 +317,15 @@
 
     <!-- TOPBAR (Desktop) - Hidden on Mobile -->
     <header class="hidden md:flex items-center justify-between px-8 py-5 bg-transparent z-10">
-      <h2 id="page-title" class="text-2xl font-display font-bold text-brand-text dark:text-dark-text">Resumen</h2>
+      <h2 id="page-title" class="text-2xl font-display font-bold text-brand-text dark:text-dark-text"
+        data-i18n="header_summary">Resumen</h2>
       <div class="flex items-center gap-4">
         <div class="relative">
           <select onchange="window.ui && window.ui.updateDateRange(this.value)"
             class="appearance-none bg-white dark:bg-dark-surface rounded-full shadow-sm border border-gray-100 dark:border-white/10 pl-4 pr-10 py-2 text-sm font-medium text-slate-600 dark:text-dark-text/60 focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer">
-            <option value="week" selected>Esta Semana</option>
-            <option value="month">Este Mes</option>
-            <option value="year">Este Año</option>
+            <option value="week" selected data-i18n="filter_week">Esta Semana</option>
+            <option value="month" data-i18n="filter_month">Este Mes</option>
+            <option value="year" data-i18n="filter_year">Este Año</option>
           </select>
           <i
             class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -366,17 +350,17 @@
     <button onclick="router.navigate('home')"
       class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
       <i class="fa-solid fa-house text-xl mb-0.5"></i>
-      <span class="text-[10px] font-medium">Inicio</span>
+      <span class="text-[10px] font-medium" data-i18n="nav_home">Inicio</span>
     </button>
     <button onclick="router.navigate('account')"
       class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
       <i class="fa-solid fa-receipt text-xl mb-0.5"></i>
-      <span class="text-[10px] font-medium">Cuenta</span>
+      <span class="text-[10px] font-medium" data-i18n="nav_account">Cuenta</span>
     </button>
     <button onclick="router.navigate('piggybanks')"
       class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
       <i class="fa-solid fa-piggy-bank text-xl mb-0.5"></i>
-      <span class="text-[10px] font-medium">Huchas</span>
+      <span class="text-[10px] font-medium" data-i18n="nav_piggybanks">Huchas</span>
     </button>
 
     <!-- FAB (Floating Action Button) embedded in nav -->
@@ -390,17 +374,18 @@
     <button onclick="router.navigate('stats')"
       class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
       <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
-      <span class="text-[10px] font-medium">Gráficos</span>
+      <span class="text-[10px] font-medium" data-i18n="nav_stats">Gráficos</span>
     </button>
     <button onclick="router.navigate('settings')"
       class="nav-item flex flex-col items-center gap-1 p-2 text-brand-muted dark:text-dark-text/60 hover:text-brand-primary dark:hover:text-white transition-colors w-16">
       <i class="fa-solid fa-gear text-xl mb-0.5"></i>
-      <span class="text-[10px] font-medium">Ajustes</span>
+      <span class="text-[10px] font-medium" data-i18n="nav_settings">Ajustes</span>
     </button>
   </div>
 
   <!-- SCRIPTS -->
   <script src="js/supa-client.js?v=7"></script>
+  <script src="js/i18n.js?v=7"></script>
   <script src="js/auth.js?v=7"></script>
   <script src="js/store.js?v=7"></script>
   <script src="js/router.js?v=7"></script>
@@ -408,9 +393,24 @@
   <script src="js/app.js?v=7"></script>
 
   <script>
-    // App is initialized in js/app.js via DOMContentLoaded
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+    // Force-clear old service worker caches, then register fresh
+    // Only register logic if we are on a supported protocol
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      // Unregister ALL existing service workers first
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        const unregisterAll = registrations.map(r => r.unregister());
+        return Promise.all(unregisterAll);
+      }).then(() => {
+        // Clear ALL caches
+        return caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+      }).then(() => {
+        // Register fresh SW
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('Service Worker re-registered with fresh cache'))
+          .catch(err => console.warn('Service Worker registration failed:', err));
+      });
+    } else {
+      console.warn('Service Worker skipped: Not https or localhost');
     }
   </script>
 </body>

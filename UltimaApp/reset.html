@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reset & Debug</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .box {
+            border: 2px solid #ddd;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+
+        button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 Reparación de Conexión</h1>
+
+    <div class="box">
+        <p>Tu Origen actual (copia esto si es diferente a lo que pusiste en Supabase):</p>
+        <div class="info" id="origin-display">Detectando...</div>
+
+        <p>Vamos a limpiar caché, service workers y datos corruptos.</p>
+        <button onclick="hardReset()">Limpiar Todo y Recargar</button>
+    </div>
+
+    <script>
+        document.getElementById('origin-display').textContent = window.location.origin;
+
+        async function hardReset() {
+            // 1. Unregister Service Workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                    console.log('SW Unregistered');
+                }
+            }
+
+            // 2. Clear LocalStorage
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // 3. Clear Cookies (Simple attempt)
+            document.cookie.split(";").forEach(function (c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
+            // 4. Force Reload
+            alert('¡Limpieza completada! La página se recargará ahora.');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

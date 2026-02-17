@@ -4,8 +4,8 @@
 // Initialize Supabase Client (Standard Configuration)
 // Initialize Supabase Client (Standard Configuration)
 // Valid config restored from debug-gh.html (Original Project)
-const SUPABASE_URL = 'https://qtcdkqqjlrphfxrhzpkx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0Y2RrcXFqbHJwaGZ4cmh6cGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMjYxNjEsImV4cCI6MjA4NTYwMjE2MX0.43vwOFUXGMTRLKary-rYct95g5ZRjGRpuU6h6qYMoW8';
+const SUPABASE_URL = 'https://vedpoayvzzoozpshghwy.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_2KQubV3vQT3oVH6qRMyS3g_q3iT6wH6';
 
 // BROKEN CONFIG (Invalid Key Format):
 // const SUPABASE_URL = 'https://vedpoayvzzoozpshghwy.supabase.co'.trim();
@@ -44,3 +44,4 @@ console.log('Supabase Client Initialized (Standard Check)');
         console.error('❌ Supabase Exception:', e);
     }
 })();
+

@@ -140,13 +140,28 @@ class Store {
             localStorage.setItem('finance_piggybanks', JSON.stringify(this.piggyBanks));
         }
 
+        // Check for Auto Contributions (Run on every app load)
+        this.checkAutoContributions();
+
         // 2. Transactions (Table)
         try {
-            const { data, error } = await window.supabaseClient
+            console.log('Fetching transactions for User ID:', window.auth.user.id);
+
+            const query = window.supabaseClient
                 .from('transactions')
                 .select('*')
                 .eq('user_id', window.auth.user.id)
                 .order('date', { ascending: false });
+
+            console.log('DEBUG: Sending Supabase Query...');
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('DEBUG: Query Error Details:', JSON.stringify(error, null, 2));
+                throw error;
+            }
+
+            console.log('DEBUG: Query Success. Rows:', data?.length);
 
             if (error) throw error;
 
@@ -197,6 +212,96 @@ class Store {
         localStorage.setItem('finance_categories', JSON.stringify(this.categories));
     }
 
+    async convertGlobalCurrency(newCurrency) {
+        const oldCurrency = this.settings.currency || 'EUR';
+
+        // ALLOW RE-CONVERSION always to fix desync states
+        // if (oldCurrency === newCurrency) ...
+
+        try {
+            // 1. Get Rate
+            let rate = await window.api.getExchangeRate(oldCurrency, newCurrency);
+
+            console.log(`Converting ${oldCurrency} -> ${newCurrency} @ ${rate}`);
+
+            if (!rate || isNaN(rate)) {
+                console.warn(`Invalid exchange rate (${rate}), aborting conversion.`);
+                return null;
+            }
+
+            // Force rate if same currency but user wants to re-calculate? No.
+            // If old == new, rate is 1. We just re-parse numbers.
+
+
+            const convert = (val) => {
+                // Handle mixed types: numbers, strings with commas, etc.
+                let num = val;
+                if (typeof val === 'string') {
+                    num = parseFloat(val.replace(',', '.'));
+                }
+
+                if (isNaN(num)) {
+                    console.warn('Value is NaN, skipping convert:', val);
+                    return val;
+                }
+
+                // Math
+                const res = num * rate;
+                return parseFloat(res.toFixed(2));
+            };
+
+            console.log('Starting conversion of transactions...', this.transactions.length);
+
+            // 2. Convert Transactions
+            let convertedCount = 0;
+            this.transactions.forEach(tx => {
+                const oldVal = tx.amount;
+                tx.amount = convert(tx.amount);
+                if (oldVal !== tx.amount) convertedCount++;
+                // Debug first few
+                if (convertedCount < 3) console.log(`Tx ${tx.concept}: ${oldVal} -> ${tx.amount}`);
+            });
+            console.log(`Converted ${convertedCount} transactions.`);
+
+            // 3. Convert Piggy Banks
+            this.piggyBanks.forEach(piggy => {
+                piggy.target = convert(piggy.target);
+                piggy.current = convert(piggy.current);
+                if (piggy.autoAmount) piggy.autoAmount = convert(piggy.autoAmount);
+                if (piggy.history) {
+                    piggy.history.forEach(h => {
+                        h.amount = convert(h.amount);
+                    });
+                }
+            });
+
+            // 4. Convert Investments
+            this.activeInvestments.forEach(inv => {
+                inv.currentPrice = convert(inv.currentPrice); // Also convert price cache
+                inv.avgPrice = convert(inv.avgPrice);
+                // amount is qty? check store. If amount is money invested, convert it.
+                // Looking at renderInvestments, amount seems to be quantity or total value?
+                // Let's assume it's total value or cost basis. 
+                // Actually, store uses 'amount' usually for monetary value in this app.
+                if (inv.invested) inv.invested = convert(inv.invested);
+                if (inv.amount) inv.amount = convert(inv.amount);
+            });
+
+            // 5. Update Settings
+            this.settings.currency = newCurrency;
+
+            // 6. Save All
+            this.saveLocal(); // Saves transactions (guest) & piggies
+            this.saveSettings();
+
+            return rate;
+
+        } catch (err) {
+            console.error('Currency Conversion Failed:', err);
+            throw err;
+        }
+    }
+
     updateSetting(key, value) {
         this.settings[key] = value;
         this.saveSettings();
@@ -242,24 +347,50 @@ class Store {
         }
 
         // SUPABASE MODE
-        const tempId = Date.now();
-        const optimisticTx = { ...dbData, id: tempId };
-        this.transactions.unshift(optimisticTx);
-        if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
+        try {
+            // ✅ PATRÓN SOLICITADO POR EL USUARIO
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
 
-        const { data: inserted, error } = await window.supabaseClient
-            .from('transactions')
-            .insert([dbData])
-            .select();
+            if (user) {
+                // Preparar datos con el ID seguro y fecha ISO
+                const dbData = {
+                    user_id: user.id, // <--- ¡OBLIGATORIO!
+                    type: data.type,
+                    amount: data.amount,
+                    concept: data.concept,
+                    category: data.category,
+                    notes: data.notes || '',
+                    invoice: data.invoice || null,
+                    date: data.date ? new Date(data.date).toISOString() : new Date().toISOString()
+                };
 
-        if (error) {
-            console.error('Error saving to Cloud:', error);
-            alert('Error al guardar en la nube.');
-            this.transactions = this.transactions.filter(t => t.id !== tempId);
-            if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
-        } else if (inserted && inserted[0]) {
-            const index = this.transactions.findIndex(t => t.id === tempId);
-            if (index !== -1) this.transactions[index] = inserted[0];
+                // Optimistic UI Update
+                const tempId = Date.now();
+                const optimisticTx = { ...dbData, id: tempId };
+                this.transactions.unshift(optimisticTx);
+                if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
+
+                const { data: inserted, error } = await window.supabaseClient
+                    .from('transactions')
+                    .insert([dbData]) // Insert object in array as per Supabase JS v2
+                    .select();
+
+                if (error) {
+                    console.error('Error saving to Cloud:', error);
+                    alert(`❌ Error al guardar: ${error.message || JSON.stringify(error)}\nDetails: ${error.details || ''}\nHint: ${error.hint || ''}`);
+                    // Revert optimistic
+                    this.transactions = this.transactions.filter(t => t.id !== tempId);
+                    if (window.router.currentRoute === 'home' && window.ui) window.ui.renderHome();
+                } else if (inserted && inserted[0]) {
+                    const index = this.transactions.findIndex(t => t.id === tempId);
+                    if (index !== -1) this.transactions[index] = inserted[0];
+                }
+            } else {
+                alert("⚠️ Error: No se pudo obtener el usuario de la sesión.");
+            }
+        } catch (err) {
+            console.error("Excepción en addTransaction:", err);
+            alert("Error crítico al intentar guardar.");
         }
     }
 
@@ -347,45 +478,65 @@ class Store {
             });
         }
 
+        // Auto Contribution Setup
+        if (data.contributionMode === 'auto') {
+            newBank.contributionMode = 'auto';
+            newBank.autoAmount = parseFloat(data.autoAmount) || 0;
+            newBank.autoDay = parseInt(data.autoDay) || 1;
+            newBank.lastAutoContribution = new Date().toISOString();
+        } else {
+            newBank.contributionMode = 'manual';
+        }
+
         this.piggyBanks.unshift(newBank);
         this.savePiggyBanks();
     }
 
-    updatePiggyBank(id, data) {
-        const index = this.piggyBanks.findIndex(b => b.id == id);
-        if (index === -1) return;
+    checkAutoContributions() {
+        if (!this.piggyBanks.length) return;
 
-        const bank = this.piggyBanks[index];
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 0-11
+        const currentDay = now.getDate();
+        let changesMade = false;
 
-        // Update fields
-        if (data.name) bank.name = data.name;
-        if (data.target) bank.target = parseFloat(data.target) || bank.target;
-        if (data.color) bank.color = data.color;
-        if (data.icon) bank.icon = data.icon;
-        if (data.type) bank.type = data.type; // simple or interest
-        if (data.rate) bank.interestRate = parseFloat(data.rate) || bank.interestRate;
+        this.piggyBanks.forEach(bank => {
+            if (bank.contributionMode === 'auto' && bank.autoAmount > 0) {
+                const dayToPay = bank.autoDay || 1;
 
-        this.savePiggyBanks();
+                // Parse last contribution date
+                const lastDate = bank.lastAutoContribution ? new Date(bank.lastAutoContribution) : new Date(0); // 1970 if null
+
+                // Determine if we need to pay for THIS month
+                // Logic: If current day >= dayToPay AND (last contribution was in previous month OR never)
+                // We should theoretically check for EVERY missed month, but let's stick to "Current Month Catch-up" for simplicity first
+                // Or better: Check if "Target Payment Date for This Month" has passed AND we haven't paid yet.
+
+                const targetDateThisMonth = new Date(currentYear, currentMonth, dayToPay);
+
+                // If today is past the target date
+                if (now >= targetDateThisMonth) {
+                    // Check if we already paid this month
+                    // Warning: lastDate might be from today if we just created it.
+                    const alreadyPaidThisMonth = lastDate.getFullYear() === currentYear && lastDate.getMonth() === currentMonth;
+
+                    if (!alreadyPaidThisMonth) {
+                        // TRIGGER DEPOSIT
+                        console.log(`Auto-contributing ${bank.autoAmount} to ${bank.name}`);
+                        this.depositToPiggyBank(bank.id, bank.autoAmount, true); // true = automated
+                        bank.lastAutoContribution = new Date().toISOString();
+                        changesMade = true;
+                    }
+                }
+            }
+        });
+
+        if (changesMade) this.savePiggyBanks();
     }
 
-    deletePiggyBank(id) {
-        const bank = this.piggyBanks.find(b => b.id == id);
-        if (bank && bank.current > 0) {
-            this.addTransaction({
-                type: 'income',
-                amount: bank.current,
-                concept: `Cierre ${bank.name}`,
-                category: 'cat_piggy',
-                date: new Date().toISOString(),
-                notes: 'Dinero devuelto de hucha eliminada'
-            });
-        }
-
-        this.piggyBanks = this.piggyBanks.filter(b => b.id != id);
-        this.savePiggyBanks();
-    }
-
-    depositToPiggyBank(id, amount) {
+    // Updated deposit to handle auto flag for notes
+    depositToPiggyBank(id, amount, isAuto = false) {
         const bank = this.piggyBanks.find(b => b.id == id); // loose equality
         if (!bank) return;
 
@@ -400,17 +551,18 @@ class Store {
         bank.history.unshift({
             date: new Date().toISOString(),
             amount: val,
-            type: 'deposit'
+            type: 'deposit',
+            isAuto: isAuto
         });
 
         // Link with main balance: Create an expense transaction
         this.addTransaction({
             type: 'expense',
             amount: val,
-            concept: `Añadido a ${bank.name} ${progress}%`, // "Añadido a hucha tanto %"
-            category: 'cat_3', // 'Hogar' or maybe we need a 'Savings' category? Using 'Hogar' (House) or generic for now.
+            concept: `Añadido a ${bank.name} ${progress}%`,
+            category: 'cat_piggy',
             date: new Date().toISOString(),
-            notes: 'Ahorro automático'
+            notes: isAuto ? 'Ahorro automático mensual' : 'Ahorro manual'
         });
 
         this.savePiggyBanks();

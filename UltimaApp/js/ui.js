@@ -24,15 +24,33 @@ class UI {
         return map[currency] || 'es-ES';
     }
 
-    updateCurrency(currency, silent = false) {
-        if (!silent) window.store.updateSetting('currency', currency);
-        this.currencyFormatter = new Intl.NumberFormat(this.getLocaleForCurrency(currency), { style: 'currency', currency: currency });
-
+    async updateCurrency(currency, silent = false) {
         if (!silent) {
-            this.showNotification('Moneda actualizada a ' + currency);
-            // Re-render current view to apply changes
-            if (window.router.currentRoute === 'settings') this.renderSettings();
-            else window.router.navigate('home'); // Fallback to home/refresh
+            this.showNotification('Actualizando divisas y tipos de cambio...', 'info');
+
+            // Give UI time to paint the notification before blocking with calc
+            setTimeout(async () => {
+                try {
+                    const rate = await window.store.convertGlobalCurrency(currency);
+
+                    // Update Formatter
+                    this.currencyFormatter = new Intl.NumberFormat(this.getLocaleForCurrency(currency), { style: 'currency', currency: currency });
+
+                    if (rate) {
+                        this.showNotification(`Conversión completada (Tasa: ${rate})`, 'success');
+                    }
+
+                    // Re-render
+                    if (window.router && window.router.currentRoute === 'settings') this.renderSettings();
+                    else this.renderHome(); // Always fallback to home if uncertain
+
+                } catch (e) {
+                    this.showNotification('Error al convertir divisas', 'error');
+                    console.error(e);
+                }
+            }, 100);
+        } else {
+            this.currencyFormatter = new Intl.NumberFormat(this.getLocaleForCurrency(currency), { style: 'currency', currency: currency });
         }
     }
 
@@ -247,68 +265,199 @@ class UI {
                 <div class="text-right">
                     <p class="font-bold ${amountClass}">${sign} ${this.formatMoney(tx.amount)}</p>
                     ${hasInvoice ? '<i class="fa-solid fa-paperclip text-xs text-brand-primary" title="Factura adjunta"></i>' : ''}
-                    <p class="text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">Ver detalle</p>
                 </div>
             </div>
         `;
     }
+
 
     showTransactionDetail(id) {
         // loose equality to match string vs number
         const tx = window.store.transactions.find(t => t.id == id);
         if (!tx) return;
         const cat = this.getCategory(tx.category);
-        const isImage = tx.invoice && tx.invoice.startsWith('data:image');
-        const isPdf = tx.invoice && tx.invoice.startsWith('data:application/pdf');
+        const isImage = tx.invoice && (tx.invoice.startsWith('data:image') || tx.invoice.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i));
+        const isPdf = tx.invoice && (tx.invoice.startsWith('data:application/pdf') || tx.invoice.endsWith('.pdf'));
 
         const modalHtml = `
-            <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in" onclick="this.remove()">
-                <div class="bg-white dark:bg-dark-surface w-full max-w-sm rounded-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar border border-gray-100 dark:border-white/10" onclick="event.stopPropagation()">
-                    <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" onclick="this.closest('.fixed').remove()">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
-                    
-                    <div class="text-center mb-6">
-                        <div class="w-16 h-16 rounded-full ${cat.color} flex items-center justify-center text-2xl mx-auto mb-3 shadow-sm">
+            <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in" onclick="if(event.target === this) this.remove()">
+                <div class="bg-white dark:bg-dark-surface w-full max-w-sm rounded-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar border border-gray-100 dark:border-white/10 animate-pop-in">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-14 h-14 rounded-2xl ${cat.color} flex items-center justify-center text-2xl shadow-sm">
                             <i class="fa-solid ${cat.icon}"></i>
                         </div>
-                        <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2 ${tx.type === 'expense' ? 'bg-red-50 text-red-500 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-50 text-green-500 dark:bg-green-900/30 dark:text-green-300'}">
-                            ${tx.type === 'expense' ? 'Gasto' : 'Ingreso'}
-                        </span>
-                        <p class="text-sm font-bold text-brand-muted dark:text-dark-text/60 uppercase tracking-wider">${cat.name}</p>
-                        <h2 class="text-2xl font-bold text-brand-text dark:text-dark-text mt-1">${tx.concept}</h2>
-                        <p class="text-3xl font-bold mt-2 ${tx.type === 'expense' ? 'text-brand-text dark:text-dark-text' : 'text-status-incomeText dark:text-green-400'}">
+                        <button onclick="this.closest('.fixed').remove()" class="p-2 bg-gray-100 dark:bg-white/10 rounded-full hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+                            <i class="fa-solid fa-xmark text-gray-500 dark:text-white"></i>
+                        </button>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-brand-text dark:text-dark-text mb-1">${tx.concept}</h3>
+                    <p class="text-sm text-brand-muted dark:text-dark-text/60 mb-6">${this.formatDate(tx.date)} • ${cat.name}</p>
+
+                    <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 mb-6 flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-brand-muted dark:text-dark-text/50">Importe</span>
+                        <span class="text-2xl font-bold ${tx.type === 'expense' ? 'text-brand-text dark:text-dark-text' : 'text-green-500'}">
                             ${tx.type === 'expense' ? '-' : '+'} ${this.formatMoney(tx.amount)}
-                        </p>
-                        <p class="text-xs text-brand-muted dark:text-dark-text/50 mt-2">${new Date(tx.date).toLocaleString()}</p>
+                        </span>
                     </div>
 
-                    <div class="bg-gray-50 dark:bg-white/5 rounded-xl p-4 mb-4 text-sm text-slate-600 dark:text-dark-text/80">
-                        <p class="text-xs font-bold text-gray-400 dark:text-dark-text/50 uppercase mb-1">Detalles</p>
-                        ${tx.notes
-                ? `<div class="flex gap-2"><i class="fa-solid fa-quote-left text-gray-300 mt-0.5"></i> <span>${tx.notes}</span></div>`
-                : '<p class="text-gray-400 italic">Sin detalles extra</p>'}
-                    </div>
+                    ${tx.notes ? `
+                    <div class="mb-6">
+                        <p class="text-xs font-bold uppercase text-brand-muted dark:text-dark-text/50 mb-2">Notas</p>
+                        <p class="text-sm text-brand-text dark:text-dark-text bg-gray-50 dark:bg-white/5 p-3 rounded-xl">${tx.notes}</p>
+                    </div>` : ''}
 
-                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6">
-                        <p class="text-xs font-bold text-blue-400 uppercase mb-2">Factura Adjunta</p>
-                        ${tx.invoice
-                ? (isImage
-                    ? `<img src="${tx.invoice}" class="w-full rounded-lg shadow-sm border border-blue-100 dark:border-blue-800 max-h-40 object-cover" onclick="const w=window.open(); w.document.write('<img src=${tx.invoice}>')" style="cursor:zoom-in">`
-                    : (isPdf
-                        ? `<a href="${tx.invoice}" download="factura_${tx.id}.pdf" class="flex items-center gap-3 bg-white dark:bg-white/5 p-3 rounded-lg border border-blue-100 dark:border-white/10 text-blue-600 dark:text-blue-400 font-bold text-sm hover:shadow-md transition-all"><i class="fa-solid fa-file-pdf text-xl"></i> Descargar PDF</a>`
-                        : `<p class="text-sm text-gray-500">Archivo adjunto</p>`))
-                : '<div class="flex items-center gap-2 text-gray-400 italic"><i class="fa-solid fa-file-slash"></i> <span>Sin archivo adjunto</span></div>'}
-                    </div>
+                    ${tx.invoice ? `
+                    <div class="mb-6">
+                        <p class="text-xs font-bold uppercase text-brand-muted dark:text-dark-text/50 mb-2">Adjunto</p>
+                        ${isImage
+                    ? `<img src="${tx.invoice}" class="w-full rounded-xl shadow-sm border border-gray-100 dark:border-white/10 max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="window.ui.showImageModal('${tx.invoice}')" title="Click para ampliar">`
+                    : `<a href="${tx.invoice}" target="_blank" class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400 font-bold text-sm hover:underline">
+                                <i class="fa-solid fa-paperclip"></i> Ver Documento
+                               </a>`
+                }
+                    </div>` : ''}
 
-                    <button onclick="if(confirm('¿Borrar este movimiento?')) { window.store.deleteTransaction(${id}); window.ui.showNotification('Movimiento eliminado', 'error'); this.closest('.fixed').remove(); window.router.navigate('home'); }" 
-                        class="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center justify-center gap-2 rounded-xl">
+                    <button onclick="if(confirm('¿Borrar este movimiento?')) { window.store.deleteTransaction(${id}); window.ui.showNotification('Movimiento eliminado', 'error'); this.closest('.fixed').remove(); }" 
+                        class="w-full py-4 bg-red-50 dark:bg-red-900/10 text-red-500 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2">
                         <i class="fa-regular fa-trash-can"></i> Eliminar Movimiento
                     </button>
                 </div>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    showImageModal(src) {
+        const id = 'img-modal-' + Date.now();
+        const imgId = id + '-img';
+
+        const modalHtml = `
+            <div id="${id}" class="fixed inset-0 z-[100000] bg-black/95 flex items-center justify-center overflow-hidden animate-fade-in select-none">
+                
+                <!-- Image Container with Pan/Zoom support -->
+                <div id="${id}-container" class="relative w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing" 
+                    onmousedown="window.ui.startDrag(event, '${id}-img')"
+                    onmousemove="window.ui.drag(event, '${id}-img')"
+                    onmouseup="window.ui.endDrag()"
+                    onmouseleave="window.ui.endDrag()"
+                    onwheel="window.ui.handleWheel(event, '${id}-img')">
+                    
+                    <img id="${imgId}" src="${src}" class="max-w-[90%] max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-100 ease-out object-contain" style="transform: scale(1) translate(0px, 0px);" data-scale="1" data-x="0" data-y="0">
+                
+                </div>
+
+                <!-- Close Button -->
+                <button onclick="document.getElementById('${id}').remove()" class="absolute top-4 right-4 z-[100001] w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+
+                <!-- Zoom Controls -->
+                <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-4 z-[100001] bg-black/50 backdrop-blur-md rounded-full px-4 py-2 border border-white/10">
+                    <button onclick="window.ui.adjustZoom('${imgId}', -0.2)" class="w-8 h-8 flex items-center justify-center text-white hover:text-blue-400 transition-colors">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="${imgId}-scale-text" class="text-white text-xs font-mono w-12 text-center">100%</span>
+                    <button onclick="window.ui.adjustZoom('${imgId}', 0.2)" class="w-8 h-8 flex items-center justify-center text-white hover:text-blue-400 transition-colors">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <div class="w-px h-4 bg-white/20 mx-1"></div>
+                    <button onclick="window.ui.resetZoom('${imgId}')" class="text-xs text-white hover:text-blue-400 transition-colors px-2">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Add Esc key listener
+        const escListener = (e) => {
+            if (e.key === 'Escape') {
+                const el = document.getElementById(id);
+                if (el) el.remove();
+                document.removeEventListener('keydown', escListener);
+            }
+        };
+        document.addEventListener('keydown', escListener);
+    }
+
+    // Zoom Logic
+    adjustZoom(imgId, delta) {
+        const img = document.getElementById(imgId);
+        if (!img) return;
+
+        // Get current values
+        let scale = parseFloat(img.getAttribute('data-scale') || '1');
+        let x = parseFloat(img.getAttribute('data-x') || '0');
+        let y = parseFloat(img.getAttribute('data-y') || '0');
+
+        // Update Scale
+        let newScale = scale + delta;
+        if (newScale < 0.5) newScale = 0.5;
+        if (newScale > 5) newScale = 5;
+
+        // Apply
+        this.updateTransform(img, newScale, x, y);
+    }
+
+    resetZoom(imgId) {
+        const img = document.getElementById(imgId);
+        if (!img) return;
+        this.updateTransform(img, 1, 0, 0);
+    }
+
+    handleWheel(event, imgId) {
+        event.preventDefault();
+        const delta = event.deltaY > 0 ? -0.1 : 0.1;
+        this.adjustZoom(imgId, delta);
+    }
+
+    // Drag Logic
+    startDrag(e, imgId) {
+        e.preventDefault(); // Prevent default drag behavior
+        this.isDragging = true;
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+        this.currentImgId = imgId; // Track which image is being dragged
+    }
+
+    drag(e, imgId) {
+        if (!this.isDragging || this.currentImgId !== imgId) return;
+        e.preventDefault();
+
+        const img = document.getElementById(imgId);
+        if (!img) return;
+
+        let scale = parseFloat(img.getAttribute('data-scale') || '1');
+        // Only allow drag if zoomed in slightly or generally
+        if (scale <= 1 && false) return; // Optional: disable drag if not zoomed
+
+        let x = parseFloat(img.getAttribute('data-x') || '0');
+        let y = parseFloat(img.getAttribute('data-y') || '0');
+
+        const deltaX = (e.clientX - this.startX) / scale; // Adjust speed by scale
+        const deltaY = (e.clientY - this.startY) / scale;
+
+        this.updateTransform(img, scale, x + deltaX, y + deltaY);
+
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+    }
+
+    endDrag() {
+        this.isDragging = false;
+        this.currentImgId = null;
+    }
+
+    updateTransform(img, scale, x, y) {
+        img.style.transform = `scale(${scale}) translate(${x}px, ${y}px)`;
+        img.setAttribute('data-scale', scale);
+        img.setAttribute('data-x', x);
+        img.setAttribute('data-y', y);
+
+        // Update text
+        const text = document.getElementById(img.id + '-scale-text');
+        if (text) text.innerText = Math.round(scale * 100) + '%';
     }
 
     initMiniChart() {
@@ -735,7 +884,7 @@ class UI {
 
                 // Detect Piggy Bank transfers (Expenses only usually)
                 // Improved Piggy detection logic consistent with renderAccount
-                const isPiggy = (tx.notes && (tx.notes.includes('Ahorro automático') || tx.notes.includes('Depósito inicial hucha'))) ||
+                const isPiggy = tx.category === 'cat_piggy' || (tx.notes && (tx.notes.includes('Ahorro automático') || tx.notes.includes('Depósito inicial hucha'))) ||
                     (tx.concept && (tx.concept.startsWith('Añadido a') || tx.concept.startsWith('Apertura')));
 
                 if (isPiggy) {
@@ -825,7 +974,7 @@ class UI {
 
                  <!-- Piggy Bank Toggle -->
                 <div class="flex justify-end px-2 mb-2">
-                    <button onclick="window.ui.renderStats(null, null, ${!showPiggy})" class="text-xs flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${showPiggy ? 'bg-teal-50 text-teal-600 border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-700' : 'bg-white text-gray-500 border-gray-200 dark:bg-white/5 dark:text-gray-400 dark:border-transparent'}">
+                    <button onclick="window.ui.togglePiggyStats()" class="text-xs flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${showPiggy ? 'bg-teal-50 text-teal-600 border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-700' : 'bg-white text-gray-500 border-gray-200 dark:bg-white/5 dark:text-gray-400 dark:border-transparent'}">
                         <i class="fa-solid ${showPiggy ? 'fa-check' : 'fa-piggy-bank'}"></i>
                         ${showPiggy ? 'Huchas Incluidas' : 'Incluir Huchas'}
                     </button>
@@ -922,8 +1071,32 @@ class UI {
         }, 50);
     }
 
+
+    togglePiggyStats() {
+        this.showPiggyBanks = !this.showPiggyBanks;
+        this.renderStats();
+
+        if (this.showPiggyBanks) {
+            // Check if there are any piggy transactions to show
+            const currentType = this.currentStatsType || 'expense';
+            const transactions = window.store.filterTransactions(this.currentFilter);
+            const hasPiggy = transactions.some(tx => {
+                if (tx.type !== currentType) return false;
+                return tx.category === 'cat_piggy' || (tx.notes && (tx.notes.includes('Ahorro automático') || tx.notes.includes('Depósito inicial hucha'))) ||
+                    (tx.concept && (tx.concept.startsWith('Añadido a') || tx.concept.startsWith('Apertura')));
+            });
+
+            if (!hasPiggy) {
+                const typeLabel = currentType === 'expense' ? 'gastos (depósitos)' : 'ingresos (cierres)';
+                window.ui.showNotification(`No hay ${typeLabel} de huchas en este periodo`, 'info');
+            } else {
+                window.ui.showNotification('Huchas incluidas en el gráfico', 'success');
+            }
+        }
+    }
+
     getChartGridColor() {
-        return document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
     }
 
     applyTheme(themeName, silent = false) {
@@ -975,6 +1148,89 @@ class UI {
             if (window.router && window.router.currentRoute === 'settings') {
                 this.renderSettings('appearance');
             }
+        }
+    }
+
+    applyAccessibilityModes() {
+        const root = document.documentElement;
+
+        // 1. Color Blindness
+        const colorBlindMode = localStorage.getItem('finance_access_colorblind') || 'none';
+        root.classList.remove('protanopia', 'deuteranopia', 'tritanopia');
+        if (colorBlindMode !== 'none') {
+            root.classList.add(colorBlindMode);
+        }
+
+        // 2. Dyslexic Font
+        const isDyslexic = localStorage.getItem('finance_access_dyslexic') === 'true';
+        root.classList.toggle('dyslexic-font', isDyslexic);
+
+        // 3. High Contrast
+        const isHighContrast = localStorage.getItem('finance_access_contrast') === 'true';
+        root.classList.toggle('high-contrast', isHighContrast);
+
+        console.log('Accessibility Modes Applied:', { colorBlindMode, isDyslexic, isHighContrast });
+    }
+
+    setAccessMode(mode, value) {
+        // Handle Color Blindness
+        if (mode === 'colorblind') {
+            const root = document.documentElement;
+            // Remove existing filters
+            root.classList.remove('protanopia', 'deuteranopia', 'tritanopia');
+            if (value !== 'none') {
+                root.classList.add(value);
+            }
+            localStorage.setItem('finance_access_colorblind', value);
+        } else {
+            // Handle boolean toggles (dyslexic, contrast)
+            const key = `finance_access_${mode}`;
+            localStorage.setItem(key, value);
+
+            if (mode === 'dyslexic') {
+                document.documentElement.classList.toggle('dyslexic-font', value);
+            } else if (mode === 'contrast') {
+                document.documentElement.classList.toggle('high-contrast', value);
+            }
+        }
+
+        console.log(`Access Mode Set: ${mode} = ${value}`);
+
+        // 1. Manually update buttons for instant feedback (no flicker)
+        if (mode === 'colorblind') {
+            document.querySelectorAll('button[data-mode]').forEach(btn => {
+                const isSelected = btn.dataset.mode === value;
+                if (isSelected) {
+                    btn.classList.remove('border-transparent', 'bg-gray-50', 'dark:bg-white/5', 'hover:bg-gray-100', 'dark:hover:bg-white/10');
+                    btn.classList.add('border-brand-primary', 'bg-brand-primary/5', 'dark:bg-brand-primary/10', 'shadow-md', 'shadow-brand-primary/20');
+
+                    // Add checkmark if missing
+                    if (!btn.querySelector('.fa-check')) {
+                        const iconContainer = btn.querySelector('.w-12');
+                        if (iconContainer && iconContainer.parentNode) {
+                            const check = document.createElement('div');
+                            check.className = 'absolute top-4 right-4 bg-brand-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md animate-fade-in';
+                            check.innerHTML = '<i class="fa-solid fa-check"></i>';
+                            iconContainer.parentNode.appendChild(check);
+                        }
+                    }
+                } else {
+                    btn.classList.add('border-transparent', 'bg-gray-50', 'dark:bg-white/5', 'hover:bg-gray-100', 'dark:hover:bg-white/10');
+                    btn.classList.remove('border-brand-primary', 'bg-brand-primary/5', 'dark:bg-brand-primary/10', 'shadow-md', 'shadow-brand-primary/20');
+
+                    // Remove checkmark
+                    const check = btn.querySelector('.absolute.top-4.right-4');
+                    if (check) check.remove();
+                }
+            });
+        }
+
+        // 2. Re-render safely (Sync)
+        const tab = mode === 'colorblind' ? 'appearance' : 'general';
+        try {
+            this.renderSettings(tab);
+        } catch (e) {
+            console.error('Error rendering settings:', e);
         }
     }
 
@@ -1269,10 +1525,17 @@ class UI {
         `;
     }
 
+    async updateLanguage(langCode) {
+        // ... (not changing this)
+    }
+
     _renderColorBlindOption(mode, label, icon, colorClass, currentMode) {
         const isActive = currentMode === mode;
+        // DEBUG:
+        // console.log(`Rendering CB Option: ${mode} vs current ${currentMode} -> Active: ${isActive}`);
+
         return `
-            <button onclick="window.ui.setAccessMode('colorblind', '${mode}')" 
+            <button onclick="window.ui.setAccessMode('colorblind', '${mode}')" data-mode="${mode}"
                 class="relative p-5 rounded-2xl border-2 transition-all duration-300 text-left group
                 ${isActive
                 ? 'border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10 shadow-md shadow-brand-primary/20'
@@ -1812,47 +2075,212 @@ class UI {
         document.getElementById('investments-content').innerHTML = content;
     }
 
-    renderInvestmentMarket() {
-        const content = `
+    async renderInvestmentMarket() {
+        const container = document.getElementById('investments-content');
+
+        // 1. Initial Skeleton / Loading State
+        container.innerHTML = `
             <div class="space-y-6 animate-fade-in">
-                <!-- Market Placeholder Card -->
-                <div class="bg-white dark:bg-dark-surface rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-white/10 text-center transition-colors">
-                    <div class="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center text-gray-400 dark:text-dark-text/40 text-2xl mx-auto mb-4">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
-                    <h3 class="font-bold text-brand-text dark:text-dark-text mb-2">Mercado en Tiempo Real</h3>
-                    <p class="text-slate-500 dark:text-dark-text/60 text-sm mb-6">Conectando con la API de Bolsa...</p>
-                    
-                    <!-- Placeholder Chart -->
-                    <div class="h-40 bg-gray-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
-                        <p class="text-xs font-bold text-gray-400 dark:text-dark-text/40 uppercase">Gráfico de Mercado (Placeholder)</p>
+                <!-- Search Bar -->
+                <div class="relative">
+                    <input type="text" id="stock-search" placeholder="Buscar acción (ej. AAPL, TSLA)..." 
+                        class="w-full bg-white dark:bg-dark-surface border-none rounded-2xl py-4 pl-12 pr-4 shadow-sm text-brand-text dark:text-dark-text font-bold focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                        onkeydown="if(event.key === 'Enter') window.ui.handleStockSearch(this.value)">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <button onclick="window.ui.handleStockSearch(document.getElementById('stock-search').value)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-brand-primary text-white p-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 dark:shadow-none">
+                        Buscar
+                    </button>
+                </div>
+
+                <div id="market-results"></div>
+
+                <!-- Market Indices -->
+                <div>
+                    <h3 class="font-bold text-brand-text dark:text-dark-text mb-4 px-2 text-lg">Índices Globales</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="indices-container">
+                        ${[1, 2, 3, 4].map(() => `
+                            <div class="bg-white dark:bg-dark-surface p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 animate-pulse">
+                                <div class="h-3 w-16 bg-gray-200 dark:bg-white/10 rounded mb-2"></div>
+                                <div class="h-6 w-24 bg-gray-200 dark:bg-white/10 rounded"></div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
 
-                <!-- Placeholder Table -->
-                <div class="bg-white dark:bg-dark-surface rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-white/10 transition-colors">
-                    <h3 class="font-bold text-brand-text dark:text-dark-text mb-4 px-2">Activos Populares</h3>
-                    <div class="space-y-4">
+                <!-- Top Movers -->
+                <div class="bg-white dark:bg-dark-surface rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-white/10">
+                    <h3 class="font-bold text-brand-text dark:text-dark-text mb-4">Top Motores (Tech)</h3>
+                    <div class="space-y-4" id="movers-container">
                         ${[1, 2, 3, 4, 5].map(() => `
                             <div class="flex items-center justify-between animate-pulse">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10"></div>
                                     <div class="space-y-2">
                                         <div class="h-3 w-16 bg-gray-200 dark:bg-white/10 rounded"></div>
-                                        <div class="h-2 w-24 bg-gray-100 dark:bg-white/5 rounded"></div>
                                     </div>
                                 </div>
-                                <div class="space-y-2 text-right">
-                                    <div class="h-3 w-12 bg-gray-200 dark:bg-white/10 rounded ml-auto"></div>
-                                    <div class="h-2 w-8 bg-gray-100 dark:bg-white/5 rounded ml-auto"></div>
-                                </div>
+                                <div class="h-4 w-12 bg-gray-200 dark:bg-white/10 rounded"></div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             </div>
         `;
-        document.getElementById('investments-content').innerHTML = content;
+
+        // 2. Fetch Data
+        try {
+            const [indices, movers] = await Promise.all([
+                window.api.getMarketIndices(),
+                window.api.getMarketMovers()
+            ]);
+
+            // 3. Render Indices
+            const indicesHtml = indices.map(idx => {
+                const isPos = idx.d >= 0;
+                const colorClass = isPos ? 'text-green-500' : 'text-red-500';
+                const icon = isPos ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                const bgClass = isPos ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20';
+
+                return `
+                    <div class="bg-white dark:bg-dark-surface p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 hover:scale-[1.02] transition-transform">
+                        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 truncate">${idx.name}</p>
+                        <p class="text-lg font-bold text-brand-text dark:text-dark-text mb-1">$${idx.c}</p>
+                        <div class="flex items-center gap-1 ${colorClass} text-xs font-bold">
+                            <span class="${bgClass} px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1">
+                                <i class="fa-solid ${icon}"></i> ${idx.dp}%
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('indices-container').innerHTML = indicesHtml;
+
+            // 4. Render Movers
+            const moversHtml = movers.map(stock => {
+                const isPos = stock.d >= 0;
+                const colorClass = isPos ? 'text-green-500' : 'text-red-500';
+                return `
+                    <div class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer" onclick="window.ui.handleStockSearch('${stock.symbol}')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center font-bold text-xs text-brand-text dark:text-white">
+                                ${stock.symbol.substring(0, 2)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-brand-text dark:text-dark-text text-sm">${stock.symbol}</h4>
+                                <p class="text-xs text-slate-500">$${stock.c}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                             <span class="${isPos ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} px-2 py-1 rounded-lg text-xs font-bold">
+                                ${isPos ? '+' : ''}${stock.dp}%
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('movers-container').innerHTML = moversHtml;
+
+        } catch (err) {
+            console.error('Market Data Error:', err);
+            container.innerHTML += `<div class="p-4 bg-red-50 text-red-500 text-center rounded-xl my-4">Error cargando datos de mercado.</div>`;
+        }
+    }
+
+    async handleStockSearch(query) {
+        if (!query) return;
+
+        const resultsContainer = document.getElementById('market-results');
+        resultsContainer.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-brand-primary"></i> Buscando...</div>';
+
+        try {
+            // Check if it's a direct symbol quote or a search
+            let data = null;
+            if (query.length <= 5) {
+                // Try direct quote first
+                try {
+                    const quote = await window.api.getQuote(query.toUpperCase());
+                    const profile = await window.api.getProfile(query.toUpperCase());
+                    data = { ...quote, ...profile, symbol: query.toUpperCase() };
+                } catch (e) {
+                    // Fallback to search
+                }
+            }
+
+            if (!data) {
+                // Search list
+                const searchRes = await window.api.search(query);
+                if (searchRes.length > 0) {
+                    // Just show the first one for now or a list? Let's show listing.
+                    resultsContainer.innerHTML = `
+                        <div class="bg-white dark:bg-dark-surface rounded-2xl p-4 mb-6 shadow-lg border border-brand-primary/20">
+                            <h4 class="font-bold mb-3 text-brand-text dark:text-white">Resultados:</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                ${searchRes.map(s => `
+                                    <button onclick="window.ui.handleStockSearch('${s.symbol}')" class="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-white/10 rounded-lg flex justify-between">
+                                        <span class="font-bold">${s.symbol}</span>
+                                        <span class="text-slate-500 text-sm truncate">${s.description}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                     `;
+                    return;
+                } else {
+                    resultsContainer.innerHTML = '<p class="text-center text-slate-500 py-4">No se encontraron resultados.</p>';
+                    return;
+                }
+            }
+
+            // Render Single Stock Detail
+            const isPos = data.d >= 0;
+            const colorClass = isPos ? 'text-green-500' : 'text-red-500';
+
+            resultsContainer.innerHTML = `
+                <div class="bg-white dark:bg-dark-surface rounded-3xl p-6 mb-6 shadow-xl border border-gray-100 dark:border-white/10 animate-fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 ${isPos ? 'bg-green-500' : 'bg-red-500'} opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div class="flex justify-between items-start mb-6 relative">
+                        <div class="flex items-center gap-4">
+                            <img src="${data.logo || 'https://ui-avatars.com/api/?name=' + data.symbol}" class="w-12 h-12 rounded-full bg-white shadow-sm object-contain p-1">
+                            <div>
+                                <h2 class="text-2xl font-bold text-brand-text dark:text-white tracking-tight">${data.name || data.symbol}</h2>
+                                <p class="text-brand-muted dark:text-slate-400 font-medium">${data.ticker || data.symbol} • ${data.finnhubIndustry || 'Stock'}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                             <p class="text-3xl font-bold text-brand-text dark:text-white">$${data.c}</p>
+                             <p class="${colorClass} font-bold flex items-center justify-end gap-1">
+                                <i class="fa-solid ${isPos ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                                ${data.dp}% ($${data.d})
+                             </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-white/5 rounded-2xl p-4">
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold">Apertura</p>
+                            <p class="font-bold text-slate-700 dark:text-slate-200">$${data.o}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold">Alto</p>
+                            <p class="font-bold text-slate-700 dark:text-slate-200">$${data.h}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold">Bajo</p>
+                            <p class="font-bold text-slate-700 dark:text-slate-200">$${data.l}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold">Cap. Mercado</p>
+                            <p class="font-bold text-slate-700 dark:text-slate-200">${data.marketCapitalization ? (data.marketCapitalization / 1000).toFixed(2) + 'B' : 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        } catch (err) {
+            console.error(err);
+            resultsContainer.innerHTML = '<p class="text-center text-red-500 py-4">Error al buscar acción.</p>';
+        }
     }
 
     selectPlan(id) {
@@ -1941,12 +2369,12 @@ class UI {
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
                             <input type="email" name="email" required placeholder="ejemplo@email.com"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all placeholder:font-medium">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña Nueva</label>
                             <input type="password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all placeholder:font-medium">
                         </div>
 
                         <div id="auth-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 p-3 rounded-lg"></div>
@@ -1979,12 +2407,12 @@ class UI {
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
                             <input type="email" name="email" required 
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
                             <input type="password" name="password" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
                         </div>
 
                         <div id="auth-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 p-3 rounded-lg"></div>
@@ -2100,38 +2528,78 @@ class UI {
                         <p class="text-brand-muted dark:text-dark-text/60">Define tu objetivo de ahorro.</p>
                     </div>
 
-                    <form onsubmit="window.ui.handleCreatePiggyBank(event)" class="space-y-4">
+                    <form onsubmit="window.ui.handleCreatePiggyBank(event)" class="space-y-6">
+                        
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Cantidad a añadir (€)</label>
-                            <input type="number" name="amount" required autofocus placeholder="5" min="5" step="0.01"
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Nombre de la Hucha (Opcional)</label>
+                            <input type="text" name="name" placeholder="Ej. Viaje a Japón" 
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                        </div>
+
+                        <!-- Amount to Add (Assuming this is the recurring or initial amount?) User said "cantidad a añadir" -->
+                        <!-- If they mean "Initial Balance", we map it to initial. If they mean "Recurring", we store it as metadata? -->
+                        <!-- Let's map "Cantidad a añadir" to "Initial Balance" for now as it's the only money input besides goal -->
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Cantidad Inicial / A añadir (€)</label>
+                            <input type="number" name="initial" required autofocus placeholder="5" min="0" step="0.01"
                                 oninput="this.value = this.value.replace(/[^0-9.]/g, '')"
                                 class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-4 text-xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Objetivo (€)</label>
-                                <input type="number" name="target" required placeholder="1000"
-                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '')"
-                                    class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Objetivo (€)</label>
+                            <input type="number" name="target" required placeholder="1000" min="1" step="0.01"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')"
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-center">
+                        </div>
+
+                        <!-- Contribution Mode -->
+                        <div class="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-slate-100 dark:border-white/5">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-3">Modo de Aportación</label>
+                            
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="contributionMode" value="manual" checked class="peer sr-only" onchange="document.getElementById('autoFields').classList.add('hidden')">
+                                    <div class="text-center py-2 rounded-lg border border-slate-200 dark:border-white/10 peer-checked:bg-brand-primary peer-checked:text-white peer-checked:border-brand-primary transition-all text-sm font-bold text-slate-500 dark:text-slate-400">
+                                        Manual
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="contributionMode" value="auto" class="peer sr-only" onchange="document.getElementById('autoFields').classList.remove('hidden')">
+                                    <div class="text-center py-2 rounded-lg border border-slate-200 dark:border-white/10 peer-checked:bg-brand-primary peer-checked:text-white peer-checked:border-brand-primary transition-all text-sm font-bold text-slate-500 dark:text-slate-400">
+                                        Automático
+                                    </div>
+                                </label>
                             </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Inicial (€)</label>
-                                <input type="number" name="initial" placeholder="0"
-                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '')"
-                                    class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+
+                            <div id="autoFields" class="hidden space-y-3 animate-fade-in">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Cantidad Mensual (€)</label>
+                                    <input type="number" name="autoAmount" placeholder="50" min="1" step="0.01"
+                                        class="w-full bg-white dark:bg-dark-bg border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-lg px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Día del Mes (1-28)</label>
+                                    <input type="number" name="autoDay" placeholder="1" min="1" max="28"
+                                        class="w-full bg-white dark:bg-dark-bg border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-lg px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary">
+                                </div>
+                                <p class="text-xs text-brand-muted dark:text-slate-500 leading-tight">
+                                    <i class="fa-solid fa-circle-info mr-1"></i>
+                                    Se descontará automáticamente de tu saldo al abrir la app.
+                                </p>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Tipo</label>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-dark-text/80 mb-2">Tipo de Hucha</label>
                             <select name="type" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 dark:text-dark-text rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all cursor-pointer">
                                 <option value="simple">Hucha Simple</option>
                                 <option value="interest">Genera Interés (2% Anual)</option>
                             </select>
                         </div>
 
-                        <button type="submit" class="w-full py-4 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none hover:scale-[1.02] transition-transform active:scale-95 mt-6">
+                        <button type="submit" class="w-full py-4 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none hover:scale-[1.02] transition-transform active:scale-95 mt-2">
                             Crear Hucha
                         </button>
                     </form>
@@ -2143,11 +2611,21 @@ class UI {
     handleCreatePiggyBank(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
+
+        // Auto-generate Name if empty
+        const userProvidedName = formData.get('name').trim();
+        const existingCount = window.store.piggyBanks.length;
+        const finalName = userProvidedName || `Hucha ${existingCount + 1}`;
+
         const data = {
-            name: formData.get('name'),
+            name: finalName,
             target: formData.get('target'),
-            initial: formData.get('initial'),
+            initial: formData.get('initial') || 0,
             type: formData.get('type'),
+            // Auto Contribution Data
+            contributionMode: formData.get('contributionMode'),
+            autoAmount: formData.get('autoAmount'),
+            autoDay: formData.get('autoDay'),
             // Random default color/icon for now
             color: 'bg-purple-100 text-purple-600',
             icon: 'fa-piggy-bank'

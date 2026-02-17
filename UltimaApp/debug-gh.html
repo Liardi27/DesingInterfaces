@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Debug CORS</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 2rem;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+
+        .box {
+            border: 1px solid #444;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #222;
+            overflow-wrap: break-word;
+        }
+
+        h1 {
+            color: #fff;
+        }
+
+        .red {
+            color: #ff6b6b;
+        }
+
+        .blue {
+            color: #60a5fa;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🕵️‍♂️ Detector de Origen</h1>
+
+    <div class="box">
+        <p>Tu navegador dice que tu ORIGEN exacto es:</p>
+        <p id="origin" class="blue">Detectando...</p>
+        <p style="color: #999; font-size: 0.9rem;">(Copia esto EXACTAMENTE y pégalo en Supabase)</p>
+    </div>
+
+    <div class="box">
+        <p>Comprobando conexión a Supabase...</p>
+        <div id="status">⏳ Conectando...</div>
+    </div>
+
+    <script>
+        // 1. Mostrar Origen
+        const origin = window.location.origin;
+        document.getElementById('origin').textContent = origin;
+
+        // 2. Probar Conexión
+        const SUPABASE_URL = 'https://qtcdkqqjlrphfxrhzpkx.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0Y2RrcXFqbHJwaGZ4cmh6cGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMjYxNjEsImV4cCI6MjA4NTYwMjE2MX0.43vwOFUXGMTRLKary-rYct95g5ZRjGRpuU6h6qYMoW8';
+
+        async function test() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=count`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+
+                if (res.ok) {
+                    document.getElementById('status').innerHTML = "✅ ¡CONEXIÓN EXITOSA! (Código 200)<br>Si ves esto, ya funciona.";
+                } else {
+                    document.getElementById('status').innerHTML = `❌ FALLO: Código ${res.status}<br>CORS Bloqueado probablemente.`;
+                }
+            } catch (e) {
+                document.getElementById('status').innerHTML = `❌ ERROR CRÍTICO: ${e.message}`;
+            }
+        }
+
+        test();
+    </script>
+</body>
+
+</html>

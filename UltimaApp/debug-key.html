@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Debug WRITE Permissions</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body style="font-family: monospace; padding: 2rem; background: #1a1a1a; color: #00ff00;">
+    <h1>📝 Write Permission Debugger</h1>
+    <p>Testing if we can WRITE to Supabase...</p>
+    <div id="log">Initializing...</div>
+    <button onclick="window.location.href='index.html'" style="padding:10px; margin-top:20px;">Back to App</button>
+
+    <script>
+        const log = (msg) => {
+            document.getElementById('log').innerHTML += `<br>${msg}`;
+            console.log(msg);
+        };
+
+        const URL = 'https://vedpoayvzzoozpshghwy.supabase.co';
+        const KEY = 'sb_publishable_2KQubV3vQT3oVH6qRMyS3g_q3iT6wH6';
+
+        async function test() {
+            try {
+                const client = supabase.createClient(URL, KEY);
+
+                // 1. Check if we have a session (we need to be logged in to write!)
+                const { data: { session }, error: authError } = await client.auth.getSession();
+
+                if (!session) {
+                    log(`⚠️ NO ACTIVE SESSION. You must be logged in to test writes.`);
+                    log(`Redirecting to login...`);
+                    // Try to restore session from local storage manually if possible, or just fail
+                    // Actually, the JS client should auto-detect from localStorage if on same domain.
+                    // But since this file is separate, it might share localStorage if on same origin (localhost).
+                } else {
+                    log(`✅ User Authenticated: ${session.user.email}`);
+
+                    // 2. Try to INSERT a dummy transaction
+                    log(`Attempting to INSERT a test transaction...`);
+                    const testTx = {
+                        user_id: session.user.id,
+                        type: 'expense',
+                        amount: 1.00,
+                        concept: 'TEST_WRITE_DEBUG',
+                        category: 'others',
+                        date: new Date().toISOString().split('T')[0]
+                    };
+
+                    const { data, error } = await client
+                        .from('transactions')
+                        .insert([testTx])
+                        .select();
+
+                    if (error) {
+                        log(`❌ WRITE FAILED: ${JSON.stringify(error)}`);
+                        log(`⚠️ DIAGNOSIS: ${error.message}`);
+                        log(`possible causes: RLS Policy missing for INSERT, or column mismatch.`);
+                    } else {
+                        log(`✅ WRITE SUCCESS! Inserted ID: ${data[0].id}`);
+
+                        // cleanup
+                        await client.from('transactions').delete().eq('id', data[0].id);
+                        log(`(Cleaned up test data)`);
+                    }
+                }
+
+            } catch (e) {
+                log(`❌ CRITICAL EXCEPTION: ${e.message}`);
+            }
+        }
+
+        test();
+    </script>
+</body>
+
+</html>

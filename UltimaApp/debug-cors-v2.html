@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Supabase Debugger V2</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #111;
+            color: #ddd;
+        }
+
+        .box {
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #222;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #818cf8;
+        }
+
+        .success {
+            color: #4ade80;
+        }
+
+        .error {
+            color: #f87171;
+        }
+
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🕵️ Supabase Connection Debugger</h1>
+    <p>Use this to check if your browser can actually reach Supabase.</p>
+
+    <div class="box">
+        <h3>1. Configuration</h3>
+        <p>URL: <span id="conf-url">...</span></p>
+        <p>Key (Prefix): <span id="conf-key">...</span></p>
+        <button onclick="runDiagnostics()">▶ Run Diagnostics</button>
+        <button onclick="forceUnregisterSW()" style="background:#991b1b; margin-left:10px;">⚠ Force Unregister Service
+            Worker</button>
+    </div>
+
+    <div class="box">
+        <h3>2. Service Worker Status</h3>
+        <div id="sw-status">checking...</div>
+    </div>
+
+    <div class="box">
+        <h3>3. Raw Fetch Test (No Client)</h3>
+        <pre id="raw-test">waiting...</pre>
+    </div>
+
+    <div class="box">
+        <h3>4. Client Data Test</h3>
+        <pre id="client-test">waiting...</pre>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://qtcdkqqjlrphfxrhzpkx.supabase.co';
+        // NOTE: This key is visible in client-side code anyway, so it's 'public' by definition of the app architecture.
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0Y2RrcXFqbHJwaGZ4cmh6cGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMjYxNjEsImV4cCI6MjA4NTYwMjE2MX0.43vwOFUXGMTRLKary-rYct95g5ZRjGRpuU6h6qYMoW8';
+
+        document.getElementById('conf-url').textContent = SUPABASE_URL;
+        document.getElementById('conf-key').textContent = SUPABASE_KEY.substring(0, 20) + '...';
+
+        async function forceUnregisterSW() {
+            const el = document.getElementById('sw-status');
+            el.textContent = 'Unregistering...';
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                    el.innerHTML = '<span class="success">✅ All Service Workers Unregistered. Reload page to verify.</span>';
+                } else {
+                    el.textContent = 'Service Worker not supported.';
+                }
+            } catch (e) {
+                el.innerHTML = `<span class="error">❌ Error: ${e.message}</span>`;
+            }
+        }
+
+        async function runDiagnostics() {
+            // 1. Check SW
+            const swEl = document.getElementById('sw-status');
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                if (regs.length > 0) {
+                    swEl.innerHTML = `<span class="error">⚠ Active Service Workers found: ${regs.length}. Attempting to bypass...</span>`;
+                } else {
+                    swEl.innerHTML = '<span class="success">✅ No Active Service Workers. Clean slate.</span>';
+                }
+            } else {
+                swEl.textContent = 'SW Not supported.';
+            }
+
+            // 2. Raw Fetch
+            const rawEl = document.getElementById('raw-test');
+            rawEl.textContent = 'Fetching...';
+            try {
+                // Try a simple health check or just a rest call
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=count`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                const txt = await res.text();
+                rawEl.innerHTML = `Status: ${res.status} ${res.statusText}\nType: ${res.type}\nBody: ${txt.substring(0, 100)}...`;
+
+                if (res.ok) rawEl.classList.add('success');
+                else rawEl.classList.add('error');
+
+            } catch (e) {
+                rawEl.innerHTML = `<span class="error">❌ NETWORK ERROR: ${e.message} - ${e.name}</span>`;
+            }
+
+            // 3. Client Test
+            const clientEl = document.getElementById('client-test');
+            clientEl.textContent = 'Connecting...';
+            try {
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                const { data, error, count } = await supabase
+                    .from('transactions')
+                    .select('*', { count: 'exact', head: true });
+
+                if (error) throw error;
+
+                clientEl.innerHTML = `<span class="success">✅ SUCCESS! Count: ${count}</span>\nData loaded correctly via SDK.`;
+            } catch (e) {
+                clientEl.innerHTML = `<span class="error">❌ SDK ERROR: ${e.message || JSON.stringify(e)}</span>`;
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+
+</html>

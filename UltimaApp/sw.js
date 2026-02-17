@@ -32,10 +32,16 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // Network-first for JS files (always get fresh code), cache-first for CDN assets
     const url = new URL(e.request.url);
+
+    // 1. BYPASS SUPABASE (CRITICAL FIX)
+    // Don't let SW touch API requests. Let browser handle CORS/Network directly.
+    if (url.hostname.includes('supabase.co')) {
+        return; // Return nothing = browser performs default fetch
+    }
+
+    // 2. NETWORK-FIRST for Local JS (Dev experience)
     if (url.pathname.endsWith('.js') && url.origin === self.location.origin) {
-        // Network-first for local JS files
         e.respondWith(
             fetch(e.request).then(response => {
                 const clone = response.clone();
@@ -43,10 +49,12 @@ self.addEventListener('fetch', (e) => {
                 return response;
             }).catch(() => caches.match(e.request))
         );
-    } else {
-        // Cache-first for external CDN assets
-        e.respondWith(
-            caches.match(e.request).then((response) => response || fetch(e.request))
-        );
+        return;
     }
+
+    // 3. CACHE-FIRST for CDNs & Assets (Performance)
+    // Only engage cache for known static assets or CDNs (excluding Supabase)
+    e.respondWith(
+        caches.match(e.request).then((response) => response || fetch(e.request))
+    );
 });

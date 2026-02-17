@@ -92,14 +92,19 @@ class Auth {
             this.disableGuestMode();
             return;
         }
-        const { error } = await window.supabaseClient.auth.signOut();
-        if (error) throw error;
+
+        try {
+            await window.supabaseClient.auth.signOut();
+        } catch (error) {
+            console.warn('Supabase SignOut failed (Network?), forcing local cleanup:', error);
+        }
 
         // Session Cleanup: Clear user-specific local data to prevent leaks
         localStorage.removeItem('finance_piggybanks');
         localStorage.removeItem('finance_settings');
         localStorage.removeItem('finance_categories');
         localStorage.removeItem('finance_data'); // Just in case
+        localStorage.removeItem('sb-qtcdkqqjlrphfxrhzpkx-auth-token'); // Clear Supabase token specifically
 
         // Force reload to reset application state
         window.location.reload();

@@ -25,6 +25,15 @@
   <!-- Supabase (Versión Fija) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
 
+  <!-- Local Development Check -->
+  <script>
+    if (window.location.protocol === 'file:') {
+      alert("⚠️ ATENCIÓN: No abras el archivo directamente.\n\nDebes usar el servidor local 'localhost' para que funcione la base de datos (Supabase).\n\nPor favor, abre 'http://localhost:5500' en tu navegador.");
+      window.location.href = "http://localhost:5500/index.html";
+      document.body.innerHTML = '<div style="padding:50px; text-align:center;"><h1>⚠️ ERROR: Protocolo Incorrecto</h1><p>No abras el archivo con doble clic.</p><p>Usa este enlace: <a href="http://localhost:5500">http://localhost:5500</a></p></div>';
+    }
+  </script>
+
   <!-- Custom Config for Tailwind -->
   <script>
     tailwind.config = {
@@ -388,6 +397,7 @@
   <script src="js/i18n.js?v=7"></script>
   <script src="js/auth.js?v=7"></script>
   <script src="js/store.js?v=7"></script>
+  <script src="js/api.js?v=7"></script>
   <script src="js/router.js?v=7"></script>
   <script src="js/ui.js?v=7"></script>
   <script src="js/app.js?v=7"></script>
@@ -404,11 +414,12 @@
         // Clear ALL caches
         return caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
       }).then(() => {
-        // Register fresh SW
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log('Service Worker re-registered with fresh cache'))
-          .catch(err => console.warn('Service Worker registration failed:', err));
-      });
+        // Register fresh SW with cache-busting timestamp
+        return navigator.serviceWorker.register('sw.js?v=' + Date.now());
+      }).then((registration) => {
+        console.log('Service Worker re-registered with fresh cache:', registration);
+      })
+        .catch(err => console.warn('Service Worker registration failed:', err));
     } else {
       console.warn('Service Worker skipped: Not https or localhost');
     }

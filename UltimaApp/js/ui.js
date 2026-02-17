@@ -318,10 +318,7 @@ class UI {
                 }
                     </div>` : ''}
 
-                    <button onclick="if(confirm('¿Borrar este movimiento?')) { window.store.deleteTransaction(${id}); window.ui.showNotification('Movimiento eliminado', 'error'); this.closest('.fixed').remove(); }" 
-                        class="w-full py-4 bg-red-50 dark:bg-red-900/10 text-red-500 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-trash-can"></i> Eliminar Movimiento
-                    </button>
+
                 </div>
             </div>
         `;
@@ -1163,7 +1160,7 @@ class UI {
 
         // 2. Dyslexic Font
         const isDyslexic = localStorage.getItem('finance_access_dyslexic') === 'true';
-        root.classList.toggle('dyslexic-font', isDyslexic);
+        root.classList.toggle('font-dyslexic', isDyslexic);
 
         // 3. High Contrast
         const isHighContrast = localStorage.getItem('finance_access_contrast') === 'true';
@@ -1176,62 +1173,58 @@ class UI {
         // Handle Color Blindness
         if (mode === 'colorblind') {
             const root = document.documentElement;
-            // Remove existing filters
             root.classList.remove('protanopia', 'deuteranopia', 'tritanopia');
             if (value !== 'none') {
                 root.classList.add(value);
             }
             localStorage.setItem('finance_access_colorblind', value);
+
+            // Instantly update all color blind option buttons via className swap
+            const optionMeta = {
+                'none': { label: 'Visión Normal', icon: 'fa-eye', colorClass: 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-white' },
+                'protanopia': { label: 'Protanopia (Rojo)', icon: 'fa-eye-slash', colorClass: 'bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400' },
+                'deuteranopia': { label: 'Deuteranopia (Verde)', icon: 'fa-eye-low-vision', colorClass: 'bg-green-50 dark:bg-green-900/10 text-green-600 dark:text-green-400' },
+                'tritanopia': { label: 'Tritanopia (Azul)', icon: 'fa-glasses', colorClass: 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400' }
+            };
+
+            document.querySelectorAll('button[data-mode]').forEach(btn => {
+                const btnMode = btn.dataset.mode;
+                const meta = optionMeta[btnMode];
+                if (!meta) return;
+                const isSelected = (btnMode === value);
+
+                // Swap entire className to avoid Tailwind slash/colon issues
+                btn.className = isSelected
+                    ? 'relative p-5 rounded-2xl border-2 transition-all duration-300 text-left group border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10 shadow-md shadow-brand-primary/20'
+                    : 'relative p-5 rounded-2xl border-2 transition-all duration-300 text-left group border-transparent bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10';
+
+                // Rebuild innerHTML for checkmark
+                btn.innerHTML = `
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center ${meta.colorClass} text-xl shadow-sm transition-transform">
+                            <i class="fa-solid ${meta.icon}"></i>
+                        </div>
+                        ${isSelected ? '<div class="absolute top-4 right-4 bg-brand-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-check"></i></div>' : ''}
+                    </div>
+                    <span class="block text-base font-bold text-slate-700 dark:text-slate-200 mb-1">${meta.label}</span>
+                    <span class="text-xs text-slate-400 group-hover:text-slate-500 transition-colors">
+                        ${btnMode === 'none' ? 'Visión Normal' : 'Filtro de corrección activo'}
+                    </span>`;
+            });
+
         } else {
             // Handle boolean toggles (dyslexic, contrast)
             const key = `finance_access_${mode}`;
             localStorage.setItem(key, value);
 
             if (mode === 'dyslexic') {
-                document.documentElement.classList.toggle('dyslexic-font', value);
+                document.documentElement.classList.toggle('font-dyslexic', value);
             } else if (mode === 'contrast') {
                 document.documentElement.classList.toggle('high-contrast', value);
             }
         }
 
         console.log(`Access Mode Set: ${mode} = ${value}`);
-
-        // 1. Manually update buttons for instant feedback (no flicker)
-        if (mode === 'colorblind') {
-            document.querySelectorAll('button[data-mode]').forEach(btn => {
-                const isSelected = btn.dataset.mode === value;
-                if (isSelected) {
-                    btn.classList.remove('border-transparent', 'bg-gray-50', 'dark:bg-white/5', 'hover:bg-gray-100', 'dark:hover:bg-white/10');
-                    btn.classList.add('border-brand-primary', 'bg-brand-primary/5', 'dark:bg-brand-primary/10', 'shadow-md', 'shadow-brand-primary/20');
-
-                    // Add checkmark if missing
-                    if (!btn.querySelector('.fa-check')) {
-                        const iconContainer = btn.querySelector('.w-12');
-                        if (iconContainer && iconContainer.parentNode) {
-                            const check = document.createElement('div');
-                            check.className = 'absolute top-4 right-4 bg-brand-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md animate-fade-in';
-                            check.innerHTML = '<i class="fa-solid fa-check"></i>';
-                            iconContainer.parentNode.appendChild(check);
-                        }
-                    }
-                } else {
-                    btn.classList.add('border-transparent', 'bg-gray-50', 'dark:bg-white/5', 'hover:bg-gray-100', 'dark:hover:bg-white/10');
-                    btn.classList.remove('border-brand-primary', 'bg-brand-primary/5', 'dark:bg-brand-primary/10', 'shadow-md', 'shadow-brand-primary/20');
-
-                    // Remove checkmark
-                    const check = btn.querySelector('.absolute.top-4.right-4');
-                    if (check) check.remove();
-                }
-            });
-        }
-
-        // 2. Re-render safely (Sync)
-        const tab = mode === 'colorblind' ? 'appearance' : 'general';
-        try {
-            this.renderSettings(tab);
-        } catch (e) {
-            console.error('Error rendering settings:', e);
-        }
     }
 
     renderSettings(activeTab = 'general') {
@@ -1902,45 +1895,19 @@ class UI {
     }
 
     toggleDarkMode() {
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('finance_dark_mode', isDark);
-    }
+        const currentlyDark = localStorage.getItem('finance_dark_mode') === 'true';
+        const newState = !currentlyDark;
 
-    setAccessMode(mode, value) {
-        if (mode === 'dyslexic') {
-            localStorage.setItem('finance_access_dyslexic', value);
-        } else if (mode === 'contrast') {
-            localStorage.setItem('finance_access_contrast', value);
-        } else if (mode === 'colorblind') {
-            localStorage.setItem('finance_access_colorblind', value);
+        if (newState) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
-        this.applyAccessibilityModes();
+
+        localStorage.setItem('finance_dark_mode', newState);
+        this.renderSettings('appearance');
     }
 
-    applyAccessibilityModes() {
-        const isDark = localStorage.getItem('finance_dark_mode') === 'true';
-        const isDyslexic = localStorage.getItem('finance_access_dyslexic') === 'true';
-        const isHighContrast = localStorage.getItem('finance_access_contrast') === 'true';
-        const colorBlindMode = localStorage.getItem('finance_access_colorblind') || 'none';
-
-        // Apply Dark Mode
-        if (isDark) document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
-
-        // Apply Dyslexia Font
-        if (isDyslexic) document.body.classList.add('font-dyslexic');
-        else document.body.classList.remove('font-dyslexic');
-
-        // Apply High Contrast
-        if (isHighContrast) document.body.classList.add('high-contrast');
-        else document.body.classList.remove('high-contrast');
-
-        // Apply Color Blindness
-        document.body.classList.remove('protanopia', 'deuteranopia', 'tritanopia');
-        if (colorBlindMode !== 'none') {
-            document.body.classList.add(colorBlindMode);
-        }
-    }
     renderInvestments(activeTab = 'simulator') {
         const tabs = [
             { id: 'simulator', label: 'Simulador', icon: 'fa-calculator' },

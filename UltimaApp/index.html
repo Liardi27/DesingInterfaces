@@ -13,7 +13,7 @@
 
   <!-- Google Fonts -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Lexend:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
 
   <!-- FontAwesome (Icons) -->
@@ -156,7 +156,7 @@
 
       --color-dark-bg: #0f172a;
       --color-dark-surface: #1e293b;
-      --color-dark-text: #f1f5f9;
+      --color-dark-text: #ffffff;
 
       --body-bg-light: #F5F2FF;
       --body-bg-dark: #0F0B1F;
@@ -171,6 +171,35 @@
       background-color: var(--body-bg-dark);
     }
 
+    /* Global Dark Mode Text Overrides - make all text lighter */
+    .dark .text-slate-700 {
+      color: #e2e8f0 !important;
+    }
+
+    .dark .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+
+    .dark .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+
+    .dark .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+
+    .dark .text-gray-500 {
+      color: #94a3b8 !important;
+    }
+
+    .dark .text-gray-600 {
+      color: #cbd5e1 !important;
+    }
+
+    .dark .text-gray-700 {
+      color: #e2e8f0 !important;
+    }
+
     /* Hide scrollbar for clean UI */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -183,9 +212,11 @@
 
     /* Accessibility Classes */
     .font-dyslexic {
-      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif !important;
-      line-height: 1.6 !important;
-      letter-spacing: 0.05em !important;
+      font-family: 'Lexend', 'Verdana', 'Trebuchet MS', sans-serif !important;
+      line-height: 1.8 !important;
+      letter-spacing: 0.04em !important;
+      word-spacing: 0.12em !important;
+      font-size: 105% !important;
     }
 
     .high-contrast {

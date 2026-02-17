@@ -545,7 +545,7 @@ class UI {
 
     renderAddTransaction() {
         this.app.innerHTML = `
-            <div class="max-w-md mx-auto bg-white dark:bg-dark-surface rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-white/10 animate-fade-in mt-4 transition-colors">
+            <div class="max-w-md md:max-w-2xl mx-auto bg-white dark:bg-dark-surface rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-white/10 animate-fade-in mt-4 transition-colors">
                 <h2 class="text-xl font-bold mb-6 text-center text-brand-text dark:text-dark-text">Añadir Movimiento</h2>
                 
                 <form id="addForm" onsubmit="event.preventDefault(); window.ui.handleSubmit(event);">
@@ -1151,6 +1151,10 @@ class UI {
     applyAccessibilityModes() {
         const root = document.documentElement;
 
+        // 0. Dark Mode
+        const isDark = localStorage.getItem('finance_dark_mode') === 'true';
+        root.classList.toggle('dark', isDark);
+
         // 1. Color Blindness
         const colorBlindMode = localStorage.getItem('finance_access_colorblind') || 'none';
         root.classList.remove('protanopia', 'deuteranopia', 'tritanopia');
@@ -1563,14 +1567,6 @@ class UI {
         `;
     }
 
-    readFileAsBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
 
     renderEditProfileModal() {
         const user = window.auth.user;
@@ -2334,14 +2330,14 @@ class UI {
 
                     <form onsubmit="window.auth.handleRegisterSubmit(event)" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
+                            <label class="block text-sm font-bold text-slate-900 mb-2">Email</label>
                             <input type="email" name="email" required placeholder="ejemplo@email.com"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all placeholder:font-medium">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all placeholder:font-medium">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña Nueva</label>
+                            <label class="block text-sm font-bold text-slate-900 mb-2">Contraseña Nueva</label>
                             <input type="password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all placeholder:font-medium">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all placeholder:font-medium">
                         </div>
 
                         <div id="auth-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 p-3 rounded-lg"></div>
@@ -2372,14 +2368,14 @@ class UI {
 
                     <form onsubmit="window.auth.handleSignInSubmit(event)" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
+                            <label class="block text-sm font-bold text-slate-900 mb-2">Email</label>
                             <input type="email" name="email" required 
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
+                            <label class="block text-sm font-bold text-slate-900 mb-2">Contraseña</label>
                             <input type="password" name="password" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all">
                         </div>
 
                         <div id="auth-error" class="hidden text-red-500 text-sm text-center font-bold bg-red-50 p-3 rounded-lg"></div>

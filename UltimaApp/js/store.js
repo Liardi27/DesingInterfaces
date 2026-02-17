@@ -173,7 +173,11 @@ class Store {
             window.IS_OFFLINE_MODE = false;
 
         } catch (err) {
-            console.error('Error loading transactions (Using Cache):', err);
+            console.error('Error loading transactions:', err);
+
+            // Determine failure reason
+            const isOffline = !navigator.onLine;
+            const isProjectPaused = err.message && (err.message.includes('upstream') || err.message.includes('503'));
 
             // Mark app as running in offline/cached mode
             window.IS_OFFLINE_MODE = true;
@@ -182,12 +186,21 @@ class Store {
             const localTx = localStorage.getItem('finance_transactions_cache');
             this.transactions = localTx ? JSON.parse(localTx) : [];
 
-            // Notify User via UI
+            // Notify User via UI with specific message
             const alert = document.createElement('div');
-            alert.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-full shadow-lg z-[50] text-sm font-bold flex items-center gap-2 animate-pulse';
-            alert.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Modo Sin Conexión (Datos en Caché)';
+            const colorClass = isOffline ? 'bg-orange-500' : 'bg-red-500';
+            const icon = isOffline ? 'fa-wifi' : 'fa-server';
+            const msg = isOffline
+                ? 'Modo Sin Conexión (Datos en Caché)'
+                : (isProjectPaused ? 'Error: Servidor Pausado (Supabase)' : 'Error de Conexión con Base de Datos');
+
+            alert.className = `fixed bottom-20 left-1/2 transform -translate-x-1/2 ${colorClass} text-white px-4 py-2 rounded-full shadow-lg z-[50] text-sm font-bold flex items-center gap-2 animate-pulse`;
+            alert.innerHTML = `<i class="fa-solid ${icon}"></i> ${msg}`;
             document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 5000);
+
+            // If it's a server error, keep it visible longer or until manual dismiss? 
+            // For now, 5s is fine, UI should probably have a persistent indicator if offline.
+            setTimeout(() => alert.remove(), 8000);
         }
     }
 

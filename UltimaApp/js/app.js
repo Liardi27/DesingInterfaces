@@ -17,4 +17,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.store.init(); // Load data
         window.router.init(); // Handle initial URL
     }, 10);
+
+    // Global Connectivity Listeners
+    window.addEventListener('online', () => {
+        console.log('Network is ONLINE. Attempting reconnection...');
+        if (window.ui) window.ui.showNotification('Conexión restaurada', 'success');
+        // Reload data if we were in offline mode
+        if (window.IS_OFFLINE_MODE && window.store) {
+            window.store.init();
+        }
+    });
+
+    window.addEventListener('offline', () => {
+        console.log('Network is OFFLINE.');
+        if (window.ui) window.ui.showNotification('Conexión perdida. Modo Offline activado.', 'error');
+        window.IS_OFFLINE_MODE = true;
+    });
 });

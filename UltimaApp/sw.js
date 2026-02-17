@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pocket-finance-v8';
+const CACHE_NAME = 'pocket-finance-v9';
 const ASSETS = [
     './',
     './index.html',
@@ -9,6 +9,8 @@ const ASSETS = [
     './js/store.js',
     './js/ui.js',
     './js/supa-client.js',
+    './assets/icon-192.png',
+    './assets/icon-512.png',
     'https://cdn.tailwindcss.com',
     'https://cdn.jsdelivr.net/npm/chart.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',

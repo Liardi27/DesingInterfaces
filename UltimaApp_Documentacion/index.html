@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PocketFinance — Documentación</title>
+  <meta name="description"
+    content="Documentación completa de PocketFinance: evolución, arquitectura, código y prompts utilizados.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="#" class="navbar-brand"><i class="fa-solid fa-wallet"></i> PocketFinance Docs</a>
+    <div class="navbar-links">
+      <a href="#timeline">Evolución</a>
+      <a href="#architecture">Arquitectura</a>
+      <a href="#features">Funcionalidades</a>
+      <a href="#code">Código</a>
+      <a href="#gallery">Galería</a>
+      <a href="#prompts">Prompts</a>
+      <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode"><i
+          class="fa-solid fa-moon"></i></button>
+      <button class="hamburger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#timeline">Evolución</a>
+    <a href="#architecture">Arquitectura</a>
+    <a href="#features">Funcionalidades</a>
+    <a href="#code">Código</a>
+    <a href="#gallery">Galería</a>
+    <a href="#prompts">Prompts</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="hero-badge"><i class="fa-solid fa-sparkles"></i> Documentación Oficial</span>
+    <h1>PocketFinance</h1>
+    <p>Aplicación web progresiva de finanzas personales. Explora su evolución completa, arquitectura, código fuente y
+      los prompts de IA que la hicieron posible.</p>
+    <div class="hero-buttons">
+      <a href="#timeline" class="btn btn-primary"><i class="fa-solid fa-clock-rotate-left"></i> Ver Evolución</a>
+      <a href="#architecture" class="btn btn-outline"><i class="fa-solid fa-diagram-project"></i> Arquitectura</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats">
+    <div class="stats-bar fade-up">
+      <div class="stat-item">
+        <div class="stat-number" data-count="4100" data-suffix="+">0</div>
+        <div class="stat-label">Líneas de código</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-count="7">0</div>
+        <div class="stat-label">Módulos JS</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-count="10">0</div>
+        <div class="stat-label">Iteraciones</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-count="7">0</div>
+        <div class="stat-label">Idiomas</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section id="timeline">
+    <div class="section-header fade-up">
+      <h2>Evolución del <span class="gradient-text">Desarrollo</span></h2>
+      <p>Desde una idea básica hasta una PWA completa con autenticación, cloud sync e internacionalización.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="timeline-version">v1.0</span>
+        <div class="timeline-date">27 de Enero, 2026</div>
+        <h3>🏗️ Base del Proyecto</h3>
+        <p>Creación inicial de la aplicación de finanzas con HTML, TailwindCSS y JavaScript vanilla. Tracker de
+          ingresos
+          y gastos con interfaz mobile-first, sidebar para desktop y navegación inferior para móvil.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Crea una aplicación de finanzas responsive con HTML,
+          CSS
+          y JavaScript que permita registrar ingresos y gastos, con diseño mobile-first."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v1.1</span>
+        <div class="timeline-date">27 de Enero, 2026</div>
+        <h3>🔐 Autenticación con Supabase</h3>
+        <p>Integración de Supabase como backend: sistema de login/registro, base de datos con Row Level Security
+          (RLS),
+          sincronización de transacciones en la nube y perfiles de usuario.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Implementa autenticación con Supabase, añade login y
+          registro, y guarda las transacciones en la base de datos con RLS para que cada usuario solo vea sus datos."
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v1.2</span>
+        <div class="timeline-date">2 de Febrero, 2026</div>
+        <h3>🛠️ Guest Mode, Estadísticas y Ajustes</h3>
+        <p>Implementación del Modo Invitado (datos en localStorage), gráficos dinámicos con Chart.js (doughnut +
+          breakdown por categoría), y panel de Ajustes con toggle de modo oscuro.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Arregla todos los errores de la app de finanzas y hazla
+          completamente funcional. Incluye modo invitado, estadísticas con gráficos y ajustes."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v1.3</span>
+        <div class="timeline-date">2 de Febrero, 2026</div>
+        <h3>🎨 Color Scheme Violet/Lavender</h3>
+        <p>Cambio completo del esquema de colores a una paleta Violet/Lavender. Colores personalizados para light y
+          dark
+          mode con gradientes premium y mesh gradients animados.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Actualiza el esquema de colores de la aplicación a una
+          paleta Violet/Lavender, con colores específicos para ambos modos (claro y oscuro)."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v2.0</span>
+        <div class="timeline-date">5 de Febrero, 2026</div>
+        <h3>🐷 Mejoras UI de Huchas</h3>
+        <p>Sustitución del prompt() nativo por formularios integrados en la UI para depositar fondos en huchas.
+          Creación
+          de formularios de crear, editar y depositar con diseño consistente.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Reemplaza el prompt() del navegador para depositar en
+          huchas por un formulario integrado en la UI con un diseño consistente con la aplicación."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v2.1</span>
+        <div class="timeline-date">12 de Febrero, 2026</div>
+        <h3>🔔 Notificaciones y Filtro Semanal</h3>
+        <p>Sistema de notificaciones con animaciones CSS (toast notifications), historial de notificaciones y
+          corrección
+          del filtro por defecto del dashboard a "Esta Semana".</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Asegúrate de que las notificaciones se muestren
+          correctamente y que el filtro de fechas por defecto del dashboard sea 'Esta Semana'."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v2.2</span>
+        <div class="timeline-date">16 de Febrero, 2026</div>
+        <h3>👤 Perfil y Dark Mode Mejorado</h3>
+        <p>Modal de edición de perfil completo (nombre, bio, teléfono, ubicación, foto). Modo oscuro más profundo con
+          mejores contrastes y backgrounds más oscuros.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Implementa edición de perfil con nombre y foto de
+          perfil,
+          y haz el modo oscuro más oscuro con mejores contrastes."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v2.3</span>
+        <div class="timeline-date">16 de Febrero, 2026</div>
+        <h3>📸 Upload de Foto y Categoría Tecnología</h3>
+        <p>Funcionalidad de subida de foto de perfil, corrección de actualización de datos de cuenta. Añadida
+          categoría
+          "Tecnología" y eliminada "Huchas" del formulario de transacciones.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Haz que la subida de foto de perfil funcione
+          correctamente. Añade una categoría de Tecnología y quita Huchas del formulario."</div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v3.0</span>
+        <div class="timeline-date">16 de Febrero, 2026</div>
+        <h3>🌍 Internacionalización + PWA + Cloud Sync</h3>
+        <p>Sistema completo de i18n con soporte para 7 idiomas (ES, EN, JA, DE, FR, PT, IT). Sincronización de huchas,
+          tema y moneda en la nube vía Supabase user_metadata. Instalación como PWA con manifest.json y Service
+          Worker.
+          Modos de accesibilidad (daltonismo, dislexia, alto contraste).</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Implementa soporte multi-idioma para la aplicación con
+          Español, Inglés, Japonés, Alemán, Portugués, Francés e Italiano. Añade un selector de idiomas en Ajustes."
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-version">v3.1</span>
+        <div class="timeline-date">17 de Febrero, 2026</div>
+        <h3>📈 Mercado de Inversiones + Gestor de Categorías</h3>
+        <p>Módulo de Inversiones completo: simulador con 3 planes (Conservador, Moderado, Arriesgado), mercado en vivo
+          con
+          búsqueda de acciones y índices globales. Gestor de categorías personalizable (añadir/eliminar). Conversión
+          automática de divisa (transacciones, huchas e inversiones). Contribuciones automáticas mensuales en huchas.
+          Visor de imágenes con zoom y pan para facturas adjuntas.</p>
+        <div class="timeline-prompt"><strong>Prompt:</strong> "Añade un mercado de acciones en tiempo real al módulo de
+          inversiones, con búsqueda y índices globales. Quiero poder crear categorías personalizadas."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture">
+    <div class="section-header fade-up">
+      <h2>Arquitectura del <span class="gradient-text">Código</span></h2>
+      <p>7 módulos JavaScript organizados en una arquitectura modular sin frameworks.</p>
+    </div>
+
+    <div class="arch-grid fade-up">
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #6366f1, #818cf8)"><i
+            class="fa-solid fa-rocket"></i></div>
+        <h3>Entry Point</h3>
+        <div class="filename">app.js</div>
+        <p>Punto de entrada. Instancia los módulos globales (Auth, Store, UI, Router), inicializa la app al cargar el
+          DOM: accesibilidad → autenticación → datos → routing.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6)"><i
+            class="fa-solid fa-route"></i></div>
+        <h3>Router SPA</h3>
+        <div class="filename">router.js</div>
+        <p>Sistema de rutas hash-based con auth guard integrado. Gestiona 8 vistas: home, account, add, stats,
+          investments, piggybanks, settings, login. Actualiza navegación activa y títulos.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #10b981, #34d399)"><i
+            class="fa-solid fa-database"></i></div>
+        <h3>Data Store</h3>
+        <div class="filename">store.js</div>
+        <p>Gestión centralizada de datos: transacciones (CRUD con Supabase), huchas (cloud sync), inversiones,
+          categorías, ajustes. Dual-mode: Supabase para usuarios autenticados, localStorage para invitados.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24)"><i
+            class="fa-solid fa-shield-halved"></i></div>
+        <h3>Autenticación</h3>
+        <div class="filename">auth.js</div>
+        <p>Sistema completo de auth: login, registro, logout, modo invitado, actualización de perfil (nombre, avatar,
+          bio, teléfono, ubicación), eliminación de cuenta. Integrado con Supabase Auth.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa)"><i
+            class="fa-solid fa-paint-brush"></i></div>
+        <h3>Interfaz de Usuario</h3>
+        <div class="filename">ui.js — 2,389 líneas</div>
+        <p>El módulo más grande. Renderiza todas las vistas dinámicamente: dashboard con mini-chart, formularios,
+          estadísticas con Chart.js, ajustes con tabs, modal de perfil, gestor de categorías, y sistema de
+          notificaciones.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee)"><i
+            class="fa-solid fa-language"></i></div>
+        <h3>Internacionalización</h3>
+        <div class="filename">i18n.js</div>
+        <p>Diccionario de traducciones para 7 idiomas con atributos data-i18n en el HTML. Funciones: init(),
+          setLanguage(), t(key), updatePageLanguage(). Persistencia en localStorage y user_metadata.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon" style="background: linear-gradient(135deg, #ef4444, #f87171)"><i
+            class="fa-solid fa-cloud"></i></div>
+        <h3>Cliente Supabase</h3>
+        <div class="filename">supa-client.js</div>
+        <p>Configuración del cliente Supabase con verificación de conexión. Muestra alertas visuales si la conexión
+          falla. Expone el cliente globalmente vía window.supabaseClient.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-header fade-up">
+      <h2>Funcionalidades <span class="gradient-text">Principales</span></h2>
+      <p>Todo lo que PocketFinance ofrece en su versión actual.</p>
+    </div>
+
+    <div class="features-grid fade-up">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #6366f1, #818cf8)"><i
+            class="fa-solid fa-chart-line"></i></div>
+        <h3>Dashboard Inteligente</h3>
+        <p>Balance en tiempo real, mini-chart de actividad, transacciones recientes y filtros por semana/mes/año.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #10b981, #34d399)"><i
+            class="fa-solid fa-exchange-alt"></i></div>
+        <h3>Transacciones</h3>
+        <p>Registro de ingresos y gastos con categorías, notas, adjuntos (facturas) y detalle expandido.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24)"><i
+            class="fa-solid fa-piggy-bank"></i></div>
+        <h3>Huchas de Ahorro</h3>
+        <p>Metas de ahorro con barra de progreso, depósitos integrados, CRUD completo y sync en la nube.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6)"><i
+            class="fa-solid fa-chart-pie"></i></div>
+        <h3>Estadísticas</h3>
+        <p>Gráficos doughnut y barras con Chart.js, breakdown por categoría, histograma de gastos e ingresos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa)"><i
+            class="fa-solid fa-arrow-trend-up"></i></div>
+        <h3>Inversiones</h3>
+        <p>Simulador con 3 planes (5%, 8%, 12% ROI), mercado de acciones en vivo con búsqueda y índices globales.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee)"><i
+            class="fa-solid fa-globe"></i></div>
+        <h3>7 Idiomas</h3>
+        <p>Español, English, 日本語, Deutsch, Français, Português, Italiano — con selector de banderas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #1e1b4b, #312e81)"><i
+            class="fa-solid fa-moon"></i></div>
+        <h3>Dark Mode</h3>
+        <p>Modo oscuro profundo con transiciones suaves, persistente en sesión y sincronizado en la nube.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #ef4444, #f87171)"><i
+            class="fa-solid fa-universal-access"></i></div>
+        <h3>Accesibilidad</h3>
+        <p>Modos de daltonismo (protanopia, deuteranopia, tritanopia), fuente para dislexia y alto contraste.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #059669, #10b981)"><i
+            class="fa-solid fa-mobile-screen-button"></i></div>
+        <h3>PWA Instalable</h3>
+        <p>Manifest.json + Service Worker. Se puede instalar en el móvil como app nativa con icono propio.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #2563eb, #3b82f6)"><i
+            class="fa-solid fa-chart-column"></i></div>
+        <h3>Mercado de Acciones</h3>
+        <p>Búsqueda de acciones en tiempo real, índices globales (S&P 500, NASDAQ) y top movers del mercado tech.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #d946ef, #e879f9)"><i
+            class="fa-solid fa-tags"></i></div>
+        <h3>Gestor de Categorías</h3>
+        <p>Crea y elimina categorías personalizadas con icono y color a tu gusto para organizar gastos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #0891b2, #06b6d4)"><i
+            class="fa-solid fa-coins"></i></div>
+        <h3>Conversión de Divisa</h3>
+        <p>Convierte todas tus cantidades (transacciones, huchas, inversiones) entre EUR, USD, GBP y más.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6)"><i
+            class="fa-solid fa-magnifying-glass-plus"></i></div>
+        <h3>Visor de Imágenes</h3>
+        <p>Zoom con rueda, pan con arrastrar, y doble-clic reset. Para ver facturas adjuntas a transacciones.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODE EXPLANATION -->
+  <section id="code">
+    <div class="section-header fade-up">
+      <h2>Explicación de <span class="gradient-text">Código</span></h2>
+      <p>Fragmentos clave de cada módulo con explicaciones detalladas.</p>
+    </div>
+
+    <!-- App Entry -->
+    <div class="code-section fade-up">
+      <div class="code-header">
+        <div class="dot-group"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <span>app.js — Inicialización</span>
+      </div>
+      <pre class="code-block"><span class="cm">// Main App Entry - No imports needed, we assume Global classes exist</span>
+
+<span class="cm">// Initialize core modules</span>
+<span class="kw">window</span>.auth = <span class="kw">new</span> <span class="kw">window</span>.<span class="fn">Auth</span>();
+<span class="kw">window</span>.store = <span class="kw">new</span> <span class="kw">window</span>.<span class="fn">Store</span>();
+<span class="kw">window</span>.ui = <span class="kw">new</span> <span class="kw">window</span>.<span class="fn">UI</span>();
+<span class="kw">window</span>.router = <span class="kw">new</span> <span class="kw">window</span>.<span class="fn">Router</span>();
+
+<span class="cm">// Init app</span>
+document.<span class="fn">addEventListener</span>(<span class="str">'DOMContentLoaded'</span>, <span class="kw">async</span> () => {
+    <span class="fn">setTimeout</span>(<span class="kw">async</span> () => {
+        <span class="kw">window</span>.ui.<span class="fn">applyAccessibilityModes</span>();  <span class="cm">// Apply saved preferences first</span>
+        <span class="kw">await</span> <span class="kw">window</span>.auth.<span class="fn">init</span>();             <span class="cm">// Check session</span>
+        <span class="kw">await</span> <span class="kw">window</span>.store.<span class="fn">init</span>();            <span class="cm">// Load data</span>
+        <span class="kw">window</span>.router.<span class="fn">init</span>();                <span class="cm">// Handle initial URL</span>
+    }, <span class="num">10</span>);
+});</pre>
+      <p style="margin-top:12px;font-size:0.9rem;color:var(--text-muted)"><strong>¿Por qué este orden?</strong>
+        Primero
+        se aplican los modos de accesibilidad (para que la UI no "flashee"). Luego autenticación (para saber si hay
+        usuario). Después los datos (cargados según tipo de auth). Finalmente el router decide qué vista mostrar.</p>
+    </div>
+
+    <!-- Router -->
+    <div class="code-section fade-up">
+      <div class="code-header">
+        <div class="dot-group"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <span>router.js — Auth Guard</span>
+      </div>
+      <pre class="code-block"><span class="fn">navigate</span>(route, ...args) {
+    <span class="cm">// Simple Auth Guard detection</span>
+    <span class="kw">const</span> isAuth = (<span class="kw">window</span>.auth && <span class="kw">window</span>.auth.user)
+                 || (<span class="kw">window</span>.auth && <span class="kw">window</span>.auth.isGuest);
+
+    <span class="cm">// Redirect to login if not authenticated</span>
+    <span class="kw">if</span> (<span class="kw">window</span>.auth && !isAuth && route !== <span class="str">'login'</span>) {
+        route = <span class="str">'login'</span>;
+    }
+
+    <span class="cm">// Skip login if already logged in</span>
+    <span class="kw">if</span> (isAuth && route === <span class="str">'login'</span>) {
+        route = <span class="str">'home'</span>;
+    }
+
+    <span class="kw">this</span>.currentRoute = route;
+    <span class="cm">// ... render view and update UI</span>
+}</pre>
+      <p style="margin-top:12px;font-size:0.9rem;color:var(--text-muted)"><strong>Auth Guard:</strong> Cada navegación
+        pasa por este método. Si el usuario no está autenticado (ni como usuario real ni como invitado), se redirige
+        al
+        login. Si ya está autenticado e intenta ir al login, va al home.</p>
+    </div>
+
+    <!-- Store -->
+    <div class="code-section fade-up">
+      <div class="code-header">
+        <div class="dot-group"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <span>store.js — Dual Storage Strategy</span>
+      </div>
+      <pre class="code-block"><span class="kw">async</span> <span class="fn">addTransaction</span>(data) {
+    <span class="kw">const</span> tx = {
+        id: <span class="str">'tx_'</span> + Date.<span class="fn">now</span>(),
+        ...data,
+        date: <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toISOString</span>()
+    };
+
+    <span class="cm">// Cloud save for authenticated users</span>
+    <span class="kw">if</span> (<span class="kw">window</span>.auth.user && !<span class="kw">window</span>.auth.isGuest) {
+        <span class="kw">const</span> { error } = <span class="kw">await</span> <span class="kw">window</span>.supabaseClient
+            .<span class="fn">from</span>(<span class="str">'transactions'</span>)
+            .<span class="fn">insert</span>({ ...tx, user_id: <span class="kw">window</span>.auth.user.id });
+    }
+
+    <span class="kw">this</span>.transactions.<span class="fn">push</span>(tx);
+    <span class="kw">this</span>.<span class="fn">saveLocal</span>();  <span class="cm">// Always save locally too (cache)</span>
+}</pre>
+      <p style="margin-top:12px;font-size:0.9rem;color:var(--text-muted)"><strong>Estrategia dual:</strong> Los
+        usuarios
+        autenticados guardan en Supabase + localStorage (caché). Los invitados solo en localStorage. Esto permite
+        funcionar offline y sincronizar al conectarse.</p>
+    </div>
+
+    <!-- i18n -->
+    <div class="code-section fade-up">
+      <div class="code-header">
+        <div class="dot-group"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <span>i18n.js — Sistema de Traducciones</span>
+      </div>
+      <pre class="code-block"><span class="kw">const</span> i18n = {
+    supportedLanguages: {
+        <span class="str">'es'</span>: { flag: <span class="str">'🇪🇸'</span>, name: <span class="str">'Español'</span> },
+        <span class="str">'en'</span>: { flag: <span class="str">'🇬🇧'</span>, name: <span class="str">'English'</span> },
+        <span class="str">'ja'</span>: { flag: <span class="str">'🇯🇵'</span>, name: <span class="str">'日本語'</span> },
+        <span class="cm">// ... 4 idiomas más</span>
+    },
+    translations: {
+        <span class="str">'nav_home'</span>: {
+            es: <span class="str">'Inicio'</span>, en: <span class="str">'Home'</span>,
+            ja: <span class="str">'ホーム'</span>, de: <span class="str">'Startseite'</span>,
+            <span class="cm">// ...</span>
+        },
+    },
+    <span class="fn">t</span>(key) {
+        <span class="kw">const</span> entry = <span class="kw">this</span>.translations[key];
+        <span class="kw">return</span> entry?.[<span class="kw">this</span>.currentLang] || entry?.[<span class="str">'es'</span>] || key;
+    }
+};</pre>
+      <p style="margin-top:12px;font-size:0.9rem;color:var(--text-muted)"><strong>Patrón de traducción:</strong> Cada
+        clave tiene traducciones en todos los idiomas. La función <code>t(key)</code> devuelve la traducción del
+        idioma
+        actual, con fallback al español y luego a la propia clave.</p>
+    </div>
+  </section>
+
+  <!-- PROMPTS -->
+  <section id="prompts">
+    <div class="section-header fade-up">
+      <h2>Prompts de <span class="gradient-text">IA Utilizados</span></h2>
+      <p>Los prompts reales enviados a la IA para construir cada característica de la aplicación.</p>
+    </div>
+
+    <div class="fade-up">
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v1.0</span> Creación Inicial</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Crea una aplicación de finanzas responsive con HTML, CSS y JavaScript que
+            permita
+            registrar ingresos y gastos, con diseño mobile-first, sidebar para escritorio y barra de navegación
+            inferior
+            para móvil."<br><br>
+            <strong>Resultado:</strong> Se creó la estructura base con index.html, TailwindCSS via CDN, y los archivos
+            JS modulares. La UI incluía dashboard con balance, lista de transacciones recientes, y formulario de nuevo
+            movimiento con categorías visuales.
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v1.1</span> Supabase Auth + DB</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Implementa autenticación con Supabase. Necesito login, registro, y que las
+            transacciones se guarden en la base de datos. Cada usuario solo debe ver sus propios datos."<br><br>
+            <strong>Resultado:</strong> Se crearon auth.js y supa-client.js. La base de datos se configuró con Row
+            Level
+            Security (RLS). Se añadió la página de login/registro con card centrada y el router con auth guard. SQL de
+            creación de tablas proporcionado para ejecutar en Supabase.
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v1.2</span> Guest Mode + Stats + Settings</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Arregla todos los errores de la app de finanzas y hazla completamente funcional.
+            Añade modo invitado, estadísticas con gráficos y un panel de ajustes."<br><br>
+            <strong>Resultado:</strong> Modo invitado con datos en localStorage, gráficos Chart.js (doughnut de
+            categorías), panel de ajustes con dark mode toggle, sign out y muestra de info del perfil.
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v1.3</span> Paleta Violet/Lavender</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Actualiza el esquema de colores de la aplicación a una paleta Violet/Lavender.
+            Quiero colores específicos para light mode y dark mode."<br><br>
+            <strong>Resultado:</strong> Se actualizó la configuración de TailwindCSS y las variables CSS con la nueva
+            paleta violet. Se implementaron mesh gradients animados en la página de login. Los backgrounds de dark
+            mode
+            se cambiaron a tonos más profundos (0F0B1F, 1A1535).
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v2.0</span> UI Mejorada de Huchas</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Reemplaza el prompt() del navegador para depositar en huchas por un formulario
+            integrado en la UI con diseño consistente con la aplicación."<br><br>
+            <strong>Resultado:</strong> Se crearon tres nuevos formularios en ui.js: renderCreatePiggyBankForm(),
+            renderEditPiggyBankForm(id), y renderDepositToPiggyBankForm(id). Diseño con glassmorphism y validación
+            inline.
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v2.1</span> Notificaciones + Filtro</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Las notificaciones no se muestran correctamente. Asegúrate de que funcionen con
+            animaciones CSS. El filtro del dashboard debe empezar en 'Esta Semana'."<br><br>
+            <strong>Resultado:</strong> Se depuró el sistema de notificaciones toast: animación fadeInDown,
+            auto-dismiss
+            con fadeOut. Historial de notificaciones accesible desde el icono de campana. Filtro select con 'week'
+            como
+            valor selected por defecto.
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v2.2-2.3</span> Perfil + Categorías</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt 1:</strong> "Implementa edición de perfil (nombre y foto) y un modo oscuro más oscuro."<br>
+            <strong>Prompt 2:</strong> "Haz que la subida de foto de perfil funcione. Añade categoría Tecnología,
+            quita
+            Huchas del formulario."<br><br>
+            <strong>Resultado:</strong> Modal completo de perfil con campos de nombre, bio, teléfono, ubicación,
+            email/contraseña. Subida de imagen como base64. Se añadió la categoría Tecnología (sky-100/sky-600) y se
+            eliminó Huchas como categoría de transacción.
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-header">
+          <h3><span class="prompt-tag">v3.0</span> Internacionalización (i18n)</h3>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-body-inner">
+            <strong>Prompt:</strong> "Implementa soporte multi-idioma para la app con selector de idiomas. Idiomas:
+            Español, Inglés, Japonés, Alemán, Portugués, Francés e Italiano."<br><br>
+            <strong>Resultado:</strong> Se creó i18n.js con diccionario de traducciones y atributos data-i18n en el
+            HTML. Selector de idiomas con banderas en la sección de Ajustes. Persistencia del idioma en localStorage y
+            sincronización vía Supabase user_metadata. PWA con manifest.json y Service Worker.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section id="tech">
+    <div class="section-header fade-up">
+      <h2>Stack <span class="gradient-text">Tecnológico</span></h2>
+      <p>Las tecnologías y servicios detrás de PocketFinance.</p>
+    </div>
+    <div class="features-grid fade-up" style="max-width:800px; margin:0 auto;">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #f97316, #fb923c)"><i
+            class="fa-brands fa-html5"></i></div>
+        <h3>HTML5</h3>
+        <p>Estructura semántica con PWA manifest y Service Worker.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee)"><i
+            class="fa-brands fa-css3-alt"></i></div>
+        <h3>TailwindCSS</h3>
+        <p>Utilidades via CDN + CSS custom properties para temas dinámicos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #eab308, #facc15)"><i
+            class="fa-brands fa-js"></i></div>
+        <h3>JavaScript ES6</h3>
+        <p>Clases, async/await, módulos globales sin bundler.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #22c55e, #4ade80)"><i
+            class="fa-solid fa-bolt"></i></div>
+        <h3>Supabase</h3>
+        <p>Auth, PostgreSQL con RLS, user_metadata para sync.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #ef4444, #f87171)"><i
+            class="fa-solid fa-chart-bar"></i></div>
+        <h3>Chart.js</h3>
+        <p>Gráficos interactivos: doughnut, barras, líneas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #6366f1, #818cf8)"><i
+            class="fa-solid fa-icons"></i></div>
+        <h3>Font Awesome</h3>
+        <p>Iconografía consistente en toda la interfaz.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP GALLERY -->
+  <section id="gallery">
+    <div class="section-header fade-up">
+      <h2>Galería de la <span class="gradient-text">Aplicación</span></h2>
+      <p>Vistas principales de PocketFinance recreadas — así se ve la app en acción.</p>
+    </div>
+
+    <div class="gallery-grid fade-up">
+
+      <!-- Dashboard Light -->
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>PocketFinance — Dashboard</span>
+        </div>
+        <div class="mockup-body">
+          <div class="app-screen">
+            <div class="app-sidebar">
+              <div class="logo"><i class="fa-solid fa-wallet"></i> PocketFinance</div>
+              <div class="add-btn"><i class="fa-solid fa-plus"></i> Nuevo</div>
+              <div class="nav-link active"><i class="fa-solid fa-house"></i> Inicio</div>
+              <div class="nav-link"><i class="fa-solid fa-receipt"></i> Cuenta</div>
+              <div class="nav-link"><i class="fa-solid fa-arrow-trend-up"></i> Inversiones</div>
+              <div class="nav-link"><i class="fa-solid fa-piggy-bank"></i> Huchas</div>
+              <div class="nav-link"><i class="fa-solid fa-chart-pie"></i> Estadísticas</div>
+              <div class="nav-link"><i class="fa-solid fa-gear"></i> Ajustes</div>
+            </div>
+            <div class="app-main">
+              <div class="app-header">
+                <h3>Resumen</h3><span class="filter">Esta Semana ▾</span>
+              </div>
+              <div class="balance-cards">
+                <div class="balance-card">
+                  <div class="label">Balance</div>
+                  <div class="amount blue">€1.245,50</div>
+                </div>
+                <div class="balance-card">
+                  <div class="label">Ingresos</div>
+                  <div class="amount green">€2.100,00</div>
+                </div>
+                <div class="balance-card">
+                  <div class="label">Gastos</div>
+                  <div class="amount red">€854,50</div>
+                </div>
+              </div>
+              <div class="mini-chart">
+                <div class="mini-bar income" style="height:60%"></div>
+                <div class="mini-bar expense" style="height:30%"></div>
+                <div class="mini-bar income" style="height:85%"></div>
+                <div class="mini-bar expense" style="height:45%"></div>
+                <div class="mini-bar income" style="height:70%"></div>
+                <div class="mini-bar expense" style="height:25%"></div>
+                <div class="mini-bar income" style="height:90%"></div>
+              </div>
+              <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:#1e293b">Recientes</div>
+              <div class="tx-list">
+                <div class="tx-item">
+                  <div class="tx-icon" style="background:#dcfce7;color:#16a34a"><i class="fa-solid fa-briefcase"></i>
+                  </div>
+                  <div class="tx-info">
+                    <div class="name">Nómina Febrero</div>
+                    <div class="cat">Trabajo</div>
+                  </div>
+                  <div class="tx-amount" style="color:#16a34a">+€1.800,00</div>
+                </div>
+                <div class="tx-item">
+                  <div class="tx-icon" style="background:#fee2e2;color:#dc2626"><i class="fa-solid fa-utensils"></i>
+                  </div>
+                  <div class="tx-info">
+                    <div class="name">Supermercado</div>
+                    <div class="cat">Comida</div>
+                  </div>
+                  <div class="tx-amount" style="color:#dc2626">-€67,30</div>
+                </div>
+                <div class="tx-item">
+                  <div class="tx-icon" style="background:#fee2e2;color:#dc2626"><i class="fa-solid fa-car"></i></div>
+                  <div class="tx-info">
+                    <div class="name">Gasolina</div>
+                    <div class="cat">Transporte</div>
+                  </div>
+                  <div class="tx-amount" style="color:#dc2626">-€45,00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">📊 Dashboard — Light Mode (v3.0)</div>
+      </div>
+
+      <!-- Dashboard Dark -->
+      <div class="mockup-frame">
+        <div class="mockup-topbar" style="background:#0f0b1f;border-color:rgba(255,255,255,0.06)">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span style="color:#64748b">PocketFinance — Dark Mode</span>
+        </div>
+        <div class="mockup-body">
+          <div class="app-screen">
+            <div class="app-sidebar" style="background:#1a1535;border-color:rgba(255,255,255,0.06)">
+              <div class="logo"><i class="fa-solid fa-wallet"></i> PocketFinance</div>
+              <div class="add-btn"><i class="fa-solid fa-plus"></i> Nuevo</div>
+              <div class="nav-link active" style="background:rgba(255,255,255,0.1);color:#fff"><i
+                  class="fa-solid fa-house"></i> Inicio</div>
+              <div class="nav-link" style="color:#94a3b8"><i class="fa-solid fa-receipt"></i> Cuenta</div>
+              <div class="nav-link" style="color:#94a3b8"><i class="fa-solid fa-piggy-bank"></i> Huchas</div>
+              <div class="nav-link" style="color:#94a3b8"><i class="fa-solid fa-chart-pie"></i> Estadísticas</div>
+              <div class="nav-link" style="color:#94a3b8"><i class="fa-solid fa-gear"></i> Ajustes</div>
+            </div>
+            <div class="app-main dark-mock">
+              <div class="app-header">
+                <h3>Resumen</h3><span class="filter"
+                  style="background:#1a1535;border-color:rgba(255,255,255,0.08);color:#94a3b8">Esta Semana ▾</span>
+              </div>
+              <div class="balance-cards">
+                <div class="balance-card">
+                  <div class="label">Balance</div>
+                  <div class="amount blue">€1.245,50</div>
+                </div>
+                <div class="balance-card">
+                  <div class="label">Ingresos</div>
+                  <div class="amount green">€2.100,00</div>
+                </div>
+                <div class="balance-card">
+                  <div class="label">Gastos</div>
+                  <div class="amount red">€854,50</div>
+                </div>
+              </div>
+              <div class="mini-chart" style="background:#1a1535;border-color:rgba(255,255,255,0.06)">
+                <div class="mini-bar income" style="height:55%"></div>
+                <div class="mini-bar expense" style="height:35%"></div>
+                <div class="mini-bar income" style="height:80%"></div>
+                <div class="mini-bar expense" style="height:40%"></div>
+                <div class="mini-bar income" style="height:65%"></div>
+                <div class="mini-bar expense" style="height:20%"></div>
+                <div class="mini-bar income" style="height:95%"></div>
+              </div>
+              <div style="font-size:11px;font-weight:700;margin-bottom:8px">Recientes</div>
+              <div class="tx-list">
+                <div class="tx-item">
+                  <div class="tx-icon" style="background:rgba(99,102,241,0.2);color:#818cf8"><i
+                      class="fa-solid fa-laptop"></i></div>
+                  <div class="tx-info">
+                    <div class="name">Suscripción Cloud</div>
+                    <div class="cat">Tecnología</div>
+                  </div>
+                  <div class="tx-amount" style="color:#f87171">-€12,99</div>
+                </div>
+                <div class="tx-item">
+                  <div class="tx-icon" style="background:rgba(16,185,129,0.2);color:#34d399"><i
+                      class="fa-solid fa-gift"></i></div>
+                  <div class="tx-info">
+                    <div class="name">Regalo cumpleaños</div>
+                    <div class="cat">Otros</div>
+                  </div>
+                  <div class="tx-amount" style="color:#34d399">+€50,00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">🌙 Dashboard — Dark Mode (v2.2)</div>
+      </div>
+
+      <!-- Login Screen -->
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>PocketFinance — Login</span>
+        </div>
+        <div class="mockup-body">
+          <div class="login-screen">
+            <div class="login-card">
+              <div style="font-size:24px;margin-bottom:8px"><i class="fa-solid fa-wallet" style="color:#6366f1"></i>
+              </div>
+              <h4>PocketFinance</h4>
+              <p>Gestiona tus finanzas personales</p>
+              <input class="login-input" type="text" value="correo@ejemplo.com" readonly>
+              <input class="login-input" type="password" value="••••••••" readonly>
+              <div class="login-btn">Iniciar Sesión</div>
+              <div style="font-size:8px;color:#94a3b8;margin:6px 0">¿No tienes cuenta? <span
+                  style="color:#6366f1;font-weight:600">Regístrate</span></div>
+              <div class="login-guest">Continuar como Invitado →</div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">🔐 Pantalla de Login (v1.1)</div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>PocketFinance — Estadísticas</span>
+        </div>
+        <div class="mockup-body">
+          <div class="app-screen">
+            <div class="app-sidebar">
+              <div class="logo"><i class="fa-solid fa-wallet"></i> PocketFinance</div>
+              <div class="add-btn"><i class="fa-solid fa-plus"></i> Nuevo</div>
+              <div class="nav-link"><i class="fa-solid fa-house"></i> Inicio</div>
+              <div class="nav-link"><i class="fa-solid fa-receipt"></i> Cuenta</div>
+              <div class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Estadísticas</div>
+              <div class="nav-link"><i class="fa-solid fa-gear"></i> Ajustes</div>
+            </div>
+            <div class="app-main stats-screen">
+              <div class="app-header">
+                <h3>Estadísticas</h3>
+              </div>
+              <div class="doughnut-mock"></div>
+              <div class="stats-breakdown">
+                <div class="stats-row">
+                  <div class="stats-dot" style="background:#6366f1"></div> Comida <span class="pct">35%</span>
+                </div>
+                <div class="stats-row">
+                  <div class="stats-dot" style="background:#f59e0b"></div> Transporte <span class="pct">20%</span>
+                </div>
+                <div class="stats-row">
+                  <div class="stats-dot" style="background:#ec4899"></div> Ocio <span class="pct">17%</span>
+                </div>
+                <div class="stats-row">
+                  <div class="stats-dot" style="background:#10b981"></div> Tecnología <span class="pct">16%</span>
+                </div>
+                <div class="stats-row">
+                  <div class="stats-dot" style="background:#94a3b8"></div> Otros <span class="pct">12%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">📈 Estadísticas con Chart.js (v1.2)</div>
+      </div>
+
+      <!-- Settings -->
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>PocketFinance — Ajustes</span>
+        </div>
+        <div class="mockup-body">
+          <div class="app-screen">
+            <div class="app-sidebar">
+              <div class="logo"><i class="fa-solid fa-wallet"></i> PocketFinance</div>
+              <div class="add-btn"><i class="fa-solid fa-plus"></i> Nuevo</div>
+              <div class="nav-link"><i class="fa-solid fa-house"></i> Inicio</div>
+              <div class="nav-link"><i class="fa-solid fa-receipt"></i> Cuenta</div>
+              <div class="nav-link active"><i class="fa-solid fa-gear"></i> Ajustes</div>
+            </div>
+            <div class="app-main settings-screen">
+              <div class="app-header">
+                <h3>Ajustes</h3>
+              </div>
+              <div class="setting-group">
+                <div class="setting-label">APARIENCIA</div>
+                <div class="toggle-row"><span>Modo Oscuro</span>
+                  <div class="settings-toggle"></div>
+                </div>
+              </div>
+              <div class="setting-group">
+                <div class="setting-label">MONEDA</div>
+                <div style="display:flex;gap:6px;font-size:10px">
+                  <span style="padding:4px 10px;background:#6366f1;color:white;border-radius:8px;font-weight:700">EUR
+                    €</span>
+                  <span style="padding:4px 10px;background:#f1f5f9;border-radius:8px;color:#64748b">USD $</span>
+                  <span style="padding:4px 10px;background:#f1f5f9;border-radius:8px;color:#64748b">GBP £</span>
+                </div>
+              </div>
+              <div class="setting-group">
+                <div class="setting-label">IDIOMA</div>
+                <div class="lang-flags">
+                  <span class="lang-flag active">🇪🇸</span>
+                  <span class="lang-flag">🇬🇧</span>
+                  <span class="lang-flag">🇯🇵</span>
+                  <span class="lang-flag">🇩🇪</span>
+                  <span class="lang-flag">🇫🇷</span>
+                  <span class="lang-flag">🇵🇹</span>
+                  <span class="lang-flag">🇮🇹</span>
+                </div>
+              </div>
+              <div class="setting-group">
+                <div class="setting-label">ACCESIBILIDAD</div>
+                <div class="toggle-row"><span>Lectura Fácil</span>
+                  <div class="settings-toggle" style="background:#cbd5e1"></div>
+                </div>
+                <div class="toggle-row"><span>Alto Contraste</span>
+                  <div class="settings-toggle" style="background:#cbd5e1"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">⚙️ Panel de Ajustes (v3.0)</div>
+      </div>
+
+      <!-- Piggy Banks -->
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>PocketFinance — Huchas</span>
+        </div>
+        <div class="mockup-body">
+          <div class="app-screen">
+            <div class="app-sidebar">
+              <div class="logo"><i class="fa-solid fa-wallet"></i> PocketFinance</div>
+              <div class="add-btn"><i class="fa-solid fa-plus"></i> Nuevo</div>
+              <div class="nav-link"><i class="fa-solid fa-house"></i> Inicio</div>
+              <div class="nav-link active"><i class="fa-solid fa-piggy-bank"></i> Huchas</div>
+              <div class="nav-link"><i class="fa-solid fa-chart-pie"></i> Estadísticas</div>
+              <div class="nav-link"><i class="fa-solid fa-gear"></i> Ajustes</div>
+            </div>
+            <div class="app-main">
+              <div class="app-header">
+                <h3>Mis Huchas</h3>
+              </div>
+              <div style="background:white;border-radius:10px;padding:12px;border:1px solid #e2e8f0;margin-bottom:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div style="font-weight:700;font-size:11px;color:#1e293b">🎮 PlayStation 5</div>
+                  <div style="font-size:10px;color:#6366f1;font-weight:700">€320 / €500</div>
+                </div>
+                <div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden">
+                  <div
+                    style="width:64%;height:100%;background:linear-gradient(to right,#6366f1,#818cf8);border-radius:4px">
+                  </div>
+                </div>
+                <div style="font-size:8px;color:#94a3b8;margin-top:4px">64% completado</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:12px;border:1px solid #e2e8f0;margin-bottom:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div style="font-weight:700;font-size:11px;color:#1e293b">✈️ Viaje a Japón</div>
+                  <div style="font-size:10px;color:#f59e0b;font-weight:700">€800 / €3.000</div>
+                </div>
+                <div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden">
+                  <div
+                    style="width:27%;height:100%;background:linear-gradient(to right,#f59e0b,#fbbf24);border-radius:4px">
+                  </div>
+                </div>
+                <div style="font-size:8px;color:#94a3b8;margin-top:4px">27% completado</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:12px;border:1px solid #e2e8f0">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div style="font-weight:700;font-size:11px;color:#1e293b">🚗 Coche Nuevo</div>
+                  <div style="font-size:10px;color:#10b981;font-weight:700">€4.200 / €15.000</div>
+                </div>
+                <div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden">
+                  <div
+                    style="width:28%;height:100%;background:linear-gradient(to right,#10b981,#34d399);border-radius:4px">
+                  </div>
+                </div>
+                <div style="font-size:8px;color:#94a3b8;margin-top:4px">28% completado</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">🐷 Huchas de Ahorro (v2.0)</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Documentación de <strong>PocketFinance</strong></p>
+    <p style="margin-top:8px">Creado por <strong>Cristina Cichon</strong></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
